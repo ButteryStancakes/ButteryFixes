@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace ButteryFixes.Patches
 {
@@ -36,6 +37,12 @@ namespace ButteryFixes.Patches
                         Plugin.Logger.LogInfo("Rend now properly spaces spike traps");
                     }
                 }
+            }
+            GameObject helmetVisor = GameObject.Find("/Systems/Rendering/PlayerHUDHelmetModel/ScavengerHelmet");
+            if (helmetVisor != null)
+            {
+                helmetVisor.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+                Plugin.Logger.LogInfo("\"Fake helmet\" no longer casts a shadow");
             }
         }
 
