@@ -34,10 +34,6 @@ namespace ButteryFixes.Patches
                     {
                         rend.spawnableMapObjects[i].requireDistanceBetweenSpawns = true;
                         Plugin.Logger.LogInfo("Rend now properly spaces spike traps");
-                        RandomWeatherWithVariables eclipse = rend.randomWeathers.FirstOrDefault(randomWeather => randomWeather.weatherType == LevelWeatherType.Eclipsed);
-                        eclipse.weatherVariable = 4;
-                        rend.maxEnemyPowerCount = 25;
-                        Plugin.Logger.LogInfo("!!!DEBUG!!! Rend Eclipsed challenge");
                     }
                 }
             }
