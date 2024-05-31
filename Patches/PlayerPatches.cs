@@ -10,7 +10,7 @@ namespace ButteryFixes.Patches
         [HarmonyPostfix]
         static void PlayerControllerBPostUpdate(PlayerControllerB __instance, bool ___isWalking)
         {
-            if (__instance.isClimbingLadder)
+            if (__instance.isClimbingLadder && !Plugin.DISABLE_LADDER_PATCH)
             {
                 __instance.isSprinting = false;
                 if (___isWalking)

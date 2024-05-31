@@ -15,7 +15,7 @@ namespace ButteryFixes.Patches
             if (oldBird != null)
                 oldBird.enemyType.requireNestObjectsToSpawn = true;
             Plugin.Logger.LogInfo("Old Birds now require \"nest\" to spawn");
-            SpawnableEnemyWithRarity masked = __instance.testAllEnemiesLevel.OutsideEnemies.FirstOrDefault(enemy => enemy.enemyType.name == "RadMech");
+            SpawnableEnemyWithRarity masked = __instance.testAllEnemiesLevel.Enemies.FirstOrDefault(enemy => enemy.enemyType.name == "MaskedPlayerEnemy");
             if (masked != null)
                 masked.enemyType.isOutsideEnemy = false;
             Plugin.Logger.LogInfo("\"Masked\" now subtract from indoor power level");
