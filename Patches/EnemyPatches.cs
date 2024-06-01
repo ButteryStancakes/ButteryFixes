@@ -10,6 +10,8 @@ namespace ButteryFixes.Patches
     [HarmonyPatch]
     internal class EnemyPatches
     {
+        internal static EnemyType FLOWER_SNAKE;
+
         static readonly MethodInfo GLOBAL_NUTCRACKER_CLOCK = typeof(NutcrackerEnemyAI).GetMethod("GlobalNutcrackerClock", BindingFlags.Instance | BindingFlags.NonPublic);
         static readonly FieldInfo IS_LEADER_SCRIPT = typeof(NutcrackerEnemyAI).GetField("isLeaderScript", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -187,6 +189,33 @@ namespace ButteryFixes.Patches
             {
                 Plugin.Logger.LogInfo("\"Masked\" was mimicking a player; will not subtract from power level");
                 ___removedPowerLevel = true;
+            }
+        }
+
+        [HarmonyPatch(typeof(FlowerSnakeEnemy), "SetFlappingLocalClient")]
+        [HarmonyPostfix]
+        public static void PostSetFlappingLocalClient(FlowerSnakeEnemy __instance, bool isMainSnake/*, bool setFlapping*/)
+        {
+            if (!isMainSnake /*|| setFlapping*/ || __instance.clingingToPlayer != GameNetworkManager.Instance.localPlayerController || !__instance.clingingToPlayer.disablingJetpackControls)
+                return;
+
+            for (int i = 0; i < __instance.clingingToPlayer.ItemSlots.Length; i++)
+            {
+                if (__instance.clingingToPlayer.ItemSlots[i] == null || __instance.clingingToPlayer.ItemSlots[i].isPocketed)
+                    continue;
+
+                if (__instance.clingingToPlayer.ItemSlots[i] is JetpackItem)
+                {
+                    JetpackItem heldJetpack = __instance.clingingToPlayer.ItemSlots[i] as JetpackItem;
+                    if ((bool)ItemPatches.JETPACK_ACTIVATED.GetValue(heldJetpack))
+                    {
+                        __instance.clingingToPlayer.disablingJetpackControls = false;
+                        __instance.clingingToPlayer.maxJetpackAngle = -1f;
+                        __instance.clingingToPlayer.jetpackRandomIntensity = 0f;
+                        Plugin.Logger.LogInfo("Player still using jetpack when tulip snake dropped; re-enable flight controls");
+                        return;
+                    }
+                }
             }
         }
     }

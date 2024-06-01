@@ -8,6 +8,8 @@ namespace ButteryFixes.Patches
     [HarmonyPatch]
     internal class GeneralPatches
     {
+        internal static float MUSIC_DOPPLER_LEVEL = 1f;
+
         [HarmonyPatch(typeof(QuickMenuManager), "Start")]
         [HarmonyPostfix]
         static void QuickMenuManagerPostStart(QuickMenuManager __instance)
@@ -20,6 +22,7 @@ namespace ButteryFixes.Patches
             if (masked != null)
                 masked.enemyType.isOutsideEnemy = false;
             Plugin.Logger.LogInfo("\"Masked\" now subtract from indoor power level");
+            EnemyPatches.FLOWER_SNAKE = __instance.testAllEnemiesLevel.DaytimeEnemies.FirstOrDefault(enemy => enemy.enemyType.name == "FlowerSnake")?.enemyType;
         }
 
         [HarmonyPatch(typeof(StartOfRound), "Awake")]
@@ -38,11 +41,63 @@ namespace ButteryFixes.Patches
                     }
                 }
             }
+
             GameObject helmetVisor = GameObject.Find("/Systems/Rendering/PlayerHUDHelmetModel/ScavengerHelmet");
             if (helmetVisor != null)
             {
                 helmetVisor.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
                 Plugin.Logger.LogInfo("\"Fake helmet\" no longer casts a shadow");
+            }
+
+            switch (Plugin.configMusicDopplerLevel.Value)
+            {
+                case MusicDopplerLevel.None:
+                    MUSIC_DOPPLER_LEVEL = 0f;
+                    break;
+                case MusicDopplerLevel.Reduced:
+                    MUSIC_DOPPLER_LEVEL = 0.3f;
+                    break;
+                default:
+                    MUSIC_DOPPLER_LEVEL = 1f;
+                    break;
+            }
+
+            __instance.speakerAudioSource.dopplerLevel = MUSIC_DOPPLER_LEVEL;
+            Plugin.Logger.LogInfo("Doppler level: Ship speaker");
+
+            foreach (Item item in __instance.allItemsList.itemsList)
+            {
+
+                switch (item.name)
+                {
+                    case "Knife":
+                        item.spawnPrefab.GetComponent<KnifeItem>().SetScrapValue(35);
+                        Plugin.Logger.LogInfo("Kitchen knives now display value on scan");
+                        break;
+                    case "Boombox":
+                        item.spawnPrefab.GetComponent<BoomboxItem>().boomboxAudio.dopplerLevel = 0.3f * MUSIC_DOPPLER_LEVEL;
+                        Plugin.Logger.LogInfo("Doppler level: Boombox");
+                        break;
+                }
+            }
+
+            foreach (UnlockableItem unlockableItem in __instance.unlockablesList.unlockables)
+            {
+                switch (unlockableItem.unlockableName)
+                {
+                    /*case "Television":
+                        unlockableItem.prefabObject.GetComponentInChildren<TVScript>().tvSFX.dopplerLevel = MUSIC_DOPPLER_LEVEL;
+                        Plugin.Logger.LogInfo("Doppler level: Television");
+                        break;*/
+                    case "Record player":
+                        unlockableItem.prefabObject.GetComponentInChildren<AnimatedObjectTrigger>().thisAudioSource.dopplerLevel = MUSIC_DOPPLER_LEVEL;
+                        Plugin.Logger.LogInfo("Doppler level: Record player");
+                        break;
+                    case "Disco Ball":
+                        unlockableItem.prefabObject.GetComponentInChildren<CozyLights>().turnOnAudio.dopplerLevel = 0.92f * MUSIC_DOPPLER_LEVEL;
+                        Plugin.Logger.LogInfo("Doppler level: Disco ball");
+                        break;
+                }
             }
         }
 
@@ -69,6 +124,16 @@ namespace ButteryFixes.Patches
                     Plugin.Logger.LogInfo("Dropship inventory was emptied (game over)");
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(ItemDropship), "Start")]
+        [HarmonyPostfix]
+        static void ItemDropshipPostStart(ItemDropship __instance)
+        {
+            Transform music = __instance.transform.Find("Music");
+            music.GetComponent<AudioSource>().dopplerLevel = 0.6f * MUSIC_DOPPLER_LEVEL;
+            music.Find("Music (1)").GetComponent<AudioSource>().dopplerLevel = 0.6f * MUSIC_DOPPLER_LEVEL;
+            Plugin.Logger.LogInfo("Doppler level: Dropship");
         }
     }
 }
