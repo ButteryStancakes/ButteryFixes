@@ -107,7 +107,7 @@ namespace ButteryFixes.Patches
                         break;
                 }
 
-                if (item.canBeInspected)
+                if (item.canBeInspected && item.toolTips.Length < 4)
                 {
                     bool hasInspectTip = false;
                     foreach (string tooltip in item.toolTips)
@@ -244,6 +244,9 @@ namespace ButteryFixes.Patches
         [HarmonyPostfix]
         static void PostSaveGame(GameNetworkManager __instance)
         {
+            if (!__instance.isHostingGame)
+                return;
+
             Terminal terminal = Object.FindObjectOfType<Terminal>();
             if (terminal != null)
             {

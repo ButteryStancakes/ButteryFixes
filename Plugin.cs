@@ -25,7 +25,7 @@ namespace ButteryFixes
     [BepInDependency("e3s1.BetterLadders", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.2.0";
+        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.2.1";
         internal static new ManualLogSource Logger;
 
         internal static bool DISABLE_LADDER_PATCH;
