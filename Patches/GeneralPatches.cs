@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -85,6 +84,12 @@ namespace ButteryFixes.Patches
             };
             foreach (Item item in __instance.allItemsList.itemsList)
             {
+                if (item == null)
+                {
+                    Plugin.Logger.LogWarning("Encountered a missing item in StartOfRound.allItemsList; this is probably an issue with another mod");
+                    continue;
+                }
+
                 switch (item.name)
                 {
                     case "Knife":
@@ -107,22 +112,27 @@ namespace ButteryFixes.Patches
                         break;
                 }
 
-                if (item.canBeInspected && item.toolTips.Length < 4)
+                if (item.canBeInspected)
                 {
-                    bool hasInspectTip = false;
-                    foreach (string tooltip in item.toolTips)
+                    if (item.toolTips == null)
+                        Plugin.Logger.LogWarning($"Item \"{item.name}\" is missing toolTips");
+                    else if (item.toolTips.Length < 3)
                     {
-                        if (tooltip.StartsWith("Inspect"))
+                        bool hasInspectTip = false;
+                        foreach (string tooltip in item.toolTips)
                         {
-                            hasInspectTip = true;
-                            break;
+                            if (tooltip.StartsWith("Inspect"))
+                            {
+                                hasInspectTip = true;
+                                break;
+                            }
                         }
-                    }
 
-                    if (!hasInspectTip)
-                    {
-                        item.toolTips.AddToArray("Inspect: [Z]");
-                        Plugin.Logger.LogInfo($"Inspect tooltip: {item.itemName}");
+                        if (!hasInspectTip)
+                        {
+                            item.toolTips = item.toolTips.AddToArray("Inspect: [Z]");
+                            Plugin.Logger.LogInfo($"Inspect tooltip: {item.itemName}");
+                        }
                     }
                 }
 
