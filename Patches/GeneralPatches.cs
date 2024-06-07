@@ -290,13 +290,13 @@ namespace ButteryFixes.Patches
             }
         }
 
-        [HarmonyPatch(typeof(Terminal), "PostProcessText")]
+        [HarmonyPatch(typeof(Terminal), "TextPostProcess")]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> TransPostProcessText(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> TransTextPostProcess(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
-            for (int i = codes.Count - 1; i >= 0; i++)
+            for (int i = codes.Count - 1; i >= 0; i--)
             {
                 if (codes[i].opcode == OpCodes.Ldstr)
                 {
