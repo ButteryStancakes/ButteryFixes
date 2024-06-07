@@ -25,7 +25,7 @@ namespace ButteryFixes
     [BepInDependency("e3s1.BetterLadders", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.1.0";
+        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.2.0";
         internal static new ManualLogSource Logger;
 
         internal static bool DISABLE_LADDER_PATCH;
@@ -33,6 +33,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> configMusicDopplerLevel;
         internal static ConfigEntry<GameResolution> configGameResolution;
+        internal static ConfigEntry<bool> configMakeConductive;
 
         void Awake()
         {
@@ -58,6 +59,12 @@ namespace ButteryFixes
                 MusicDopplerLevel.Vanilla,
                 "Controls how much Unity's simulated \"doppler effect\" applies to music sources like the dropship, boombox, etc. (This is what causes pitch distortion when moving towards/away from the source of the music)\n" +
                 "\"Vanilla\" makes no changes. \"Reduced\" will make the effect more subtle. \"None\" will disable it completely (so music always plays at the correct pitch)");
+
+            configMakeConductive = Config.Bind(
+                "Gameplay",
+                "MakeConductive",
+                true,
+                "(Host only) Makes some metallic items that are non-conductive in vanilla actually conductive. This fix applies sensibly to the existing items, but you can disable it if you are used to vanilla's properties.");
 
             new Harmony(PLUGIN_GUID).PatchAll();
 

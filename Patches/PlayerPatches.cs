@@ -12,9 +12,11 @@ namespace ButteryFixes.Patches
         [HarmonyPostfix]
         static void PlayerControllerBPostUpdate(PlayerControllerB __instance, bool ___isWalking)
         {
+            // ladder patches are disabled for Fast Climbing & BetterLadders compatibility
             if (__instance.isClimbingLadder && !Plugin.DISABLE_LADDER_PATCH)
             {
                 __instance.isSprinting = false;
+                // fixes residual slope speed
                 if (___isWalking)
                     __instance.playerBodyAnimator.SetFloat("animationSpeed", 1f);
             }
@@ -50,7 +52,7 @@ namespace ButteryFixes.Patches
 
         [HarmonyPatch(typeof(HUDManager), "UpdateScanNodes")]
         [HarmonyPostfix]
-        static void HUDManagerPostUpdateScanNodes(HUDManager __instance, Dictionary<RectTransform, ScanNodeProperties> ___scanNodes)
+        static void PostUpdateScanNodes(HUDManager __instance, Dictionary<RectTransform, ScanNodeProperties> ___scanNodes)
         {
             if (!Plugin.ENABLE_SCAN_PATCH || GameNetworkManager.Instance.localPlayerController == null)
                 return;
@@ -61,9 +63,31 @@ namespace ButteryFixes.Patches
                 if (___scanNodes.TryGetValue(__instance.scanElements[i], out ScanNodeProperties scanNodeProperties))
                 {
                     Vector3 viewportPos = GameNetworkManager.Instance.localPlayerController.gameplayCamera.WorldToViewportPoint(scanNodeProperties.transform.position);
+                    // this places elements in the proper position regardless of resolution (rescaling causes awkward misalignments)
                     __instance.scanElements[i].anchoredPosition = new Vector2(rect.xMin + (rect.width * viewportPos.x), rect.yMin + (rect.height * viewportPos.y));
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.DestroyItemInSlot))]
+        [HarmonyPostfix]
+        static void PostDestroyItemInSlot(PlayerControllerB __instance, int itemSlot)
+        {
+            // this fix is redundant with LethalFixes, but here just in case the user doesn't have it installed...
+            if (!__instance.IsOwner && !HUDManager.Instance.itemSlotIcons[itemSlot].enabled && GameNetworkManager.Instance.localPlayerController.ItemSlots[itemSlot] != null)
+            {
+                HUDManager.Instance.itemSlotIcons[itemSlot].enabled = true;
+                Plugin.Logger.LogInfo("Re-enabled inventory icon (likely that another player has just reloaded a shotgun, and it was erroneously disabled)");
+            }
+        }
+
+        [HarmonyPatch(typeof(SoundManager), "Start")]
+        [HarmonyPostfix]
+        static void SoundManagerPostStart(SoundManager __instance)
+        {
+            // fixes the TZP effects persisting when you disconnect and re-enter the game
+            __instance.currentMixerSnapshotID = 4;
+            __instance.SetDiageticMixerSnapshot(0, 0.2f);
         }
     }
 }

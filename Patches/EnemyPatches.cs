@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
+using BepInEx.Bootstrap;
 
 namespace ButteryFixes.Patches
 {
@@ -32,7 +33,7 @@ namespace ButteryFixes.Patches
                         codes[j].opcode = OpCodes.Nop;
                         codes[j].operand = null;
                     }
-                    Plugin.Logger.LogInfo("Transpiler: Remove timestamp check (replace with prefix)");
+                    Plugin.Logger.LogDebug("Transpiler: Remove timestamp check (replace with prefix)");
                     return codes;
                 }
                 else if (startAt == -1)
@@ -52,6 +53,7 @@ namespace ButteryFixes.Patches
         [HarmonyPrefix]
         static bool ButlerEnemyAIPreOnCollideWithPlayer(ButlerEnemyAI __instance, ref float ___timeSinceStealthStab)
         {
+            // recreate the timestamp check since we need to run some additional logic
             if (!__instance.isEnemyDead && __instance.currentBehaviourStateIndex != 2)
             {
                 if (Time.realtimeSinceStartup - ___timeSinceStealthStab < 10f)
@@ -112,10 +114,11 @@ namespace ButteryFixes.Patches
 
             for (int i = 2; i < codes.Count; i++)
             {
+                // fix erroneous < 0 check with <= 0
                 if (codes[i].opcode == OpCodes.Bge_Un && codes[i - 2].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 2].operand == typeof(BlobAI).GetField("angeredTimer", BindingFlags.Instance | BindingFlags.NonPublic))
                 {
                     codes[i].opcode = OpCodes.Bgt_Un;
-                    Plugin.Logger.LogInfo("Transpiler: Blob taming now possible without angering");
+                    Plugin.Logger.LogDebug("Transpiler: Blob taming now possible without angering");
                     return codes;
                 }
             }
@@ -127,24 +130,34 @@ namespace ButteryFixes.Patches
         [HarmonyPostfix]
         static void NutcrackerEnemyAIPostUpdate(NutcrackerEnemyAI __instance, bool ___isLeaderScript)
         {
+            // if the leader is dead, manually update the clock
             if (___isLeaderScript && __instance.isEnemyDead)
                 GLOBAL_NUTCRACKER_CLOCK.Invoke(__instance, null);
         }
 
         [HarmonyPatch(typeof(NutcrackerEnemyAI), nameof(NutcrackerEnemyAI.Start))]
         [HarmonyPostfix]
+        [HarmonyAfter("Dev1A3.LethalFixes")]
         static void NutcrackerEnemyAIPostStart(NutcrackerEnemyAI __instance, ref bool ___isLeaderScript)
         {
+            // to piggyback off the LethalFixes tiptoe fix, 0.5 is still a little too jittery
+            if (Chainloader.PluginInfos.ContainsKey("Dev1A3.LethalFixes"))
+                __instance.updatePositionThreshold = 0.3f;
+
+            // if numbersSpawned > 1, a leader might not have been assigned yet (if the first nutcracker spawned with another already queued in a vent)
             if (__instance.IsServer && !___isLeaderScript && __instance.enemyType.numberSpawned > 1)
             {
                 NutcrackerEnemyAI[] nutcrackers = Object.FindObjectsOfType<NutcrackerEnemyAI>();
                 foreach (NutcrackerEnemyAI nutcracker in nutcrackers)
                 {
                     if (nutcracker != __instance && (bool)IS_LEADER_SCRIPT.GetValue(nutcracker))
+                    {
+                        Plugin.Logger.LogDebug($"NUTCRACKER CLOCK: Nutcracker #{__instance.GetInstanceID()} spawned, #{nutcracker.GetInstanceID()} is already leader");
                         return;
+                    }
                 }
-                Plugin.Logger.LogInfo($"NUTCRACKER CLOCK: \"Leader\" is still unassigned, promoting #{__instance.GetInstanceID()}");
                 ___isLeaderScript = true;
+                Plugin.Logger.LogInfo($"NUTCRACKER CLOCK: \"Leader\" is still unassigned, promoting #{__instance.GetInstanceID()}");
             }
         }
 
@@ -166,8 +179,8 @@ namespace ButteryFixes.Patches
         {
             if (prevInspection >= 0f)
             {
-                string live = __instance.isEnemyDead ? "dead" : "alive";
-                Plugin.Logger.LogInfo($"NUTCRACKER CLOCK: Leader #{__instance.GetInstanceID()} is {live}, ticked at {prevInspection}, next tick at {NutcrackerEnemyAI.timeAtNextInspection + 2f}");
+                string status = __instance.isEnemyDead ? "dead" : "alive";
+                Plugin.Logger.LogDebug($"NUTCRACKER CLOCK: Leader #{__instance.GetInstanceID()} is {status}, ticked at {prevInspection}, next tick at {NutcrackerEnemyAI.timeAtNextInspection + 2f}");
                 prevInspection = -1f;
             }
         }
@@ -177,7 +190,7 @@ namespace ButteryFixes.Patches
         static void PreSwitchToBehaviourStateOnLocalClient(EnemyAI __instance, int stateIndex)
         {
             if (__instance is NutcrackerEnemyAI && stateIndex == 1 && __instance.currentBehaviourStateIndex != 1)
-                Plugin.Logger.LogInfo($"NUTCRACKER CLOCK: Nutcracker #{__instance.GetInstanceID()} began inspection at {Time.realtimeSinceStartup}, global inspection time is {NutcrackerEnemyAI.timeAtNextInspection}");
+                Plugin.Logger.LogDebug($"NUTCRACKER CLOCK: Nutcracker #{__instance.GetInstanceID()} began inspection at {Time.realtimeSinceStartup}, global inspection time is {NutcrackerEnemyAI.timeAtNextInspection}");
         }
         */
 
@@ -185,6 +198,8 @@ namespace ButteryFixes.Patches
         [HarmonyPrefix]
         static void PreSubtractFromPowerLevel(EnemyAI __instance, ref bool ___removedPowerLevel)
         {
+            // should always apply to the host? they control spawning anyway
+            // I've only had mimickingPlayer desync on client
             if (__instance is MaskedPlayerEnemy && !___removedPowerLevel && (__instance as MaskedPlayerEnemy).mimickingPlayer != null)
             {
                 Plugin.Logger.LogInfo("\"Masked\" was mimicking a player; will not subtract from power level");
@@ -196,16 +211,19 @@ namespace ButteryFixes.Patches
         [HarmonyPostfix]
         public static void PostSetFlappingLocalClient(FlowerSnakeEnemy __instance, bool isMainSnake/*, bool setFlapping*/)
         {
+            // if the current snake is dropping a player
             if (!isMainSnake /*|| setFlapping*/ || __instance.clingingToPlayer != GameNetworkManager.Instance.localPlayerController || !__instance.clingingToPlayer.disablingJetpackControls)
                 return;
 
             for (int i = 0; i < __instance.clingingToPlayer.ItemSlots.Length; i++)
             {
+                // if the item is equipped
                 if (__instance.clingingToPlayer.ItemSlots[i] == null || __instance.clingingToPlayer.ItemSlots[i].isPocketed)
                     continue;
 
                 if (__instance.clingingToPlayer.ItemSlots[i] is JetpackItem)
                 {
+                    // and is a jetpack that's activated
                     JetpackItem heldJetpack = __instance.clingingToPlayer.ItemSlots[i] as JetpackItem;
                     if ((bool)ItemPatches.JETPACK_ACTIVATED.GetValue(heldJetpack))
                     {
@@ -216,6 +234,19 @@ namespace ButteryFixes.Patches
                         return;
                     }
                 }
+            }
+        }
+
+        [HarmonyPatch(typeof(NutcrackerEnemyAI), nameof(NutcrackerEnemyAI.ReloadGunClientRpc))]
+        [HarmonyPostfix]
+        static void PostReloadGunClientRpc(NutcrackerEnemyAI __instance)
+        {
+            if (__instance.gun.shotgunShellLeft.enabled)
+            {
+                __instance.gun.shotgunShellLeft.enabled = false;
+                __instance.gun.shotgunShellRight.enabled = false;
+                __instance.gun.StartCoroutine(ItemPatches.ShellsAppearAfterDelay(__instance.gun));
+                Plugin.Logger.LogInfo("Shotgun was reloaded by nutcracker; animating shells");
             }
         }
     }
