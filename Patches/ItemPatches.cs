@@ -1,8 +1,12 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
+using System.Linq;
 using UnityEngine;
+using ButteryFixes.Helpers;
 
 namespace ButteryFixes.Patches
 {
@@ -154,6 +158,35 @@ namespace ButteryFixes.Patches
         {
             __instance.shotgunShellLeft.forceRenderingOff = true;
             __instance.shotgunShellRight.forceRenderingOff = true;
+        }
+
+        [HarmonyPatch(typeof(ShotgunItem), nameof(ShotgunItem.ShootGun))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> TransShootGun(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            for (int i = 1; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Newarr && (System.Type)codes[i].operand == typeof(RaycastHit) && codes[i - 1].opcode == OpCodes.Ldc_I4_S && (sbyte)codes[i - 1].operand == 10)
+                {
+                    codes[i - 1].operand = 50;
+                    Plugin.Logger.LogDebug("Transpiler: Resize shotgun collider array");
+                }
+                else if (codes[i].opcode == OpCodes.Call && codes[i].operand.ToString().Contains("SphereCastNonAlloc"))
+                {
+                    codes.InsertRange(i + 2, new CodeInstruction[]
+                    {
+                        new CodeInstruction(OpCodes.Ldloca_S, codes[i + 1].operand),
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        new CodeInstruction(OpCodes.Ldflda, typeof(ShotgunItem).GetField("enemyColliders", BindingFlags.Instance | BindingFlags.NonPublic)),
+                        new CodeInstruction(OpCodes.Call, typeof(GunHelper).GetMethod(nameof(GunHelper.FilterDuplicateHits), BindingFlags.Static | BindingFlags.Public)),
+                    });
+                    Plugin.Logger.LogDebug("Transpiler: Shotgun filters duplicate targets");
+                }
+            }
+
+            return codes;
         }
     }
 }

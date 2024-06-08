@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
 using BepInEx.Bootstrap;
+using GameNetcodeStuff;
 
 namespace ButteryFixes.Patches
 {
@@ -248,6 +249,14 @@ namespace ButteryFixes.Patches
                 __instance.gun.StartCoroutine(ItemPatches.ShellsAppearAfterDelay(__instance.gun));
                 Plugin.Logger.LogInfo("Shotgun was reloaded by nutcracker; animating shells");
             }
+        }
+
+        // prevents nullref if bunker spider is shot by nutcracker. bug originally described (and fixed) in NutcrackerFixes
+        [HarmonyPatch(typeof(SandSpiderAI), nameof(SandSpiderAI.TriggerChaseWithPlayer))]
+        [HarmonyPrefix]
+        static bool SandSpiderAIPreTriggerChaseWithPlayer(PlayerControllerB playerScript)
+        {
+            return playerScript != null;
         }
     }
 }

@@ -322,5 +322,16 @@ namespace ButteryFixes.Patches
 
             return codes;
         }
+
+        [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.ApplyPenalty))]
+        [HarmonyPostfix]
+        static void ApplyPenalty(HUDManager __instance, int playersDead, int bodiesInsured)
+        {
+            float fine = 100;
+            fine *= Mathf.Pow(0.8f, playersDead - bodiesInsured);
+            fine *= Mathf.Pow(0.92f, bodiesInsured);
+            fine = Mathf.FloorToInt(100 - fine);
+            __instance.statsUIElements.penaltyAddition.text = $"{playersDead} casualties: -{fine}%\n({bodiesInsured} bodies recovered)";
+        }
     }
 }
