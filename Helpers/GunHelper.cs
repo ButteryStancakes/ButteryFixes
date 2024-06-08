@@ -22,6 +22,8 @@ namespace ButteryFixes.Helpers
                         if (i > index)
                             results[index] = results[i];
                         index++;
+                        if (i >= 10)
+                            Plugin.Logger.LogInfo($"Registered hit on \"{enemyCollider.mainScript.name}\" (index {i} > 9; vanilla would have skipped)");
                     }
                     else
                         Plugin.Logger.LogInfo($"Filtered duplicate shotgun hit on \"{enemyCollider.mainScript.name}\"");
