@@ -25,7 +25,7 @@ namespace ButteryFixes
     [BepInDependency("e3s1.BetterLadders", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.2.3";
+        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.3.0";
         internal static new ManualLogSource Logger;
 
         internal static bool DISABLE_LADDER_PATCH;
@@ -34,6 +34,7 @@ namespace ButteryFixes
         internal static ConfigEntry<MusicDopplerLevel> configMusicDopplerLevel;
         internal static ConfigEntry<GameResolution> configGameResolution;
         internal static ConfigEntry<bool> configMakeConductive;
+        internal static ConfigEntry<bool> configMaskHornetsPower;
 
         void Awake()
         {
@@ -65,6 +66,12 @@ namespace ButteryFixes
                 "MakeConductive",
                 true,
                 "(Host only) Makes some metallic items that are non-conductive in vanilla actually conductive. This fix applies sensibly to the existing items, but you can disable it if you are used to vanilla's properties.");
+
+            configMaskHornetsPower = Config.Bind(
+                "Gameplay",
+                "MaskHornetsPower",
+                false,
+                "(Host only) Mask hornets internally have the same power level as butlers, but because they spawn in a non-standard way, they don't contribute to the indoor power. Enabling this will prevent additional monsters spawning to replace dead butlers.");
 
             new Harmony(PLUGIN_GUID).PatchAll();
 

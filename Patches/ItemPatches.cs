@@ -188,5 +188,18 @@ namespace ButteryFixes.Patches
 
             return codes;
         }
+
+        [HarmonyPatch(typeof(LungProp), nameof(LungProp.Start))]
+        [HarmonyPostfix]
+        static void LungPropPostStart(LungProp __instance)
+        {
+            ScanNodeProperties scanNodeProperties = __instance.GetComponentInChildren<ScanNodeProperties>();
+            if (scanNodeProperties != null)
+            {
+                if (scanNodeProperties.headerText == "Apparatice")
+                    scanNodeProperties.headerText = "Apparatus";
+                scanNodeProperties.subText = "Value: $80";
+            }
+        }
     }
 }

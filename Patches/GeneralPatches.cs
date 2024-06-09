@@ -82,6 +82,7 @@ namespace ButteryFixes.Patches
                 { "SprayPaint", true },
                 //{ "SteeringWheel", true }
             };
+
             foreach (Item item in __instance.allItemsList.itemsList)
             {
                 if (item == null)
@@ -109,6 +110,16 @@ namespace ButteryFixes.Patches
                     case "PillBottle":
                         item.canBeInspected = true;
                         Plugin.Logger.LogInfo($"Inspectable: {item.itemName} (True)");
+                        break;
+                    case "Cog1":
+                    case "FishTestProp":
+                    case "RedLocustHive":
+                    case "StickyNote":
+                    case "Clipboard":
+                    case "MapDevice":
+                    case "ZapGun":
+                        item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Linear;
+                        Plugin.Logger.LogInfo($"Audio rolloff: {item.itemName}");
                         break;
                 }
 
@@ -141,6 +152,19 @@ namespace ButteryFixes.Patches
                     item.isConductiveMetal = conductiveItems[item.name] && Plugin.configMakeConductive.Value;
                     Plugin.Logger.LogInfo($"Conductive: {item.itemName} ({item.isConductiveMetal})");
                 }
+            }
+
+            AudioSource stickyNote = __instance.elevatorTransform.Find("StickyNoteItem")?.GetComponent<AudioSource>();
+            if (stickyNote != null)
+            {
+                stickyNote.rolloffMode = AudioRolloffMode.Linear;
+                Plugin.Logger.LogInfo($"Audio rolloff: Sticky note");
+            }
+            AudioSource clipboard = __instance.elevatorTransform.Find("ClipboardManual")?.GetComponent<AudioSource>();
+            if (clipboard != null)
+            {
+                clipboard.rolloffMode = AudioRolloffMode.Linear;
+                Plugin.Logger.LogInfo($"Audio rolloff: Clipboard");
             }
 
             // fix doppler level for furniture

@@ -199,12 +199,23 @@ namespace ButteryFixes.Patches
         [HarmonyPrefix]
         static void PreSubtractFromPowerLevel(EnemyAI __instance, ref bool ___removedPowerLevel)
         {
-            // should always apply to the host? they control spawning anyway
-            // I've only had mimickingPlayer desync on client
-            if (__instance is MaskedPlayerEnemy && !___removedPowerLevel && (__instance as MaskedPlayerEnemy).mimickingPlayer != null)
+            if (__instance is MaskedPlayerEnemy)
             {
-                Plugin.Logger.LogInfo("\"Masked\" was mimicking a player; will not subtract from power level");
-                ___removedPowerLevel = true;
+                // should always work correctly for the host?
+                // I've only had mimickingPlayer desync on client
+                if (!___removedPowerLevel && (__instance as MaskedPlayerEnemy).mimickingPlayer != null)
+                {
+                    Plugin.Logger.LogInfo("\"Masked\" was mimicking a player; will not subtract from power level");
+                    ___removedPowerLevel = true;
+                }
+            }
+            else if (__instance is ButlerEnemyAI)
+            {
+                if (Plugin.configMaskHornetsPower.Value)
+                {
+                    Plugin.Logger.LogInfo("Butler died, but mask hornets don't decrease power level");
+                    ___removedPowerLevel = true;
+                }
             }
         }
 
@@ -257,6 +268,108 @@ namespace ButteryFixes.Patches
         static bool SandSpiderAIPreTriggerChaseWithPlayer(PlayerControllerB playerScript)
         {
             return playerScript != null;
+        }
+
+        [HarmonyPatch(typeof(MaskedPlayerEnemy), nameof(MaskedPlayerEnemy.Update))]
+        [HarmonyPostfix]
+        static void MaskedPlayerEnemyPostUpdate(MaskedPlayerEnemy __instance)
+        {
+            // enables the blood spillage effect that Zeekerss removed in v49
+            if (__instance.maskFloodParticle.isEmitting && __instance.inSpecialAnimationWithPlayer == GameNetworkManager.Instance.localPlayerController && !HUDManager.Instance.HUDAnimator.GetBool("biohazardDamage"))
+            {
+                HUDManager.Instance.HUDAnimator.SetBool("biohazardDamage", true);
+                Plugin.Logger.LogInfo("Enable screen blood for mask vomit animation");
+            }
+        }
+
+        [HarmonyPatch(typeof(MaskedPlayerEnemy), nameof(MaskedPlayerEnemy.FinishKillAnimation))]
+        [HarmonyPrefix]
+        static void MaskedPlayerEnemyPreFinishKillAnimation(MaskedPlayerEnemy __instance)
+        {
+            // this should properly prevent the blood effect from persisting after you are rescued from a mask
+            // reasons this didn't work in v49 (and presumably why it got removed):
+            // - inSpecialAnimationWithPlayer was set to null before checking if it matched the local player
+            // - just disabling biohazardDamage wasn't enough to transition back to a normal HUD animator state
+            if (__instance.inSpecialAnimationWithPlayer == GameNetworkManager.Instance.localPlayerController && HUDManager.Instance.HUDAnimator.GetBool("biohazardDamage"))
+            {
+                // cancel the particle effect early, just in case (to prevent it from retriggering and becoming stuck)
+                if (__instance.maskFloodParticle.isEmitting)
+                    __instance.maskFloodParticle.Stop();
+                HUDManager.Instance.HUDAnimator.SetBool("biohazardDamage", false);
+                HUDManager.Instance.HUDAnimator.SetTrigger("HealFromCritical");
+                Plugin.Logger.LogInfo("Vomit animation was interrupted while blood was on screen");
+            }
+        }
+
+        [HarmonyPatch(typeof(RadMechAI), "Stomp")]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> RadMechAITransStomp(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            for (int i = 0; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Ldloc_1 && codes[i + 1].opcode == OpCodes.Ldarg_S && codes[i + 2].opcode == OpCodes.Bge_Un)
+                {
+                    Label label = generator.DefineLabel();
+                    for (int j = i + 3; j < codes.Count; j++)
+                    {
+                        if (codes[j].opcode == OpCodes.Dup)
+                        {
+                            codes[j - 1].labels.Add(label);
+                            codes.InsertRange(i + 3, new CodeInstruction[]
+                            {
+                                new CodeInstruction(OpCodes.Ldloc_0),
+                                new CodeInstruction(OpCodes.Ldfld, typeof(PlayerControllerB).GetField(nameof(PlayerControllerB.isInHangarShipRoom), BindingFlags.Instance | BindingFlags.Public)),
+                                new CodeInstruction(OpCodes.Brtrue, label)
+                            });
+                            Plugin.Logger.LogDebug("Transpiler: Old Bird stomps don't damage players in ship");
+                            return codes;
+                        }
+                    }
+                }
+            }
+
+            return codes;
+        }
+
+        [HarmonyPatch(typeof(FlowermanAI), nameof(FlowermanAI.HitEnemy))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> FlowermanAITransHitEnemy(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            for (int i = 2; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == typeof(FlowermanAI).GetField(nameof(FlowermanAI.angerMeter), BindingFlags.Instance | BindingFlags.Public))
+                {
+                    for (int j = i - 2; j < codes.Count; j++)
+                    {
+                        if (codes[j].opcode == OpCodes.Ret)
+                        {
+                            Plugin.Logger.LogDebug("Transpiler: Remove bracken aggro on hit (replace with postfix)");
+                            break;
+                        }
+                        codes[j].opcode = OpCodes.Nop;
+                    }
+                }
+            }
+
+            return codes;
+        }
+
+        [HarmonyPatch(typeof(FlowermanAI), nameof(FlowermanAI.HitEnemy))]
+        [HarmonyPostfix]
+        static void PostBrackenDamage(FlowermanAI __instance, PlayerControllerB playerWhoHit)
+        {
+            if (playerWhoHit != null)
+            {
+                __instance.angerMeter = 11f;
+                __instance.angerCheckInterval = 1f;
+            }
+            else
+                Plugin.Logger.LogInfo("Bracken was damaged by an enemy; don't max aggro");
+            __instance.AddToAngerMeter(0.1f);
         }
     }
 }

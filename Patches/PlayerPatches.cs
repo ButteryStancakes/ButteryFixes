@@ -1,6 +1,8 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
 using UnityEngine;
 
 namespace ButteryFixes.Patches
@@ -48,6 +50,9 @@ namespace ButteryFixes.Patches
                 Plugin.ENABLE_SCAN_PATCH = false;
                 Plugin.Logger.LogInfo("Resolution changes reverted");
             }
+            __instance.playerBadgeMesh.gameObject.SetActive(false);
+            __instance.playerBetaBadgeMesh.gameObject.SetActive(false);
+            Plugin.Logger.LogInfo("Hide badges on local player");
         }
 
         [HarmonyPatch(typeof(HUDManager), "UpdateScanNodes")]
@@ -88,6 +93,25 @@ namespace ButteryFixes.Patches
             // fixes the TZP effects persisting when you disconnect and re-enter the game
             __instance.currentMixerSnapshotID = 4;
             __instance.SetDiageticMixerSnapshot(0, 0.2f);
+        }
+
+        [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.UpdateHealthUI))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> TransUpdateHealthUI(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            for (int i = 0; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Ldarg_1 && codes[i + 1].opcode == OpCodes.Ldc_I4_S && (sbyte)codes[i + 1].operand == 20 && codes[i + 2].opcode == OpCodes.Bge)
+                {
+                    codes[i + 1].operand = 10;
+                    Plugin.Logger.LogDebug("Transpiler: Fix critical injury popup threshold");
+                    break;
+                }
+            }
+
+            return codes;
         }
     }
 }
