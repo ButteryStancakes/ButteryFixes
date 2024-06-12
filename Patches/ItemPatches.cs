@@ -132,7 +132,7 @@ namespace ButteryFixes.Patches
 
         [HarmonyPatch(typeof(ShotgunItem), nameof(ShotgunItem.ShootGun))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> TransShootGun(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> ShotgunItemTransShootGun(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
@@ -147,6 +147,7 @@ namespace ButteryFixes.Patches
                 {
                     codes.InsertRange(i + 2, new CodeInstruction[]
                     {
+                        new CodeInstruction(OpCodes.Ldarg_1),
                         new CodeInstruction(OpCodes.Ldloca_S, codes[i + 1].operand),
                         new CodeInstruction(OpCodes.Ldarg_0),
                         new CodeInstruction(OpCodes.Ldflda, typeof(ShotgunItem).GetField("enemyColliders", BindingFlags.Instance | BindingFlags.NonPublic)),
