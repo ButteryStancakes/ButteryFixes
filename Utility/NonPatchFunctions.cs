@@ -12,6 +12,7 @@ namespace ButteryFixes.Utility
         {
             int index = 0;
             List<EnemyAI> enemies = new();
+            List<RaycastHit> invincibles = new();
 
             // sort in order of distance
             RaycastHit[] sortedResults = results.Take(num).OrderBy(hit => Vector3.Distance(shotgunPosition, hit.point)).ToArray();
@@ -22,14 +23,30 @@ namespace ButteryFixes.Utility
                 if (sortedResults[i].transform.TryGetComponent(out EnemyAICollisionDetect enemyCollider) && !enemyCollider.onlyCollideWhenGrounded && !enemies.Contains(enemyCollider.mainScript))
                 {
                     enemies.Add(enemyCollider.mainScript);
-                    if (!enemyCollider.mainScript.isEnemyDead)
+                    // invincible enemies are low-priority
+                    if (!enemyCollider.mainScript.enemyType.canDie)
+                        invincibles.Add(sortedResults[i]);
+                    else if (!enemyCollider.mainScript.isEnemyDead)
                     {
                         results[index] = sortedResults[i];
                         index++;
                         // only hit 10 targets max
                         if (index == 10)
-                            break;
+                        {
+                            num = 10;
+                            return;
+                        }
                     }
+                }
+            }
+
+            // add invincible enemies at the end, if there are slots leftover
+            if (invincibles.Count > 0)
+            {
+                for (int i = 0; i < invincibles.Count && index < 10; i++)
+                {
+                    results[index] = invincibles[i];
+                    index++;
                 }
             }
 
