@@ -8,6 +8,8 @@ namespace ButteryFixes.Utility
 {
     static class NonPatchFunctions
     {
+        internal static bool[] playerWasLastSprinting = new bool[/*4*/50];
+
         public static void ShotgunPreProcess(Vector3 shotgunPosition, ref int num, ref RaycastHit[] results)
         {
             int index = 0;
@@ -95,10 +97,7 @@ namespace ButteryFixes.Utility
         internal static void FakeFootstepAlert(PlayerControllerB player)
         {
             bool noiseIsInsideClosedShip = player.isInHangarShipRoom && StartOfRound.Instance.hangarDoorsClosed;
-            // the below doesn't work as expected because jumping cancels the sprint animation
-            bool sprinting = player.IsOwner ? player.isSprinting : player.playerBodyAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Sprinting");
-            Plugin.Logger.LogDebug($"Bunnyhop while sprinting: {sprinting}");
-            if (sprinting)
+            if (player.IsOwner ? player.isSprinting : playerWasLastSprinting[player.actualClientId])
                 RoundManager.Instance.PlayAudibleNoise(player.transform.position, 22f, 0.6f, 0, noiseIsInsideClosedShip, 3322);
             else
                 RoundManager.Instance.PlayAudibleNoise(player.transform.position, 17f, 0.4f, 0, noiseIsInsideClosedShip, 3322);

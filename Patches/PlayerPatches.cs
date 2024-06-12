@@ -194,5 +194,20 @@ namespace ButteryFixes.Patches
 
             bunnyhoppingPlayers.Remove(__instance);
         }
+
+        // TODO: Check animator state during animsync RPC instead
+        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.PlayFootstepSound))]
+        [HarmonyPostfix]
+        static void PostPlayFootstepSound(PlayerControllerB __instance)
+        {
+            if (__instance.IsServer && !__instance.IsOwner)
+                NonPatchFunctions.playerWasLastSprinting[__instance.actualClientId] = __instance.playerBodyAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Sprinting");
+        }
+
+        /*[HarmonyPatch(typeof(PlayerControllerB), "UpdatePlayerAnimationClientRpc")]
+        [HarmonyPostfix]
+        static void PostUpdatePlayerAnimationClientRpc(PlayerControllerB __instance)
+        {
+        }*/
     }
 }
