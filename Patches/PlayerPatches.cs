@@ -1,15 +1,19 @@
-﻿using GameNetcodeStuff;
+﻿using ButteryFixes.Utility;
+using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace ButteryFixes.Patches
 {
     [HarmonyPatch]
     internal class PlayerPatches
     {
+        static List<PlayerControllerB> bunnyhoppingPlayers = new();
+
         [HarmonyPatch(typeof(PlayerControllerB), "Update")]
         [HarmonyPostfix]
         static void PlayerControllerBPostUpdate(PlayerControllerB __instance, bool ___isWalking)
@@ -50,9 +54,25 @@ namespace ButteryFixes.Patches
                 Plugin.ENABLE_SCAN_PATCH = false;
                 Plugin.Logger.LogInfo("Resolution changes reverted");
             }
-            __instance.playerBadgeMesh.gameObject.SetActive(false);
-            __instance.playerBetaBadgeMesh.gameObject.SetActive(false);
-            Plugin.Logger.LogInfo("Hide badges on local player");
+            
+            // fix some oddities with local player rendering
+            Renderer scavengerHelmet = __instance.localVisor.Find("ScavengerHelmet")?.GetComponent<Renderer>();
+            if (scavengerHelmet != null)
+            {
+                scavengerHelmet.shadowCastingMode = ShadowCastingMode.Off;
+                Plugin.Logger.LogInfo("\"Fake helmet\" no longer casts a shadow");
+            }
+            try
+            {
+                __instance.playerBadgeMesh.GetComponent<Renderer>().forceRenderingOff = true;
+                __instance.playerBetaBadgeMesh.forceRenderingOff = true;
+                Plugin.Logger.LogInfo("Hide badges on local player");
+            }
+            catch (System.Exception e)
+            {
+                Plugin.Logger.LogError("Ran into error fetching local player's badges");
+                Plugin.Logger.LogError(e);
+            }
         }
 
         [HarmonyPatch(typeof(HUDManager), "UpdateScanNodes")]
@@ -107,11 +127,72 @@ namespace ButteryFixes.Patches
                 {
                     codes[i + 1].operand = 10;
                     Plugin.Logger.LogDebug("Transpiler: Fix critical injury popup threshold");
-                    break;
+                    return codes;
                 }
             }
 
+            Plugin.Logger.LogDebug("Health UI transpiler failed");
             return codes;
+        }
+
+        [HarmonyPatch(typeof(PlayerControllerB), "PlayJumpAudio")]
+        [HarmonyPostfix]
+        static void PostPlayJumpAudio(PlayerControllerB __instance, bool ___isWalking)
+        {
+            if (!Plugin.configFixJumpCheese.Value || !__instance.IsServer || StartOfRound.Instance.inShipPhase)
+            {
+                if (bunnyhoppingPlayers.Count > 0)
+                {
+                    Plugin.Logger.LogWarning("Bunnyhopping player list has some residual entries");
+                    bunnyhoppingPlayers.Clear();
+                }
+                return;
+            }
+
+            if (__instance.isInsideFactory || __instance.isInElevator || __instance.isInHangarShipRoom)
+                return;
+
+            EnemyType mouthDog = GlobalReferences.allEnemiesList["MouthDog"];
+            if (mouthDog == null || mouthDog.numberSpawned < 1)
+                return;
+
+            bool moving = false;
+            if (__instance.IsOwner)
+                moving = ___isWalking;
+            else if (__instance.timeSincePlayerMoving < 0.25f)
+            {
+                Vector3 deltaDist = __instance.serverPlayerPosition - __instance.oldPlayerPosition;
+                deltaDist.y = 0f;
+                moving = deltaDist.magnitude > float.Epsilon;
+            }
+
+            if (moving)
+            {
+                Plugin.Logger.LogInfo($"Player \"{__instance.playerUsername}\" is bunnyhopping with dogs outside; creating noise");
+                NonPatchFunctions.FakeFootstepAlert(__instance);
+
+                if (!bunnyhoppingPlayers.Contains(__instance))
+                    bunnyhoppingPlayers.Add(__instance);
+            }
+        }
+
+        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.LandFromJumpClientRpc))]
+        [HarmonyPostfix]
+        static void PostLandFromJumpClientRpc(PlayerControllerB __instance)
+        {
+            if (!bunnyhoppingPlayers.Contains(__instance))
+                return;
+
+            Plugin.Logger.LogInfo($"Player \"{__instance.playerUsername}\" landed from bunnyhop");
+
+            if (Plugin.configFixJumpCheese.Value && __instance.IsServer)
+            {
+                EnemyType mouthDog = GlobalReferences.allEnemiesList["MouthDog"];
+                if (mouthDog != null && mouthDog.numberSpawned >= 1)
+                    NonPatchFunctions.FakeFootstepAlert(__instance);
+            }
+
+            bunnyhoppingPlayers.Remove(__instance);
         }
     }
 }

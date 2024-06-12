@@ -6,23 +6,21 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Linq;
 using UnityEngine;
-using ButteryFixes.Helpers;
+using ButteryFixes.Utility;
 
 namespace ButteryFixes.Patches
 {
     [HarmonyPatch]
     internal class ItemPatches
     {
-        internal static readonly FieldInfo JETPACK_ACTIVATED = typeof(JetpackItem).GetField("jetpackActivated", BindingFlags.Instance | BindingFlags.NonPublic);
-
-        static readonly FieldInfo PREVIOUS_PLAYER_HELD_BY = typeof(JetpackItem).GetField("previousPlayerHeldBy", BindingFlags.Instance | BindingFlags.NonPublic);
-
         [HarmonyPatch(typeof(JetpackItem), "DeactivateJetpack")]
         [HarmonyPostfix]
         public static void PostDeactivateJetpack(JetpackItem __instance)
         {
+            EnemyType flowerSnake = GlobalReferences.allEnemiesList["FlowerSnake"];
+
             // if the jetpack turns off and there are tulip snakes on the map...
-            if (EnemyPatches.FLOWER_SNAKE != null && EnemyPatches.FLOWER_SNAKE.numberSpawned > 0)
+            if (flowerSnake != null && flowerSnake.numberSpawned > 0)
             {
                 foreach (EnemyAI enemyAI in RoundManager.Instance.SpawnedEnemies)
                 {
@@ -30,7 +28,7 @@ namespace ButteryFixes.Patches
                     {
                         FlowerSnakeEnemy tulipSnake = enemyAI as FlowerSnakeEnemy;
                         // verify there is a living tulip snake clung to the player and flapping its wings
-                        if (!tulipSnake.isEnemyDead && tulipSnake.clingingToPlayer == GameNetworkManager.Instance.localPlayerController && tulipSnake.clingingToPlayer.disablingJetpackControls && tulipSnake.clingPosition == 4 && tulipSnake.flightPower > 0f && (PlayerControllerB)PREVIOUS_PLAYER_HELD_BY.GetValue(__instance) == tulipSnake.clingingToPlayer)
+                        if (!tulipSnake.isEnemyDead && tulipSnake.clingingToPlayer == GameNetworkManager.Instance.localPlayerController && tulipSnake.clingingToPlayer.disablingJetpackControls && tulipSnake.clingPosition == 4 && tulipSnake.flightPower > 0f && (PlayerControllerB)PrivateMembers.JETPACK_ITEM_PREVIOUS_PLAYER_HELD_BY.GetValue(__instance) == tulipSnake.clingingToPlayer)
                         {
                             tulipSnake.clingingToPlayer.disablingJetpackControls = false;
                             // can't set maxJetpackAngle after player has been flying with free rotation (causes lockup and generally feels bad)
@@ -106,37 +104,9 @@ namespace ButteryFixes.Patches
             {
                 __instance.shotgunShellLeft.enabled = __instance.shellsLoaded > 0;
                 __instance.shotgunShellRight.enabled = false;
-                __instance.StartCoroutine(ShellsAppearAfterDelay(__instance));
+                __instance.StartCoroutine(NonPatchFunctions.ShellsAppearAfterDelay(__instance));
                 Plugin.Logger.LogInfo("Shotgun was reloaded by another client; animating shells");
             }
-        }
-
-        internal static IEnumerator ShellsAppearAfterDelay(ShotgunItem shotgun)
-        {
-            yield return new WaitForSeconds(shotgun.isHeldByEnemy ? 0.85f : 1.9f);
-
-            if (shotgun.isHeldByEnemy)
-            {
-                // nutcrackers don't set isReloading (see below)
-                shotgun.shotgunShellLeft.forceRenderingOff = false;
-                shotgun.shotgunShellLeft.enabled = true;
-                shotgun.shotgunShellRight.forceRenderingOff = false;
-                shotgun.shotgunShellRight.enabled = true;
-            }
-            else if (shotgun.shotgunShellLeft.enabled)
-                shotgun.shotgunShellRight.enabled = true;
-            else
-                shotgun.shotgunShellLeft.enabled = true;
-
-            yield return new WaitForSeconds(shotgun.isHeldByEnemy ? 0.66f : 0.75f);
-
-            if (!shotgun.isHeldByEnemy)
-                yield return new WaitUntil(() => !shotgun.isReloading);
-
-            // disables shells rendering when the gun is closed, to prevent bleedthrough with LOD1 model
-            shotgun.shotgunShellLeft.forceRenderingOff = true;
-            shotgun.shotgunShellRight.forceRenderingOff = true;
-            Plugin.Logger.LogInfo($"Finished animating shotgun shells (held by enemy: {shotgun.isHeldByEnemy})");
         }
 
         [HarmonyPatch(typeof(ShotgunItem), nameof(ShotgunItem.Update))]
@@ -180,9 +150,9 @@ namespace ButteryFixes.Patches
                         new CodeInstruction(OpCodes.Ldloca_S, codes[i + 1].operand),
                         new CodeInstruction(OpCodes.Ldarg_0),
                         new CodeInstruction(OpCodes.Ldflda, typeof(ShotgunItem).GetField("enemyColliders", BindingFlags.Instance | BindingFlags.NonPublic)),
-                        new CodeInstruction(OpCodes.Call, typeof(GunHelper).GetMethod(nameof(GunHelper.FilterDuplicateHits), BindingFlags.Static | BindingFlags.Public)),
+                        new CodeInstruction(OpCodes.Call, typeof(NonPatchFunctions).GetMethod(nameof(NonPatchFunctions.ShotgunPreProcess), BindingFlags.Static | BindingFlags.Public)),
                     });
-                    Plugin.Logger.LogDebug("Transpiler: Shotgun filters duplicate targets");
+                    Plugin.Logger.LogDebug("Transpiler: Pre-process shotgun targets");
                 }
             }
 
@@ -198,7 +168,8 @@ namespace ButteryFixes.Patches
             {
                 if (scanNodeProperties.headerText == "Apparatice")
                     scanNodeProperties.headerText = "Apparatus";
-                scanNodeProperties.subText = "Value: $80";
+                scanNodeProperties.subText = $"Value: ${__instance.scrapValue}";
+                Plugin.Logger.LogInfo("Scan node: Apparatus");
             }
         }
     }

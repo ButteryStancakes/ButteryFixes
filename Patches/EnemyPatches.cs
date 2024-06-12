@@ -6,17 +6,13 @@ using System.Reflection.Emit;
 using UnityEngine;
 using BepInEx.Bootstrap;
 using GameNetcodeStuff;
+using ButteryFixes.Utility;
 
 namespace ButteryFixes.Patches
 {
     [HarmonyPatch]
     internal class EnemyPatches
     {
-        internal static EnemyType FLOWER_SNAKE;
-
-        static readonly MethodInfo GLOBAL_NUTCRACKER_CLOCK = typeof(NutcrackerEnemyAI).GetMethod("GlobalNutcrackerClock", BindingFlags.Instance | BindingFlags.NonPublic);
-        static readonly FieldInfo IS_LEADER_SCRIPT = typeof(NutcrackerEnemyAI).GetField("isLeaderScript", BindingFlags.Instance | BindingFlags.NonPublic);
-
         [HarmonyPatch(typeof(ButlerEnemyAI), nameof(ButlerEnemyAI.OnCollideWithPlayer))]
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> ButlerEnemyAITransOnCollideWithPlayer(IEnumerable<CodeInstruction> instructions)
@@ -32,7 +28,7 @@ namespace ButteryFixes.Patches
                     for (int j = startAt; j <= endAt; j++)
                     {
                         codes[j].opcode = OpCodes.Nop;
-                        codes[j].operand = null;
+                        //codes[j].operand = null;
                     }
                     Plugin.Logger.LogDebug("Transpiler: Remove timestamp check (replace with prefix)");
                     return codes;
@@ -124,6 +120,7 @@ namespace ButteryFixes.Patches
                 }
             }
 
+            Plugin.Logger.LogError("Hygrodere anger transpiler failed");
             return codes;
         }
 
@@ -133,17 +130,20 @@ namespace ButteryFixes.Patches
         {
             // if the leader is dead, manually update the clock
             if (___isLeaderScript && __instance.isEnemyDead)
-                GLOBAL_NUTCRACKER_CLOCK.Invoke(__instance, null);
+                PrivateMembers.GLOBAL_NUTCRACKER_CLOCK.Invoke(__instance, null);
         }
 
         [HarmonyPatch(typeof(NutcrackerEnemyAI), nameof(NutcrackerEnemyAI.Start))]
         [HarmonyPostfix]
         [HarmonyAfter("Dev1A3.LethalFixes")]
-        static void NutcrackerEnemyAIPostStart(NutcrackerEnemyAI __instance, ref bool ___isLeaderScript)
+        static void NutcrackerEnemyAIPostStart(NutcrackerEnemyAI __instance, ref bool ___isLeaderScript, ref int ___previousPlayerSeenWhenAiming)
         {
             // to piggyback off the LethalFixes tiptoe fix, 0.5 is still a little too jittery
             if (Chainloader.PluginInfos.ContainsKey("Dev1A3.LethalFixes"))
                 __instance.updatePositionThreshold = 0.3f;
+
+            // fixes nutcracker tiptoe being early when against the host
+            ___previousPlayerSeenWhenAiming = -1;
 
             // if numbersSpawned > 1, a leader might not have been assigned yet (if the first nutcracker spawned with another already queued in a vent)
             if (__instance.IsServer && !___isLeaderScript && __instance.enemyType.numberSpawned > 1)
@@ -151,7 +151,7 @@ namespace ButteryFixes.Patches
                 NutcrackerEnemyAI[] nutcrackers = Object.FindObjectsOfType<NutcrackerEnemyAI>();
                 foreach (NutcrackerEnemyAI nutcracker in nutcrackers)
                 {
-                    if (nutcracker != __instance && (bool)IS_LEADER_SCRIPT.GetValue(nutcracker))
+                    if (nutcracker != __instance && (bool)PrivateMembers.IS_LEADER_SCRIPT.GetValue(nutcracker))
                     {
                         Plugin.Logger.LogDebug($"NUTCRACKER CLOCK: Nutcracker #{__instance.GetInstanceID()} spawned, #{nutcracker.GetInstanceID()} is already leader");
                         return;
@@ -237,7 +237,7 @@ namespace ButteryFixes.Patches
                 {
                     // and is a jetpack that's activated
                     JetpackItem heldJetpack = __instance.clingingToPlayer.ItemSlots[i] as JetpackItem;
-                    if ((bool)ItemPatches.JETPACK_ACTIVATED.GetValue(heldJetpack))
+                    if ((bool)PrivateMembers.JETPACK_ACTIVATED.GetValue(heldJetpack))
                     {
                         __instance.clingingToPlayer.disablingJetpackControls = false;
                         __instance.clingingToPlayer.maxJetpackAngle = -1f;
@@ -257,7 +257,7 @@ namespace ButteryFixes.Patches
             {
                 __instance.gun.shotgunShellLeft.enabled = false;
                 __instance.gun.shotgunShellRight.enabled = false;
-                __instance.gun.StartCoroutine(ItemPatches.ShellsAppearAfterDelay(__instance.gun));
+                __instance.gun.StartCoroutine(NonPatchFunctions.ShellsAppearAfterDelay(__instance.gun));
                 Plugin.Logger.LogInfo("Shotgun was reloaded by nutcracker; animating shells");
             }
         }
@@ -330,6 +330,7 @@ namespace ButteryFixes.Patches
                 }
             }
 
+            Plugin.Logger.LogError("Old Bird stomp transpiler failed");
             return codes;
         }
 
@@ -348,19 +349,20 @@ namespace ButteryFixes.Patches
                         if (codes[j].opcode == OpCodes.Ret)
                         {
                             Plugin.Logger.LogDebug("Transpiler: Remove bracken aggro on hit (replace with postfix)");
-                            break;
+                            return codes;
                         }
                         codes[j].opcode = OpCodes.Nop;
                     }
                 }
             }
 
+            Plugin.Logger.LogError("Bracken damage transpiler failed");
             return codes;
         }
 
         [HarmonyPatch(typeof(FlowermanAI), nameof(FlowermanAI.HitEnemy))]
         [HarmonyPostfix]
-        static void PostBrackenDamage(FlowermanAI __instance, PlayerControllerB playerWhoHit)
+        static void FlowermanAIPostHitEnemy(FlowermanAI __instance, PlayerControllerB playerWhoHit)
         {
             if (playerWhoHit != null)
             {
@@ -370,6 +372,53 @@ namespace ButteryFixes.Patches
             else
                 Plugin.Logger.LogInfo("Bracken was damaged by an enemy; don't max aggro");
             __instance.AddToAngerMeter(0.1f);
+        }
+
+        [HarmonyPatch(typeof(NutcrackerEnemyAI), nameof(NutcrackerEnemyAI.HitEnemy))]
+        [HarmonyPostfix]
+        static void NutcrackerEnemyAIPostHitEnemy(NutcrackerEnemyAI __instance, PlayerControllerB playerWhoHit, bool ___aimingGun, bool ___reloadingGun, float ___timeSinceSeeingTarget)
+        {
+            if (playerWhoHit != null)
+            {
+                int id = (int)playerWhoHit.playerClientId;
+                // "sense" the player hitting it, this allows turning while frozen in place
+                if (__instance.IsOwner && !__instance.isEnemyDead && __instance.currentBehaviourStateIndex == 2 && !___aimingGun && !___reloadingGun && (id == __instance.lastPlayerSeenMoving || ___timeSinceSeeingTarget > 0.5f))
+                    __instance.SwitchTargetServerRpc(id);
+            }
+        }
+
+        [HarmonyPatch(typeof(NutcrackerEnemyAI), "AimGun", MethodType.Enumerator)]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> NutcrackerEnemyAITransAimGun(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            for (int i = 1; i < codes.Count - 1; i++)
+            {
+                if (codes[i].opcode == OpCodes.Ldc_I4_0 && codes[i + 1].opcode == OpCodes.Stfld && (FieldInfo)codes[i + 1].operand == typeof(NutcrackerEnemyAI).GetField("timesSeeingSamePlayer", BindingFlags.Instance | BindingFlags.NonPublic))
+                {
+                    codes[i].opcode = OpCodes.Ldc_I4_1;
+                    Plugin.Logger.LogDebug("Transpiler: Reset times nutcracker saw same player to 1, not 0");
+                }
+                else if (codes[i].opcode == OpCodes.Ldc_I4_1 && codes[i - 1].opcode == OpCodes.Ldloc_1 && codes[i + 1].opcode == OpCodes.Stfld && (FieldInfo)codes[i + 1].operand == typeof(EnemyAI).GetField(nameof(EnemyAI.inSpecialAnimation), BindingFlags.Instance | BindingFlags.Public))
+                {
+                    for (int j = i - 1; j <= i + 1; j++)
+                        codes[j].opcode = OpCodes.Nop;
+                    Plugin.Logger.LogDebug("Transpiler: Nutcracker will sync position while tiptoeing");
+                }
+            }
+
+            return codes;
+        }
+
+        [HarmonyPatch(typeof(MouthDogAI), nameof(MouthDogAI.OnCollideWithPlayer))]
+        [HarmonyPrefix]
+        static bool MouthDogAIPreOnCollideWithPlayer(MouthDogAI __instance, Collider other)
+        {
+            if (__instance.isEnemyDead || (other.TryGetComponent(out PlayerControllerB player) && player.isInHangarShipRoom && StartOfRound.Instance.hangarDoorsClosed && !StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(__instance.transform.position)))
+                return false;
+
+            return true;
         }
     }
 }

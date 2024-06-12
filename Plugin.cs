@@ -35,6 +35,7 @@ namespace ButteryFixes
         internal static ConfigEntry<GameResolution> configGameResolution;
         internal static ConfigEntry<bool> configMakeConductive;
         internal static ConfigEntry<bool> configMaskHornetsPower;
+        internal static ConfigEntry<bool> configFixJumpCheese;
 
         void Awake()
         {
@@ -72,6 +73,12 @@ namespace ButteryFixes
                 "MaskHornetsPower",
                 false,
                 "(Host only) Mask hornets internally have the same power level as butlers, but because they spawn in a non-standard way, they don't contribute to the indoor power. Enabling this will prevent additional monsters spawning to replace dead butlers.");
+
+            configFixJumpCheese = Config.Bind(
+                "Gameplay",
+                "FixJumpCheese",
+                true,
+                "(Host only) Enabling this makes enemies hear players jumping and landing on the floor. This fixes the exploit where you can silently move past dogs with sprinting speed by spamming the jump button.");
 
             new Harmony(PLUGIN_GUID).PatchAll();
 

@@ -1,159 +1,68 @@
-﻿using HarmonyLib;
+﻿using ButteryFixes.Utility;
+using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace ButteryFixes.Patches
 {
     [HarmonyPatch]
     internal class GeneralPatches
     {
-        internal static float MUSIC_DOPPLER_LEVEL = 1f;
-
         [HarmonyPatch(typeof(QuickMenuManager), "Start")]
         [HarmonyPostfix]
         static void QuickMenuManagerPostStart(QuickMenuManager __instance)
         {
-            SpawnableEnemyWithRarity oldBird = __instance.testAllEnemiesLevel.OutsideEnemies.FirstOrDefault(enemy => enemy.enemyType.name == "RadMech");
-            if (oldBird != null)
-                oldBird.enemyType.requireNestObjectsToSpawn = true;
-            Plugin.Logger.LogInfo("Old Birds now require \"nest\" to spawn");
+            // cache all references to enemy types
+            GlobalReferences.allEnemiesList.Clear();
+            List<SpawnableEnemyWithRarity>[] allEnemyLists = new List<SpawnableEnemyWithRarity>[]
+            {
+                __instance.testAllEnemiesLevel.Enemies,
+                __instance.testAllEnemiesLevel.OutsideEnemies,
+                __instance.testAllEnemiesLevel.DaytimeEnemies
+            };
 
-            SpawnableEnemyWithRarity masked = __instance.testAllEnemiesLevel.Enemies.FirstOrDefault(enemy => enemy.enemyType.name == "MaskedPlayerEnemy");
-            if (masked != null)
-                masked.enemyType.isOutsideEnemy = false;
-            Plugin.Logger.LogInfo("\"Masked\" now subtract from indoor power level");
+            foreach (List<SpawnableEnemyWithRarity> enemies in allEnemyLists)
+                foreach (SpawnableEnemyWithRarity spawnableEnemyWithRarity in enemies)
+                {
+                    if (GlobalReferences.allEnemiesList.ContainsKey(spawnableEnemyWithRarity.enemyType.name))
+                    {
+                        if (GlobalReferences.allEnemiesList[spawnableEnemyWithRarity.enemyType.name] == spawnableEnemyWithRarity.enemyType)
+                            Plugin.Logger.LogWarning($"allEnemiesList: Tried to cache reference to \"{spawnableEnemyWithRarity.enemyType.name}\" more than once");
+                        else
+                            Plugin.Logger.LogWarning($"allEnemiesList: Tried to cache two different enemies by same name ({spawnableEnemyWithRarity.enemyType.name})");
+                    }
+                    else
+                        GlobalReferences.allEnemiesList.Add(spawnableEnemyWithRarity.enemyType.name, spawnableEnemyWithRarity.enemyType);
+                }
 
-            EnemyPatches.FLOWER_SNAKE = __instance.testAllEnemiesLevel.DaytimeEnemies.FirstOrDefault(enemy => enemy.enemyType.name == "FlowerSnake")?.enemyType;
+            ScriptableObjectOverrides.OverrideEnemyTypes();
         }
 
         [HarmonyPatch(typeof(StartOfRound), "Awake")]
         [HarmonyPostfix]
         static void StartOfRoundPostAwake(StartOfRound __instance)
         {
-            SelectableLevel rend = __instance.levels.FirstOrDefault(level => level.name == "RendLevel");
-            if (rend != null)
-            {
-                for (int i = 0; i < rend.spawnableMapObjects.Length; i++)
-                {
-                    if (rend.spawnableMapObjects[i].prefabToSpawn != null && rend.spawnableMapObjects[i].prefabToSpawn.name == "SpikeRoofTrapHazard")
-                    {
-                        rend.spawnableMapObjects[i].requireDistanceBetweenSpawns = true;
-                        Plugin.Logger.LogInfo("Rend now properly spaces spike traps");
-                    }
-                }
-            }
-
-            GameObject helmetVisor = GameObject.Find("/Systems/Rendering/PlayerHUDHelmetModel/ScavengerHelmet");
-            if (helmetVisor != null)
-            {
-                helmetVisor.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
-                Plugin.Logger.LogInfo("\"Fake helmet\" no longer casts a shadow");
-            }
+            ScriptableObjectOverrides.OverrideSelectableLevels();
 
             switch (Plugin.configMusicDopplerLevel.Value)
             {
                 case MusicDopplerLevel.None:
-                    MUSIC_DOPPLER_LEVEL = 0f;
+                    GlobalReferences.dopplerLevelMult = 0f;
                     break;
                 case MusicDopplerLevel.Reduced:
-                    MUSIC_DOPPLER_LEVEL = 0.3f;
+                    GlobalReferences.dopplerLevelMult = 0.3f;
                     break;
                 default:
-                    MUSIC_DOPPLER_LEVEL = 1f;
+                    GlobalReferences.dopplerLevelMult = 1f;
                     break;
             }
 
-            __instance.speakerAudioSource.dopplerLevel = MUSIC_DOPPLER_LEVEL;
+            __instance.speakerAudioSource.dopplerLevel = GlobalReferences.dopplerLevelMult;
             Plugin.Logger.LogInfo("Doppler level: Ship speaker");
 
-            Dictionary<string, bool> conductiveItems = new()
-            {
-                //{ "Airhorn", true },
-                //{ "DustPan", true },
-                { "FancyCup", true },
-                { "Flask", false },
-                //{ "Hairdryer", true },
-                { "MoldPan", true },
-                //{ "Phone", true },
-                { "Shotgun", true },
-                { "SprayPaint", true },
-                //{ "SteeringWheel", true }
-            };
-
-            foreach (Item item in __instance.allItemsList.itemsList)
-            {
-                if (item == null)
-                {
-                    Plugin.Logger.LogWarning("Encountered a missing item in StartOfRound.allItemsList; this is probably an issue with another mod");
-                    continue;
-                }
-
-                switch (item.name)
-                {
-                    case "Knife":
-                        item.spawnPrefab.GetComponent<KnifeItem>().SetScrapValue(35);
-                        Plugin.Logger.LogInfo("Kitchen knives now display value on scan");
-                        break;
-                    case "Boombox":
-                        item.spawnPrefab.GetComponent<BoomboxItem>().boomboxAudio.dopplerLevel = 0.3f * MUSIC_DOPPLER_LEVEL;
-                        Plugin.Logger.LogInfo("Doppler level: Boombox");
-                        break;
-                    case "RadarBooster":
-                    case "ExtensionLadder":
-                        item.canBeInspected = false;
-                        Plugin.Logger.LogInfo($"Inspectable: {item.itemName} (False)");
-                        break;
-                    case "MagnifyingGlass":
-                    case "PillBottle":
-                        item.canBeInspected = true;
-                        Plugin.Logger.LogInfo($"Inspectable: {item.itemName} (True)");
-                        break;
-                    case "Cog1":
-                    case "FishTestProp":
-                    case "RedLocustHive":
-                    case "StickyNote":
-                    case "Clipboard":
-                    case "MapDevice":
-                    case "ZapGun":
-                        item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Linear;
-                        Plugin.Logger.LogInfo($"Audio rolloff: {item.itemName}");
-                        break;
-                }
-
-                if (item.canBeInspected)
-                {
-                    if (item.toolTips == null)
-                        Plugin.Logger.LogWarning($"Item \"{item.name}\" is missing toolTips");
-                    else if (item.toolTips.Length < 3)
-                    {
-                        bool hasInspectTip = false;
-                        foreach (string tooltip in item.toolTips)
-                        {
-                            if (tooltip.StartsWith("Inspect"))
-                            {
-                                hasInspectTip = true;
-                                break;
-                            }
-                        }
-
-                        if (!hasInspectTip)
-                        {
-                            item.toolTips = item.toolTips.AddToArray("Inspect: [Z]");
-                            Plugin.Logger.LogInfo($"Inspect tooltip: {item.itemName}");
-                        }
-                    }
-                }
-
-                if (conductiveItems.ContainsKey(item.name))
-                {
-                    item.isConductiveMetal = conductiveItems[item.name] && Plugin.configMakeConductive.Value;
-                    Plugin.Logger.LogInfo($"Conductive: {item.itemName} ({item.isConductiveMetal})");
-                }
-            }
-
+            ScriptableObjectOverrides.OverrideItems();
             AudioSource stickyNote = __instance.elevatorTransform.Find("StickyNoteItem")?.GetComponent<AudioSource>();
             if (stickyNote != null)
             {
@@ -167,25 +76,7 @@ namespace ButteryFixes.Patches
                 Plugin.Logger.LogInfo($"Audio rolloff: Clipboard");
             }
 
-            // fix doppler level for furniture
-            foreach (UnlockableItem unlockableItem in __instance.unlockablesList.unlockables)
-            {
-                switch (unlockableItem.unlockableName)
-                {
-                    /*case "Television":
-                        unlockableItem.prefabObject.GetComponentInChildren<TVScript>().tvSFX.dopplerLevel = MUSIC_DOPPLER_LEVEL;
-                        Plugin.Logger.LogInfo("Doppler level: Television");
-                        break;*/
-                    case "Record player":
-                        unlockableItem.prefabObject.GetComponentInChildren<AnimatedObjectTrigger>().thisAudioSource.dopplerLevel = MUSIC_DOPPLER_LEVEL;
-                        Plugin.Logger.LogInfo("Doppler level: Record player");
-                        break;
-                    case "Disco Ball":
-                        unlockableItem.prefabObject.GetComponentInChildren<CozyLights>().turnOnAudio.dopplerLevel = 0.92f * MUSIC_DOPPLER_LEVEL;
-                        Plugin.Logger.LogInfo("Doppler level: Disco ball");
-                        break;
-                }
-            }
+            ScriptableObjectOverrides.OverrideUnlockables();
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetStats))]
@@ -230,20 +121,25 @@ namespace ButteryFixes.Patches
         {
             // fix doppler level for dropship (both music sources)
             Transform music = __instance.transform.Find("Music");
-            music.GetComponent<AudioSource>().dopplerLevel = 0.6f * MUSIC_DOPPLER_LEVEL;
-            music.Find("Music (1)").GetComponent<AudioSource>().dopplerLevel = 0.6f * MUSIC_DOPPLER_LEVEL;
-            Plugin.Logger.LogInfo("Doppler level: Dropship");
+            if (music != null)
+            {
+                music.GetComponent<AudioSource>().dopplerLevel = 0.6f * GlobalReferences.dopplerLevelMult;
+                AudioSource musicFar = music.Find("Music (1)")?.GetComponent<AudioSource>();
+                if (musicFar != null)
+                    musicFar.dopplerLevel = 0.6f * GlobalReferences.dopplerLevelMult;
+                Plugin.Logger.LogInfo("Doppler level: Dropship");
+            }
         }
 
-        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.EndPlayersFiredSequenceClientRpc))]
+        [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.ShowPlayersFiredScreen))]
         [HarmonyPostfix]
-        static void PostEndPlayersFiredSequenceClientRpc(StartOfRound __instance)
+        static void PostShowPlayersFiredScreen()
         {
             // reset TZP after firing sequence
-            for (int i = 0; i < __instance.allPlayerScripts.Length; i++)
+            for (int i = 0; i < StartOfRound.Instance.allPlayerScripts.Length; i++)
             {
-                __instance.allPlayerScripts[i].drunkness = 0f;
-                __instance.allPlayerScripts[i].drunknessInertia = 0f;
+                StartOfRound.Instance.allPlayerScripts[i].drunkness = 0f;
+                StartOfRound.Instance.allPlayerScripts[i].drunknessInertia = 0f;
             }
         }
 
@@ -339,11 +235,12 @@ namespace ButteryFixes.Patches
                     {
                         codes[i].operand = str.Replace("\nn", "\n");
                         Plugin.Logger.LogDebug("Transpiler: Fix \"n\" on terminal when viewing monitor");
-                        break;
+                        return codes;
                     }
                 }
             }
 
+            Plugin.Logger.LogDebug("Terminal transpiler failed");
             return codes;
         }
 
@@ -356,6 +253,22 @@ namespace ButteryFixes.Patches
             fine *= Mathf.Pow(0.92f, bodiesInsured);
             fine = Mathf.FloorToInt(100 - fine);
             __instance.statsUIElements.penaltyAddition.text = $"{playersDead} casualties: -{fine}%\n({bodiesInsured} bodies recovered)";
+        }
+
+        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.PredictAllOutsideEnemies))]
+        [HarmonyPostfix]
+        static void PostPredictAllOutsideEnemies()
+        {
+            // cleans up leftover spawn numbers from previous day + spawn predictions (when generating nests)
+            foreach (string name in GlobalReferences.allEnemiesList.Keys)
+                GlobalReferences.allEnemiesList[name].numberSpawned = 0;
+        }
+
+        [HarmonyPatch(typeof(GameNetworkManager), nameof(GameNetworkManager.Disconnect))]
+        [HarmonyPostfix]
+        static void GameNetworkManagerPostDisconnect()
+        {
+            GlobalReferences.allEnemiesList.Clear();
         }
     }
 }
