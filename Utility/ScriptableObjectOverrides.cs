@@ -21,6 +21,10 @@ namespace ButteryFixes.Utility
                         enemy.Value.isOutsideEnemy = false;
                         Plugin.Logger.LogInfo("\"Masked\" now subtract from indoor power level");
                         break;
+                    case "Blob":
+                        enemy.Value.canDie = false;
+                        Plugin.Logger.LogInfo("Hygroderes won't \"die\" when crushed by spike trap");
+                        break;
                 }
                 // fix residue in ScriptableObject
                 enemy.Value.numberSpawned = 0;

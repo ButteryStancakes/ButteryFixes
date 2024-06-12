@@ -20,21 +20,26 @@ namespace ButteryFixes.Utility
             // remove all duplicates
             for (int i = 0; i < num; i++)
             {
-                if (sortedResults[i].transform.TryGetComponent(out EnemyAICollisionDetect enemyCollider) && !enemyCollider.onlyCollideWhenGrounded && !enemies.Contains(enemyCollider.mainScript))
+                if (sortedResults[i].transform.TryGetComponent(out EnemyAICollisionDetect enemyCollider) && !enemyCollider.onlyCollideWhenGrounded)
                 {
-                    enemies.Add(enemyCollider.mainScript);
-                    // invincible enemies are low-priority
-                    if (!enemyCollider.mainScript.enemyType.canDie)
-                        invincibles.Add(sortedResults[i]);
-                    else if (!enemyCollider.mainScript.isEnemyDead)
+                    EnemyAI enemy = enemyCollider.mainScript;
+                    if (!enemies.Contains(enemy))
                     {
-                        results[index] = sortedResults[i];
-                        index++;
-                        // only hit 10 targets max
-                        if (index == 10)
+                        enemies.Add(enemy);
+                        EnemyType enemyType = enemy.enemyType;
+                        // invincible enemies are low-priority
+                        if (!enemyType.canDie || enemyType.name == "RadMech" || enemyType.name == "DocileLocustBees")
+                            invincibles.Add(sortedResults[i]);
+                        else if (!enemy.isEnemyDead)
                         {
-                            num = 10;
-                            return;
+                            results[index] = sortedResults[i];
+                            index++;
+                            // only hit 10 targets max
+                            if (index == 10)
+                            {
+                                num = 10;
+                                return;
+                            }
                         }
                     }
                 }
@@ -43,10 +48,16 @@ namespace ButteryFixes.Utility
             // add invincible enemies at the end, if there are slots leftover
             if (invincibles.Count > 0)
             {
-                for (int i = 0; i < invincibles.Count && index < 10; i++)
+                // slime is "medium priority" since they get angry when shot
+                foreach (RaycastHit invincible in invincibles.OrderByDescending(invincible => invincible.transform.GetComponent<EnemyAICollisionDetect>().mainScript is BlobAI))
                 {
-                    results[index] = invincibles[i];
+                    results[index] = invincible;
                     index++;
+                    if (index == 10)
+                    {
+                        num = 10;
+                        return;
+                    }
                 }
             }
 
