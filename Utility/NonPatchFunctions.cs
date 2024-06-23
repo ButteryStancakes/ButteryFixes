@@ -13,7 +13,7 @@ namespace ButteryFixes.Utility
         public static void ShotgunPreProcess(Vector3 shotgunPosition, ref int num, ref RaycastHit[] results)
         {
             int index = 0;
-            List<EnemyAI> enemies = new();
+            HashSet<EnemyAI> enemies = new();
             List<RaycastHit> invincibles = new();
 
             // sort in order of distance
@@ -25,9 +25,8 @@ namespace ButteryFixes.Utility
                 if (sortedResults[i].transform.TryGetComponent(out EnemyAICollisionDetect enemyCollider) && !enemyCollider.onlyCollideWhenGrounded)
                 {
                     EnemyAI enemy = enemyCollider.mainScript;
-                    if (!enemies.Contains(enemy))
+                    if (enemies.Add(enemy))
                     {
-                        enemies.Add(enemy);
                         EnemyType enemyType = enemy.enemyType;
                         // invincible enemies are low-priority
                         if (!enemyType.canDie || enemyType.name == "RadMech" || enemyType.name == "DocileLocustBees")
@@ -101,6 +100,37 @@ namespace ButteryFixes.Utility
                 RoundManager.Instance.PlayAudibleNoise(player.transform.position, 22f, 0.6f, 0, noiseIsInsideClosedShip, 3322);
             else
                 RoundManager.Instance.PlayAudibleNoise(player.transform.position, 17f, 0.4f, 0, noiseIsInsideClosedShip, 3322);
+        }
+
+        internal static void ConvertMaskToTragedy(Transform mask)
+        {
+            Transform mesh = mask.Find("Mesh");
+            if (mesh != null && GlobalReferences.tragedyMask != null && GlobalReferences.tragedyMaskMat != null)
+            {
+                mesh.GetComponent<MeshFilter>().mesh = GlobalReferences.tragedyMask;
+                mesh.GetComponent<MeshRenderer>().material = GlobalReferences.tragedyMaskMat;
+
+                MeshFilter tragedyMaskEyesFilled = mesh.Find("EyesFilled")?.GetComponent<MeshFilter>();
+                if (tragedyMaskEyesFilled != null && GlobalReferences.tragedyMaskEyesFilled != null)
+                {
+                    tragedyMaskEyesFilled.mesh = GlobalReferences.tragedyMaskEyesFilled;
+
+                    MeshFilter tragedyMaskLOD = mask.Find("ComedyMaskLOD1")?.GetComponent<MeshFilter>();
+                    if (tragedyMaskLOD != null && GlobalReferences.tragedyMaskLOD != null)
+                    {
+                        tragedyMaskLOD.mesh = GlobalReferences.tragedyMaskLOD;
+                        tragedyMaskLOD.GetComponent<MeshRenderer>().material = GlobalReferences.tragedyMaskMat;
+
+                        Plugin.Logger.LogInfo("All mask attachment meshes replaced successfully");
+                    }
+                    else
+                        Plugin.Logger.LogWarning("Failed to replace mask attachment eyes");
+                }
+                else
+                    Plugin.Logger.LogWarning("Failed to replace mask attachment LOD");
+            }
+            else
+                Plugin.Logger.LogWarning("Failed to replace mask attachment mesh");
         }
     }
 }

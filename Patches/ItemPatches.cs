@@ -1,6 +1,5 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -136,9 +135,32 @@ namespace ButteryFixes.Patches
         {
             List<CodeInstruction> codes = instructions.ToList();
 
-            for (int i = 1; i < codes.Count; i++)
+            bool fixEarsRinging = false;
+            for (int i = 2; i < codes.Count; i++)
             {
-                if (codes[i].opcode == OpCodes.Newarr && (System.Type)codes[i].operand == typeof(RaycastHit) && codes[i - 1].opcode == OpCodes.Ldc_I4_S && (sbyte)codes[i - 1].operand == 10)
+                // first distance check for tinnitus/screenshake
+                if (!fixEarsRinging && codes[i].opcode == OpCodes.Bge_Un && codes[i - 2].opcode == OpCodes.Ldloc_2)
+                {
+                    for (int j = i + 1; j < codes.Count - 1; j++)
+                    {
+                        int insertAt = -1;
+                        if (codes[j + 1].opcode == OpCodes.Ldloc_2)
+                        {
+                            // first jump from if/else branches
+                            if (insertAt >= 0 && codes[j].opcode == OpCodes.Br)
+                            {
+                                codes.Insert(insertAt, new CodeInstruction(OpCodes.Br, codes[j].operand));
+                                Plugin.Logger.LogDebug("Transpiler: Fix ear-ringing severity in extremely close range");
+                                fixEarsRinging = true;
+                                break;
+                            }
+                            // the end of the first if branch
+                            else if (insertAt < 0 && codes[j].opcode == OpCodes.Stloc_S)
+                                insertAt = j + 1;
+                        }
+                    }
+                }
+                else if (codes[i].opcode == OpCodes.Newarr && (System.Type)codes[i].operand == typeof(RaycastHit) && codes[i - 1].opcode == OpCodes.Ldc_I4_S && (sbyte)codes[i - 1].operand == 10)
                 {
                     codes[i - 1].operand = 50;
                     Plugin.Logger.LogDebug("Transpiler: Resize shotgun collider array");
@@ -162,6 +184,7 @@ namespace ButteryFixes.Patches
 
         [HarmonyPatch(typeof(LungProp), nameof(LungProp.Start))]
         [HarmonyPostfix]
+        [HarmonyPriority(Priority.Last)]
         static void LungPropPostStart(LungProp __instance)
         {
             ScanNodeProperties scanNodeProperties = __instance.GetComponentInChildren<ScanNodeProperties>();
@@ -171,6 +194,32 @@ namespace ButteryFixes.Patches
                     scanNodeProperties.headerText = "Apparatus";
                 scanNodeProperties.subText = $"Value: ${__instance.scrapValue}";
                 Plugin.Logger.LogInfo("Scan node: Apparatus");
+            }
+        }
+
+        [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.GetNewStoryLogClientRpc))]
+        [HarmonyPostfix]
+        static void PostGetNewStoryLogClientRpc(int logID)
+        {
+            foreach (StoryLog storyLog in Object.FindObjectsOfType<StoryLog>())
+            {
+                if (storyLog.storyLogID == logID)
+                {
+                    storyLog.CollectLog();
+                    Plugin.Logger.LogInfo($"Another player collected data chip #{logID}");
+                    return;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(HauntedMaskItem), nameof(HauntedMaskItem.MaskClampToHeadAnimationEvent))]
+        [HarmonyPostfix]
+        static void PostMaskClampToHeadAnimationEvent(HauntedMaskItem __instance)
+        {
+            if (__instance.maskTypeId == 5)
+            {
+                Plugin.Logger.LogInfo("Player is being converted by a Tragedy mask; about to replace mask prefab appearance");
+                NonPatchFunctions.ConvertMaskToTragedy(__instance.currentHeadMask.transform);
             }
         }
     }

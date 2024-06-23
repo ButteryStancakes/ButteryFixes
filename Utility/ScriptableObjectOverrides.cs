@@ -93,6 +93,23 @@ namespace ButteryFixes.Utility
                         item.canBeInspected = false;
                         Plugin.Logger.LogInfo($"Inspectable: {item.itemName} (False)");
                         break;
+                    case "Key":
+                        if (Plugin.configKeysAreScrap.Value)
+                        {
+                            item.isScrap = true;
+                            Plugin.Logger.LogInfo("Scrap: Key");
+                        }
+                        else
+                        {
+                            item.spawnPrefab.GetComponent<KeyItem>().scrapValue = 0;
+                            ScanNodeProperties scanNodeProperties = item.spawnPrefab.GetComponentInChildren<ScanNodeProperties>();
+                            if (scanNodeProperties != null)
+                            {
+                                scanNodeProperties.subText = string.Empty;
+                                Plugin.Logger.LogInfo("Scan node: Key");
+                            }
+                        }
+                        break;
                     case "Knife":
                         KnifeItem knifeItem = item.spawnPrefab.GetComponent<KnifeItem>();
                         knifeItem.SetScrapValue(knifeItem.scrapValue);
@@ -103,6 +120,40 @@ namespace ButteryFixes.Utility
                         item.canBeInspected = true;
                         Plugin.Logger.LogInfo($"Inspectable: {item.itemName} (True)");
                         break;
+                    case "TragedyMask":
+                        GlobalReferences.tragedyMaskRandomClips = item.spawnPrefab.GetComponent<RandomPeriodicAudioPlayer>()?.randomClips;
+                        MeshFilter maskMesh = item.spawnPrefab.transform.Find("MaskMesh")?.GetComponent<MeshFilter>();
+                        if (maskMesh != null)
+                        {
+                            MeshFilter eyesFilled = maskMesh.transform.Find("EyesFilled")?.GetComponent<MeshFilter>();
+                            if (eyesFilled != null && GlobalReferences.tragedyMaskEyesFilled != null)
+                            {
+                                eyesFilled.mesh = GlobalReferences.tragedyMaskEyesFilled;
+                                MeshFilter maskLOD = maskMesh.transform.Find("ComedyMaskLOD")?.GetComponent<MeshFilter>();
+                                if (maskLOD != null && GlobalReferences.tragedyMaskLOD != null)
+                                {
+                                    maskLOD.mesh = GlobalReferences.tragedyMaskLOD;
+                                    Plugin.Logger.LogInfo("Meshes: Tragedy");
+                                }
+                            }
+                        }
+                        break;
+                }
+
+                // affects whoopie cushion primarily
+                if (item.spawnPrefab != null)
+                {
+                    bool triggerHidden = false;
+                    foreach (Renderer rend in item.spawnPrefab.GetComponentsInChildren<Renderer>())
+                    {
+                        if (rend.enabled && rend.gameObject.layer == 13)
+                        {
+                            rend.enabled = false;
+                            triggerHidden = true;
+                        }
+                    }
+                    if (triggerHidden)
+                        Plugin.Logger.LogInfo($"Invisible trigger: {item.itemName}");
                 }
 
                 if (item.canBeInspected)

@@ -62,17 +62,41 @@ namespace ButteryFixes.Patches
             __instance.speakerAudioSource.dopplerLevel = GlobalReferences.dopplerLevelMult;
             Plugin.Logger.LogInfo("Doppler level: Ship speaker");
 
+            GameObject tragedyRagdoll = StartOfRound.Instance.playerRagdolls.FirstOrDefault(playerRagdoll => playerRagdoll.name == "PlayerRagdollWithTragedyMask Variant");
+            if (tragedyRagdoll != null)
+            {
+                // cache all of the visual references to the tragedy mask (the item and enemy prefabs are broken, only the ragdoll has all the correct assets)
+                foreach (MeshFilter meshFilter in tragedyRagdoll.GetComponentsInChildren<MeshFilter>())
+                {
+                    switch (meshFilter.name)
+                    {
+                        case "Mesh":
+                            GlobalReferences.tragedyMask = meshFilter.sharedMesh;
+                            GlobalReferences.tragedyMaskMat = meshFilter.GetComponent<MeshRenderer>()?.sharedMaterial;
+                            break;
+                        case "ComedyMaskLOD1":
+                            GlobalReferences.tragedyMaskLOD = meshFilter.sharedMesh;
+                            break;
+                        case "EyesFilled":
+                            GlobalReferences.tragedyMaskEyesFilled = meshFilter.sharedMesh;
+                            break;
+                    }
+                }
+            }
+
             ScriptableObjectOverrides.OverrideItems();
             AudioSource stickyNote = __instance.elevatorTransform.Find("StickyNoteItem")?.GetComponent<AudioSource>();
             if (stickyNote != null)
             {
                 stickyNote.rolloffMode = AudioRolloffMode.Linear;
+                stickyNote.GetComponent<PhysicsProp>().scrapValue = 0;
                 Plugin.Logger.LogInfo($"Audio rolloff: Sticky note");
             }
             AudioSource clipboard = __instance.elevatorTransform.Find("ClipboardManual")?.GetComponent<AudioSource>();
             if (clipboard != null)
             {
                 clipboard.rolloffMode = AudioRolloffMode.Linear;
+                clipboard.GetComponent<ClipboardItem>().scrapValue = 0;
                 Plugin.Logger.LogInfo($"Audio rolloff: Clipboard");
             }
 
@@ -224,6 +248,9 @@ namespace ButteryFixes.Patches
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> TransTextPostProcess(IEnumerable<CodeInstruction> instructions)
         {
+            if (Plugin.GENERAL_IMPROVEMENTS)
+                return instructions;
+
             List<CodeInstruction> codes = instructions.ToList();
 
             for (int i = codes.Count - 1; i >= 0; i--)
@@ -248,11 +275,12 @@ namespace ButteryFixes.Patches
         [HarmonyPostfix]
         static void ApplyPenalty(HUDManager __instance, int playersDead, int bodiesInsured)
         {
-            float fine = 100;
+            /*float fine = 100;
             fine *= Mathf.Pow(0.8f, playersDead - bodiesInsured);
             fine *= Mathf.Pow(0.92f, bodiesInsured);
             fine = Mathf.FloorToInt(100 - fine);
-            __instance.statsUIElements.penaltyAddition.text = $"{playersDead} casualties: -{fine}%\n({bodiesInsured} bodies recovered)";
+            __instance.statsUIElements.penaltyAddition.text = $"{playersDead} casualties: -{fine}%\n({bodiesInsured} bodies recovered)";*/
+            __instance.statsUIElements.penaltyAddition.text = $"{playersDead} casualties: -{Mathf.Clamp((20 * (playersDead - bodiesInsured)) + (8 * bodiesInsured), 0, 100)}%\n({bodiesInsured} bodies recovered)";
         }
 
         [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.PredictAllOutsideEnemies))]
@@ -269,6 +297,13 @@ namespace ButteryFixes.Patches
         static void GameNetworkManagerPostDisconnect()
         {
             GlobalReferences.allEnemiesList.Clear();
+        }
+
+        [HarmonyPatch(typeof(RoundManager), "Start")]
+        [HarmonyPostfix]
+        static void RoundManagerPostStart(RoundManager __instance)
+        {
+            __instance.ResetEnemyVariables();
         }
     }
 }

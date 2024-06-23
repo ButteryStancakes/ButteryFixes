@@ -23,19 +23,17 @@ namespace ButteryFixes
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
     [BepInDependency("inoyu.FastClimbing", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("e3s1.BetterLadders", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency("ShaosilGaming.GeneralImprovements", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.3.1";
+        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.3.2";
         internal static new ManualLogSource Logger;
 
-        internal static bool DISABLE_LADDER_PATCH;
-        internal static bool ENABLE_SCAN_PATCH;
+        internal static bool DISABLE_LADDER_PATCH, ENABLE_SCAN_PATCH, GENERAL_IMPROVEMENTS;
 
         internal static ConfigEntry<MusicDopplerLevel> configMusicDopplerLevel;
         internal static ConfigEntry<GameResolution> configGameResolution;
-        internal static ConfigEntry<bool> configMakeConductive;
-        internal static ConfigEntry<bool> configMaskHornetsPower;
-        internal static ConfigEntry<bool> configFixJumpCheese;
+        internal static ConfigEntry<bool> configMakeConductive, configMaskHornetsPower, configFixJumpCheese, configKeysAreScrap;
 
         void Awake()
         {
@@ -46,6 +44,8 @@ namespace ButteryFixes
                 Logger.LogInfo("CROSS-COMPATIBILITY - Ladder patch will be disabled");
                 DISABLE_LADDER_PATCH = true;
             }
+
+            GENERAL_IMPROVEMENTS = Chainloader.PluginInfos.ContainsKey("ShaosilGaming.GeneralImprovements");
 
             configGameResolution = Config.Bind(
                 "Visual",
@@ -79,6 +79,12 @@ namespace ButteryFixes
                 "FixJumpCheese",
                 true,
                 "(Host only) Enabling this makes enemies hear players jumping and landing on the floor. This fixes the exploit where you can silently move past dogs with sprinting speed by spamming the jump button.");
+
+            configKeysAreScrap = Config.Bind(
+                "Gameplay",
+                "KeysAreScrap",
+                false,
+                "(Host only) Enabling this will allow you to sell keys for $3 as listed, but will also cause them to be lost if all players die. If this is disabled, they will no longer show \"Value: $3\" on the scanner, instead.");
 
             new Harmony(PLUGIN_GUID).PatchAll();
 

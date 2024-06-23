@@ -4,9 +4,9 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
-using BepInEx.Bootstrap;
 using GameNetcodeStuff;
 using ButteryFixes.Utility;
+using UnityEngine.Rendering.HighDefinition;
 
 namespace ButteryFixes.Patches
 {
@@ -138,9 +138,9 @@ namespace ButteryFixes.Patches
         [HarmonyAfter("Dev1A3.LethalFixes")]
         static void NutcrackerEnemyAIPostStart(NutcrackerEnemyAI __instance, ref bool ___isLeaderScript, ref int ___previousPlayerSeenWhenAiming)
         {
-            // to piggyback off the LethalFixes tiptoe fix, 0.5 is still a little too jittery
-            if (Chainloader.PluginInfos.ContainsKey("Dev1A3.LethalFixes"))
-                __instance.updatePositionThreshold = 0.3f;
+            // 1 in vanilla, but LethalFixes makes it 0.5
+            if (__instance.updatePositionThreshold < GlobalReferences.nutcrackerSyncDistance)
+                GlobalReferences.nutcrackerSyncDistance = __instance.updatePositionThreshold;
 
             // fixes nutcracker tiptoe being early when against the host
             ___previousPlayerSeenWhenAiming = -1;
@@ -274,11 +274,16 @@ namespace ButteryFixes.Patches
         [HarmonyPostfix]
         static void MaskedPlayerEnemyPostUpdate(MaskedPlayerEnemy __instance)
         {
-            // enables the blood spillage effect that Zeekerss removed in v49
-            if (__instance.maskFloodParticle.isEmitting && __instance.inSpecialAnimationWithPlayer == GameNetworkManager.Instance.localPlayerController && !HUDManager.Instance.HUDAnimator.GetBool("biohazardDamage"))
+            if (__instance.maskFloodParticle.isEmitting && __instance.inSpecialAnimationWithPlayer != null)
             {
-                HUDManager.Instance.HUDAnimator.SetBool("biohazardDamage", true);
-                Plugin.Logger.LogInfo("Enable screen blood for mask vomit animation");
+                // bonus effect: cover the player's face with blood
+                __instance.inSpecialAnimationWithPlayer.bodyBloodDecals[3].SetActive(true);
+                // enables the blood spillage effect that Zeekerss removed in v49
+                if (__instance.inSpecialAnimationWithPlayer == GameNetworkManager.Instance.localPlayerController && !HUDManager.Instance.HUDAnimator.GetBool("biohazardDamage"))
+                {
+                    HUDManager.Instance.HUDAnimator.SetBool("biohazardDamage", true);
+                    Plugin.Logger.LogInfo("Enable screen blood for mask vomit animation");
+                }
             }
         }
 
@@ -289,7 +294,7 @@ namespace ButteryFixes.Patches
             // this should properly prevent the blood effect from persisting after you are rescued from a mask
             // reasons this didn't work in v49 (and presumably why it got removed):
             // - inSpecialAnimationWithPlayer was set to null before checking if it matched the local player
-            // - just disabling biohazardDamage wasn't enough to transition back to a normal HUD animator state
+            // - just disabling biohazardDamage wasn't enough to transition back to a normal HUD animator state (it needs a trigger set as well)
             if (__instance.inSpecialAnimationWithPlayer == GameNetworkManager.Instance.localPlayerController && HUDManager.Instance.HUDAnimator.GetBool("biohazardDamage"))
             {
                 // cancel the particle effect early, just in case (to prevent it from retriggering and becoming stuck)
@@ -400,11 +405,25 @@ namespace ButteryFixes.Patches
                     codes[i].opcode = OpCodes.Ldc_I4_1;
                     Plugin.Logger.LogDebug("Transpiler: Reset times nutcracker saw same player to 1, not 0");
                 }
-                else if (codes[i].opcode == OpCodes.Ldc_I4_1 && codes[i - 1].opcode == OpCodes.Ldloc_1 && codes[i + 1].opcode == OpCodes.Stfld && (FieldInfo)codes[i + 1].operand == typeof(EnemyAI).GetField(nameof(EnemyAI.inSpecialAnimation), BindingFlags.Instance | BindingFlags.Public))
+                else if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == typeof(EnemyAI).GetField(nameof(EnemyAI.inSpecialAnimation), BindingFlags.Instance | BindingFlags.Public) && codes[i - 2].opcode == OpCodes.Ldloc_1)
                 {
-                    for (int j = i - 1; j <= i + 1; j++)
-                        codes[j].opcode = OpCodes.Nop;
-                    Plugin.Logger.LogDebug("Transpiler: Nutcracker will sync position while tiptoeing");
+                    // instead of setting inSpecialAnimation to true
+                    if (codes[i - 1].opcode == OpCodes.Ldc_I4_1)
+                    {
+                        // change updatePositionThreshold to a smaller value
+                        codes[i - 1].opcode = OpCodes.Ldc_R4;
+                        codes[i - 1].operand = 0.3f;
+                        Plugin.Logger.LogDebug("Transpiler: Nutcracker will sync position while tiptoeing");
+                    }
+                    // instead of setting inSpecialAnimation to false
+                    else
+                    {
+                        // change updatePositionThreshold to the original value
+                        codes[i - 1].opcode = OpCodes.Ldsfld;
+                        codes[i - 1].operand = typeof(GlobalReferences).GetField(nameof(GlobalReferences.nutcrackerSyncDistance), BindingFlags.Static | BindingFlags.NonPublic);
+                        Plugin.Logger.LogDebug("Transpiler: Dynamic update threshold for nutcracker");
+                    }
+                    codes[i].operand = typeof(EnemyAI).GetField(nameof(EnemyAI.updatePositionThreshold), BindingFlags.Instance | BindingFlags.Public);
                 }
             }
 
@@ -419,6 +438,132 @@ namespace ButteryFixes.Patches
                 return false;
 
             return true;
+        }
+
+        [HarmonyPatch(typeof(MaskedPlayerEnemy), nameof(MaskedPlayerEnemy.KillEnemy))]
+        [HarmonyPostfix]
+        static void MaskedPlayerEnemyPostKillEnemy(MaskedPlayerEnemy __instance)
+        {
+            Animator mapDot = __instance.transform.Find("Misc/MapDot")?.GetComponent<Animator>();
+            if (mapDot)
+            {
+                mapDot.enabled = false;
+                Plugin.Logger.LogInfo("Stop animating masked radar dot");
+            }
+        }
+
+        [HarmonyPatch(typeof(MaskedPlayerEnemy), nameof(MaskedPlayerEnemy.SetSuit))]
+        [HarmonyPostfix]
+        static void PostSetSuit(MaskedPlayerEnemy __instance, int suitId)
+        {
+            Transform spine = __instance.animationContainer.Find("metarig/spine");
+            if (spine == null)
+                return;
+
+            // on second thought, not sure parenting prefabs to NetworkObjects is stable or even supported
+            try
+            {
+                if (suitId < StartOfRound.Instance.unlockablesList.unlockables.Count)
+                {
+                    UnlockableItem suit = StartOfRound.Instance.unlockablesList.unlockables[suitId];
+                    if (suit.headCostumeObject != null)
+                    {
+                        Transform spine004 = spine.Find("spine.001/spine.002/spine.003/spine.004");
+                        if (spine004 != null && spine004.Find(suit.headCostumeObject.name + "(Clone)") == null)
+                        {
+                            Object.Instantiate(suit.headCostumeObject, spine004.position, spine004.rotation, spine004);
+                            Plugin.Logger.LogInfo($"Mimic #{__instance.GetInstanceID()} equipped {suit.unlockableName} head");
+                        }
+                    }
+                    if (suit.lowerTorsoCostumeObject != null && spine.Find(suit.lowerTorsoCostumeObject.name + "(Clone)") == null)
+                    {
+                        Object.Instantiate(suit.lowerTorsoCostumeObject, spine.position, spine.rotation, spine);
+                        Plugin.Logger.LogInfo($"Mimic #{__instance.GetInstanceID()} equipped {suit.unlockableName} torso");
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                Plugin.Logger.LogError("Encountered a non-fatal error while attaching costume pieces to mimic");
+                Plugin.Logger.LogError(e);
+            }
+        }
+
+        [HarmonyPatch(typeof(MaskedPlayerEnemy), nameof(MaskedPlayerEnemy.SetEnemyOutside))]
+        [HarmonyPostfix]
+        static void MaskedPlayerEnemyPostSetEnemyOutside(MaskedPlayerEnemy __instance)
+        {
+            if (__instance.timeSinceSpawn > 40f)
+                return;
+
+            Transform spine003 = __instance.maskTypes[0].transform.parent.parent;
+
+            Renderer betaBadgeMesh = spine003.Find("BetaBadge")?.GetComponent<Renderer>();
+            if (betaBadgeMesh != null)
+            {
+                betaBadgeMesh.enabled = __instance.mimickingPlayer.playerBetaBadgeMesh.enabled;
+                Plugin.Logger.LogInfo($"Mimic #{__instance.GetInstanceID()} VIP: {betaBadgeMesh.enabled}");
+            }
+            MeshFilter badgeMesh = spine003.Find("LevelSticker")?.GetComponent<MeshFilter>();
+            if (badgeMesh != null)
+            {
+                badgeMesh.mesh = __instance.mimickingPlayer.playerBadgeMesh.mesh;
+                Plugin.Logger.LogInfo($"Mimic #{__instance.GetInstanceID()} updated level sticker");
+            }
+
+            // toggling GameObjects under a NetworkObject maybe also a bad idea?
+            try
+            {
+                foreach (DecalProjector bloodDecal in __instance.transform.GetComponentsInChildren<DecalProjector>())
+                {
+                    foreach (GameObject bodyBloodDecal in __instance.mimickingPlayer.bodyBloodDecals)
+                    {
+                        if (bloodDecal.name == bodyBloodDecal.name)
+                        {
+                            bloodDecal.gameObject.SetActive(bodyBloodDecal.activeSelf);
+                            Plugin.Logger.LogInfo($"Mimic #{__instance.GetInstanceID()} blood: \"{bloodDecal.name}\"");
+                        }
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                Plugin.Logger.LogError("Encountered a non-fatal error while enabling mimic blood");
+                Plugin.Logger.LogError(e);
+            }
+        }
+
+        [HarmonyPatch(typeof(DoorLock), "OnTriggerStay")]
+        [HarmonyPrefix]
+        public static bool DoorLockPreOnTriggerStay(Collider other)
+        {
+            // snare fleas and tulip snakes don't open door when latching to player
+            return !(other.CompareTag("Enemy") && other.TryGetComponent(out EnemyAICollisionDetect enemyAICollisionDetect) && ((enemyAICollisionDetect.mainScript as CentipedeAI)?.clingingToPlayer != null || (enemyAICollisionDetect.mainScript as FlowerSnakeEnemy)?.clingingToPlayer != null));
+        }
+
+        [HarmonyPatch(typeof(MaskedPlayerEnemy), nameof(MaskedPlayerEnemy.SetMaskType))]
+        [HarmonyPrefix]
+        static bool PostSetMaskType(MaskedPlayerEnemy __instance, int maskType)
+        {
+            if (maskType == 5 && __instance.maskTypeIndex != 1)
+            {
+                __instance.maskTypeIndex = 1;
+                Plugin.Logger.LogInfo("Mimic spawned that should be Tragedy");
+
+                // replace the comedy mask's models with the tragedy models
+                NonPatchFunctions.ConvertMaskToTragedy(__instance.maskTypes[0].transform);
+
+                // and swap the sound files (these wouldn't work if the tragedy's GameObject was just toggled on)
+                RandomPeriodicAudioPlayer randomPeriodicAudioPlayer = __instance.maskTypes[0].GetComponent<RandomPeriodicAudioPlayer>();
+                if (randomPeriodicAudioPlayer != null)
+                {
+                    randomPeriodicAudioPlayer.randomClips = GlobalReferences.tragedyMaskRandomClips;
+                    Plugin.Logger.LogInfo("Tragedy mimic cries");
+                }
+            }
+
+            // need to replace the vanilla behavior entirely because it's just too buggy
+            return false;
         }
     }
 }
