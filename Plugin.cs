@@ -26,7 +26,7 @@ namespace ButteryFixes
     [BepInDependency("ShaosilGaming.GeneralImprovements", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.3.2";
+        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.4.0";
         internal static new ManualLogSource Logger;
 
         internal static bool DISABLE_LADDER_PATCH, ENABLE_SCAN_PATCH, GENERAL_IMPROVEMENTS;
