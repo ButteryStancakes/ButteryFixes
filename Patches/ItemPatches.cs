@@ -60,25 +60,6 @@ namespace ButteryFixes.Patches
             }
         }
 
-        [HarmonyPatch(typeof(JetpackItem), nameof(JetpackItem.EquipItem))]
-        [HarmonyPostfix]
-        static void JetpackItemPostEquipItem(JetpackItem __instance)
-        {
-            // Doppler effect is only meant to apply to audio waves travelling towards or away from the listener (not a jetpack strapped to your back)
-            if (__instance.playerHeldBy == GameNetworkManager.Instance.localPlayerController)
-            {
-                __instance.jetpackAudio.dopplerLevel = 0f;
-                __instance.jetpackBeepsAudio.dopplerLevel = 0f;
-                Plugin.Logger.LogInfo("Jetpack held by you, disable doppler effect");
-            }
-            else
-            {
-                __instance.jetpackAudio.dopplerLevel = 1f;
-                __instance.jetpackBeepsAudio.dopplerLevel = 1f;
-                Plugin.Logger.LogInfo("Jetpack held by other player, enable doppler effect");
-            }
-        }
-
         [HarmonyPatch(typeof(JetpackItem), nameof(JetpackItem.Update))]
         [HarmonyPostfix]
         static void JetpackItemPostUpdate(bool ___jetpackActivated, PlayerControllerB ___previousPlayerHeldBy)
@@ -137,8 +118,6 @@ namespace ButteryFixes.Patches
             List<CodeInstruction> codes = instructions.ToList();
 
             bool fixEarsRinging = false;
-            // add our own owner check, only if player isn't already using LethalFixes
-            bool ownerCheck = Plugin.LETHAL_FIXES;
             for (int i = 2; i < codes.Count; i++)
             {
                 // first distance check for tinnitus/screenshake
@@ -163,36 +142,10 @@ namespace ButteryFixes.Patches
                         }
                     }
                 }
-                else if (!ownerCheck && codes[i].opcode == OpCodes.Ldfld && (FieldInfo)codes[i].operand == ReflectionCache.ENEMY_COLLIDERS)
-                {
-                    Label label = generator.DefineLabel();
-                    codes[i - 1].labels.Add(label);
-                    codes.InsertRange(i - 1, new CodeInstruction[]
-                    {
-                        new CodeInstruction(OpCodes.Ldarg_0),
-                        new CodeInstruction(OpCodes.Call, AccessTools.DeclaredPropertyGetter(typeof(NetworkBehaviour), nameof(NetworkBehaviour.IsOwner))),
-                        new CodeInstruction(OpCodes.Brtrue, label),
-                        new CodeInstruction(OpCodes.Ret)
-                    });
-                    Plugin.Logger.LogDebug("Transpiler: Don't multiply shotgun damage in multiplayer");
-                    ownerCheck = true;
-                }
                 else if (codes[i].opcode == OpCodes.Newarr && (System.Type)codes[i].operand == typeof(RaycastHit) && codes[i - 1].opcode == OpCodes.Ldc_I4_S && (sbyte)codes[i - 1].operand == 10)
                 {
                     codes[i - 1].operand = 50;
                     Plugin.Logger.LogDebug("Transpiler: Resize shotgun collider array");
-                }
-                else if (codes[i].opcode == OpCodes.Call && codes[i].operand.ToString().Contains("SphereCastNonAlloc"))
-                {
-                    codes.InsertRange(i + 2, new CodeInstruction[]
-                    {
-                        new CodeInstruction(OpCodes.Ldarg_1),
-                        new CodeInstruction(OpCodes.Ldloca_S, codes[i + 1].operand),
-                        new CodeInstruction(OpCodes.Ldarg_0),
-                        new CodeInstruction(OpCodes.Ldflda, ReflectionCache.ENEMY_COLLIDERS),
-                        new CodeInstruction(OpCodes.Call, typeof(NonPatchFunctions).GetMethod(nameof(NonPatchFunctions.ShotgunPreProcess), BindingFlags.Static | BindingFlags.Public)),
-                    });
-                    Plugin.Logger.LogDebug("Transpiler: Pre-process shotgun targets");
                 }
             }
 

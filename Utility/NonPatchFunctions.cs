@@ -10,61 +10,6 @@ namespace ButteryFixes.Utility
     {
         internal static bool[] playerWasLastSprinting = new bool[/*4*/50];
 
-        public static void ShotgunPreProcess(Vector3 shotgunPosition, ref int num, ref RaycastHit[] results)
-        {
-            int index = 0;
-            HashSet<EnemyAI> enemies = new();
-            List<RaycastHit> invincibles = new();
-
-            // sort in order of distance
-            RaycastHit[] sortedResults = results.Take(num).OrderBy(hit => Vector3.Distance(shotgunPosition, hit.point)).ToArray();
-
-            // remove all duplicates
-            for (int i = 0; i < num; i++)
-            {
-                if (sortedResults[i].transform.TryGetComponent(out EnemyAICollisionDetect enemyCollider) && !enemyCollider.onlyCollideWhenGrounded)
-                {
-                    EnemyAI enemy = enemyCollider.mainScript;
-                    if (enemies.Add(enemy))
-                    {
-                        EnemyType enemyType = enemy.enemyType;
-                        // invincible enemies are low-priority
-                        if (!enemyType.canDie || enemyType.name == "RadMech" || enemyType.name == "DocileLocustBees")
-                            invincibles.Add(sortedResults[i]);
-                        else if (!enemy.isEnemyDead)
-                        {
-                            results[index] = sortedResults[i];
-                            index++;
-                            // only hit 10 targets max
-                            if (index == 10)
-                            {
-                                num = 10;
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // add invincible enemies at the end, if there are slots leftover
-            if (invincibles.Count > 0)
-            {
-                // slime is "medium priority" since they get angry when shot
-                foreach (RaycastHit invincible in invincibles.OrderByDescending(invincible => invincible.transform.GetComponent<EnemyAICollisionDetect>().mainScript is BlobAI))
-                {
-                    results[index] = invincible;
-                    index++;
-                    if (index == 10)
-                    {
-                        num = 10;
-                        return;
-                    }
-                }
-            }
-
-            num = index;
-        }
-
         internal static IEnumerator ShellsAppearAfterDelay(ShotgunItem shotgun)
         {
             yield return new WaitForSeconds(shotgun.isHeldByEnemy ? 0.85f : 1.9f);
