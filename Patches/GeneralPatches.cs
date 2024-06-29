@@ -52,7 +52,7 @@ namespace ButteryFixes.Patches
                     GlobalReferences.dopplerLevelMult = 0f;
                     break;
                 case MusicDopplerLevel.Reduced:
-                    GlobalReferences.dopplerLevelMult = 0.3f;
+                    GlobalReferences.dopplerLevelMult = 0.333f;
                     break;
                 default:
                     GlobalReferences.dopplerLevelMult = 1f;
@@ -198,7 +198,7 @@ namespace ButteryFixes.Patches
         [HarmonyPostfix]
         static void PostSaveGame(GameNetworkManager __instance)
         {
-            if (!__instance.isHostingGame)
+            if (!__instance.isHostingGame || StartOfRound.Instance.isChallengeFile || !StartOfRound.Instance.inShipPhase)
                 return;
 
             Terminal terminal = Object.FindObjectOfType<Terminal>();

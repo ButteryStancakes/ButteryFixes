@@ -93,6 +93,10 @@ namespace ButteryFixes.Utility
                         item.canBeInspected = false;
                         Plugin.Logger.LogInfo($"Inspectable: {item.itemName} (False)");
                         break;
+                    case "Hairdryer":
+                        item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 2f;
+                        Plugin.Logger.LogInfo("Use cooldown: Hairdryer");
+                        break;
                     case "Key":
                         if (Plugin.configKeysAreScrap.Value)
                         {

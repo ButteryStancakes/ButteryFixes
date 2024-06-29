@@ -71,8 +71,8 @@ namespace ButteryFixes.Patches
             }
             catch (System.Exception e)
             {
-                Plugin.Logger.LogError("Ran into error fetching local player's badges");
-                Plugin.Logger.LogError(e);
+                Plugin.Logger.LogWarning("Ran into error fetching local player's badges");
+                Plugin.Logger.LogWarning(e);
             }
         }
 
@@ -100,7 +100,7 @@ namespace ButteryFixes.Patches
         static void PostDestroyItemInSlot(PlayerControllerB __instance, int itemSlot)
         {
             // this fix is redundant with LethalFixes, but here just in case the user doesn't have it installed...
-            if (!__instance.IsOwner && !HUDManager.Instance.itemSlotIcons[itemSlot].enabled && GameNetworkManager.Instance.localPlayerController.ItemSlots[itemSlot] != null)
+            if (!Plugin.LETHAL_FIXES && !__instance.IsOwner && !HUDManager.Instance.itemSlotIcons[itemSlot].enabled && GameNetworkManager.Instance.localPlayerController.ItemSlots[itemSlot] != null)
             {
                 HUDManager.Instance.itemSlotIcons[itemSlot].enabled = true;
                 Plugin.Logger.LogInfo("Re-enabled inventory icon (likely that another player has just reloaded a shotgun, and it was erroneously disabled)");
@@ -215,6 +215,10 @@ namespace ButteryFixes.Patches
         [HarmonyPrefix]
         static void PreChangePlayerCostumeElement(ref Transform costumeContainer, GameObject newCostume)
         {
+            // MoreCompany changes player suits before the local player is initialized which would cause this function to throw an exception
+            if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.localPlayerController == null)
+                return;
+
             if (costumeContainer == GameNetworkManager.Instance.localPlayerController.headCostumeContainerLocal)
             {
                 costumeContainer = GameNetworkManager.Instance.localPlayerController.headCostumeContainer;
@@ -245,6 +249,61 @@ namespace ButteryFixes.Patches
             // to draw bunny tail in shadow
             if (GameNetworkManager.Instance.localPlayerController == player)
                 UnlockableSuit.ChangePlayerCostumeElement(player.lowerTorsoCostumeContainer, StartOfRound.Instance.unlockablesList.unlockables[suitID].lowerTorsoCostumeObject);
+        }
+
+        [HarmonyPatch(typeof(DeadBodyInfo), "Start")]
+        [HarmonyPostfix]
+        static void DeadBodyInfoPostStart(DeadBodyInfo __instance)
+        {
+            SkinnedMeshRenderer mesh = __instance.GetComponentInChildren<SkinnedMeshRenderer>();
+            if (mesh == null || StartOfRound.Instance != null)
+            {
+                UnlockableItem suit = StartOfRound.Instance.unlockablesList.unlockables[__instance.playerScript.currentSuitID];
+                if (suit == null)
+                    return;
+
+                if (__instance.detachedHeadObject != null && __instance.detachedHeadObject.TryGetComponent(out Renderer headRend))
+                {
+                    headRend.material = mesh.sharedMaterial;
+                    Plugin.Logger.LogInfo("Fixed helmet material on player corpse");
+                }
+
+                if (suit.headCostumeObject == null && suit.lowerTorsoCostumeObject == null)
+                    return;
+
+                // tail costume piece
+                Transform lowerTorso = __instance.transform.Find("spine.001");
+                if (lowerTorso != null && suit.lowerTorsoCostumeObject != null)
+                {
+                    GameObject tail = Object.Instantiate(suit.lowerTorsoCostumeObject, lowerTorso.position, lowerTorso.rotation, lowerTorso);
+                    if (!__instance.setMaterialToPlayerSuit)
+                    {
+                        foreach (Renderer tailRend in tail.GetComponentsInChildren<Renderer>())
+                            tailRend.material = mesh.sharedMaterial;
+                    }
+                    Plugin.Logger.LogInfo("Torso attachment complete for player corpse");
+                }
+
+                // hat costume piece
+                Transform head = __instance.detachedHeadObject;
+                if (head == null && lowerTorso != null)
+                    head = lowerTorso.Find("spine.002/spine.003/spine.004");
+                if (head != null && suit.headCostumeObject != null)
+                {
+                    GameObject hat = Object.Instantiate(suit.headCostumeObject, head.position, head.rotation, head);
+                    if (head == __instance.detachedHeadObject)
+                    {
+                        hat.transform.SetPositionAndRotation(new Vector3(0.0698937327f, 0.0544735007f, -0.685245395f), Quaternion.Euler(96.69699f, 0f, 0f));
+                        hat.transform.localScale = new Vector3(hat.transform.localScale.x / head.localScale.x, hat.transform.localScale.y / head.localScale.y, hat.transform.localScale.z / head.localScale.z);
+                    }
+                    if (!__instance.setMaterialToPlayerSuit)
+                    {
+                        foreach (Renderer hatRend in hat.GetComponentsInChildren<Renderer>())
+                            hatRend.material = mesh.sharedMaterial;
+                    }
+                    Plugin.Logger.LogInfo("Head attachment complete for player corpse");
+                }
+            }
         }
     }
 }

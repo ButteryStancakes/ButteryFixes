@@ -24,12 +24,13 @@ namespace ButteryFixes
     [BepInDependency("inoyu.FastClimbing", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("e3s1.BetterLadders", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("ShaosilGaming.GeneralImprovements", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency("Dev1A3.LethalFixes", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.4.0";
+        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.4.2";
         internal static new ManualLogSource Logger;
 
-        internal static bool DISABLE_LADDER_PATCH, ENABLE_SCAN_PATCH, GENERAL_IMPROVEMENTS;
+        internal static bool DISABLE_LADDER_PATCH, ENABLE_SCAN_PATCH, GENERAL_IMPROVEMENTS, LETHAL_FIXES;
 
         internal static ConfigEntry<MusicDopplerLevel> configMusicDopplerLevel;
         internal static ConfigEntry<GameResolution> configGameResolution;
@@ -39,13 +40,24 @@ namespace ButteryFixes
         {
             Logger = base.Logger;
 
+            // cross compat stuff
             if (Chainloader.PluginInfos.ContainsKey("inoyu.FastClimbing") || Chainloader.PluginInfos.ContainsKey("e3s1.BetterLadders"))
             {
                 Logger.LogInfo("CROSS-COMPATIBILITY - Ladder patch will be disabled");
                 DISABLE_LADDER_PATCH = true;
             }
 
-            GENERAL_IMPROVEMENTS = Chainloader.PluginInfos.ContainsKey("ShaosilGaming.GeneralImprovements");
+            if (Chainloader.PluginInfos.ContainsKey("ShaosilGaming.GeneralImprovements"))
+            {
+                GENERAL_IMPROVEMENTS = true;
+                Logger.LogInfo("CROSS-COMPATIBILITY - GeneralImprovements detected");
+            }
+
+            if (Chainloader.PluginInfos.ContainsKey("Dev1A3.LethalFixes"))
+            {
+                LETHAL_FIXES = true;
+                Logger.LogInfo("CROSS-COMPATIBILITY - LethalFixes detected");
+            }
 
             configGameResolution = Config.Bind(
                 "Visual",

@@ -19,7 +19,7 @@ namespace ButteryFixes.Patches
         {
             List<CodeInstruction> codes = instructions.ToList();
 
-            FieldInfo timeSinceStealthStab = typeof(ButlerEnemyAI).GetField("timeSinceStealthStab", BindingFlags.Instance | BindingFlags.NonPublic);
+            FieldInfo timeSinceStealthStab = AccessTools.Field(typeof(ButlerEnemyAI), "timeSinceStealthStab");
             int startAt = -1, endAt = -1;
             for (int i = 0; i < codes.Count; i++)
             {
@@ -109,10 +109,11 @@ namespace ButteryFixes.Patches
         {
             List<CodeInstruction> codes = instructions.ToList();
 
+            FieldInfo angeredTimer = AccessTools.Field(typeof(BlobAI), "angeredTimer");
             for (int i = 2; i < codes.Count; i++)
             {
                 // fix erroneous < 0 check with <= 0
-                if (codes[i].opcode == OpCodes.Bge_Un && codes[i - 2].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 2].operand == typeof(BlobAI).GetField("angeredTimer", BindingFlags.Instance | BindingFlags.NonPublic))
+                if (codes[i].opcode == OpCodes.Bge_Un && codes[i - 2].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 2].operand == angeredTimer)
                 {
                     codes[i].opcode = OpCodes.Bgt_Un;
                     Plugin.Logger.LogDebug("Transpiler: Blob taming now possible without angering");
@@ -130,7 +131,7 @@ namespace ButteryFixes.Patches
         {
             // if the leader is dead, manually update the clock
             if (___isLeaderScript && __instance.isEnemyDead)
-                PrivateMembers.GLOBAL_NUTCRACKER_CLOCK.Invoke(__instance, null);
+                ReflectionCache.GLOBAL_NUTCRACKER_CLOCK.Invoke(__instance, null);
         }
 
         [HarmonyPatch(typeof(NutcrackerEnemyAI), nameof(NutcrackerEnemyAI.Start))]
@@ -151,7 +152,7 @@ namespace ButteryFixes.Patches
                 NutcrackerEnemyAI[] nutcrackers = Object.FindObjectsOfType<NutcrackerEnemyAI>();
                 foreach (NutcrackerEnemyAI nutcracker in nutcrackers)
                 {
-                    if (nutcracker != __instance && (bool)PrivateMembers.IS_LEADER_SCRIPT.GetValue(nutcracker))
+                    if (nutcracker != __instance && (bool)ReflectionCache.IS_LEADER_SCRIPT.GetValue(nutcracker))
                     {
                         Plugin.Logger.LogDebug($"NUTCRACKER CLOCK: Nutcracker #{__instance.GetInstanceID()} spawned, #{nutcracker.GetInstanceID()} is already leader");
                         return;
@@ -237,7 +238,7 @@ namespace ButteryFixes.Patches
                 {
                     // and is a jetpack that's activated
                     JetpackItem heldJetpack = __instance.clingingToPlayer.ItemSlots[i] as JetpackItem;
-                    if ((bool)PrivateMembers.JETPACK_ACTIVATED.GetValue(heldJetpack))
+                    if ((bool)ReflectionCache.JETPACK_ACTIVATED.GetValue(heldJetpack))
                     {
                         __instance.clingingToPlayer.disablingJetpackControls = false;
                         __instance.clingingToPlayer.maxJetpackAngle = -1f;
@@ -325,7 +326,7 @@ namespace ButteryFixes.Patches
                             codes.InsertRange(i + 3, new CodeInstruction[]
                             {
                                 new CodeInstruction(OpCodes.Ldloc_0),
-                                new CodeInstruction(OpCodes.Ldfld, typeof(PlayerControllerB).GetField(nameof(PlayerControllerB.isInHangarShipRoom), BindingFlags.Instance | BindingFlags.Public)),
+                                new CodeInstruction(OpCodes.Ldfld, ReflectionCache.IS_IN_HANGAR_SHIP_ROOM),
                                 new CodeInstruction(OpCodes.Brtrue, label)
                             });
                             Plugin.Logger.LogDebug("Transpiler: Old Bird stomps don't damage players in ship");
@@ -345,9 +346,10 @@ namespace ButteryFixes.Patches
         {
             List<CodeInstruction> codes = instructions.ToList();
 
+            FieldInfo angerMeter = AccessTools.Field(typeof(FlowermanAI), "angerMeter");
             for (int i = 2; i < codes.Count; i++)
             {
-                if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == typeof(FlowermanAI).GetField(nameof(FlowermanAI.angerMeter), BindingFlags.Instance | BindingFlags.Public))
+                if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == angerMeter)
                 {
                     for (int j = i - 2; j < codes.Count; j++)
                     {
@@ -398,14 +400,17 @@ namespace ButteryFixes.Patches
         {
             List<CodeInstruction> codes = instructions.ToList();
 
-            for (int i = 1; i < codes.Count - 1; i++)
+            FieldInfo timesSeeingSamePlayer = AccessTools.Field(typeof(NutcrackerEnemyAI), "timesSeeingSamePlayer");
+            FieldInfo inSpecialAnimation = AccessTools.Field(typeof(EnemyAI), nameof(EnemyAI.inSpecialAnimation));
+            FieldInfo updatePositionThreshold = AccessTools.Field(typeof(EnemyAI), nameof(EnemyAI.updatePositionThreshold));
+            for (int i = 2; i < codes.Count - 1; i++)
             {
-                if (codes[i].opcode == OpCodes.Ldc_I4_0 && codes[i + 1].opcode == OpCodes.Stfld && (FieldInfo)codes[i + 1].operand == typeof(NutcrackerEnemyAI).GetField("timesSeeingSamePlayer", BindingFlags.Instance | BindingFlags.NonPublic))
+                if (codes[i].opcode == OpCodes.Ldc_I4_0 && codes[i + 1].opcode == OpCodes.Stfld && (FieldInfo)codes[i + 1].operand == timesSeeingSamePlayer)
                 {
                     codes[i].opcode = OpCodes.Ldc_I4_1;
                     Plugin.Logger.LogDebug("Transpiler: Reset times nutcracker saw same player to 1, not 0");
                 }
-                else if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == typeof(EnemyAI).GetField(nameof(EnemyAI.inSpecialAnimation), BindingFlags.Instance | BindingFlags.Public) && codes[i - 2].opcode == OpCodes.Ldloc_1)
+                else if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == inSpecialAnimation && codes[i - 2].opcode == OpCodes.Ldloc_1)
                 {
                     // instead of setting inSpecialAnimation to true
                     if (codes[i - 1].opcode == OpCodes.Ldc_I4_1)
@@ -420,10 +425,10 @@ namespace ButteryFixes.Patches
                     {
                         // change updatePositionThreshold to the original value
                         codes[i - 1].opcode = OpCodes.Ldsfld;
-                        codes[i - 1].operand = typeof(GlobalReferences).GetField(nameof(GlobalReferences.nutcrackerSyncDistance), BindingFlags.Static | BindingFlags.NonPublic);
+                        codes[i - 1].operand = AccessTools.Field(typeof(GlobalReferences), nameof(GlobalReferences.nutcrackerSyncDistance));
                         Plugin.Logger.LogDebug("Transpiler: Dynamic update threshold for nutcracker");
                     }
-                    codes[i].operand = typeof(EnemyAI).GetField(nameof(EnemyAI.updatePositionThreshold), BindingFlags.Instance | BindingFlags.Public);
+                    codes[i].operand = updatePositionThreshold;
                 }
             }
 
@@ -445,7 +450,7 @@ namespace ButteryFixes.Patches
         static void MaskedPlayerEnemyPostKillEnemy(MaskedPlayerEnemy __instance)
         {
             Animator mapDot = __instance.transform.Find("Misc/MapDot")?.GetComponent<Animator>();
-            if (mapDot)
+            if (mapDot != null)
             {
                 mapDot.enabled = false;
                 Plugin.Logger.LogInfo("Stop animating masked radar dot");

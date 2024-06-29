@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using System.Linq;
 using UnityEngine;
 using ButteryFixes.Utility;
+using Unity.Netcode;
 
 namespace ButteryFixes.Patches
 {
@@ -27,7 +28,7 @@ namespace ButteryFixes.Patches
                     {
                         FlowerSnakeEnemy tulipSnake = enemyAI as FlowerSnakeEnemy;
                         // verify there is a living tulip snake clung to the player and flapping its wings
-                        if (!tulipSnake.isEnemyDead && tulipSnake.clingingToPlayer == GameNetworkManager.Instance.localPlayerController && tulipSnake.clingingToPlayer.disablingJetpackControls && tulipSnake.clingPosition == 4 && tulipSnake.flightPower > 0f && (PlayerControllerB)PrivateMembers.JETPACK_ITEM_PREVIOUS_PLAYER_HELD_BY.GetValue(__instance) == tulipSnake.clingingToPlayer)
+                        if (!tulipSnake.isEnemyDead && tulipSnake.clingingToPlayer == GameNetworkManager.Instance.localPlayerController && tulipSnake.clingingToPlayer.disablingJetpackControls && tulipSnake.clingPosition == 4 && tulipSnake.flightPower > 0f && (PlayerControllerB)ReflectionCache.JETPACK_ITEM_PREVIOUS_PLAYER_HELD_BY.GetValue(__instance) == tulipSnake.clingingToPlayer)
                         {
                             tulipSnake.clingingToPlayer.disablingJetpackControls = false;
                             // can't set maxJetpackAngle after player has been flying with free rotation (causes lockup and generally feels bad)
@@ -131,11 +132,13 @@ namespace ButteryFixes.Patches
 
         [HarmonyPatch(typeof(ShotgunItem), nameof(ShotgunItem.ShootGun))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> ShotgunItemTransShootGun(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> ShotgunItemTransShootGun(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
             bool fixEarsRinging = false;
+            // add our own owner check, only if player isn't already using LethalFixes
+            bool ownerCheck = Plugin.LETHAL_FIXES;
             for (int i = 2; i < codes.Count; i++)
             {
                 // first distance check for tinnitus/screenshake
@@ -160,6 +163,20 @@ namespace ButteryFixes.Patches
                         }
                     }
                 }
+                else if (!ownerCheck && codes[i].opcode == OpCodes.Ldfld && (FieldInfo)codes[i].operand == ReflectionCache.ENEMY_COLLIDERS)
+                {
+                    Label label = generator.DefineLabel();
+                    codes[i - 1].labels.Add(label);
+                    codes.InsertRange(i - 1, new CodeInstruction[]
+                    {
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        new CodeInstruction(OpCodes.Call, AccessTools.DeclaredPropertyGetter(typeof(NetworkBehaviour), nameof(NetworkBehaviour.IsOwner))),
+                        new CodeInstruction(OpCodes.Brtrue, label),
+                        new CodeInstruction(OpCodes.Ret)
+                    });
+                    Plugin.Logger.LogDebug("Transpiler: Don't multiply shotgun damage in multiplayer");
+                    ownerCheck = true;
+                }
                 else if (codes[i].opcode == OpCodes.Newarr && (System.Type)codes[i].operand == typeof(RaycastHit) && codes[i - 1].opcode == OpCodes.Ldc_I4_S && (sbyte)codes[i - 1].operand == 10)
                 {
                     codes[i - 1].operand = 50;
@@ -172,7 +189,7 @@ namespace ButteryFixes.Patches
                         new CodeInstruction(OpCodes.Ldarg_1),
                         new CodeInstruction(OpCodes.Ldloca_S, codes[i + 1].operand),
                         new CodeInstruction(OpCodes.Ldarg_0),
-                        new CodeInstruction(OpCodes.Ldflda, typeof(ShotgunItem).GetField("enemyColliders", BindingFlags.Instance | BindingFlags.NonPublic)),
+                        new CodeInstruction(OpCodes.Ldflda, ReflectionCache.ENEMY_COLLIDERS),
                         new CodeInstruction(OpCodes.Call, typeof(NonPatchFunctions).GetMethod(nameof(NonPatchFunctions.ShotgunPreProcess), BindingFlags.Static | BindingFlags.Public)),
                     });
                     Plugin.Logger.LogDebug("Transpiler: Pre-process shotgun targets");
