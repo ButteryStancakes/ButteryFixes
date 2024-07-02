@@ -122,7 +122,7 @@ namespace ButteryFixes.Patches.Enemies
                 if (codes[i].opcode == OpCodes.Ldc_I4_0 && codes[i + 1].opcode == OpCodes.Stfld && (FieldInfo)codes[i + 1].operand == timesSeeingSamePlayer)
                 {
                     codes[i].opcode = OpCodes.Ldc_I4_1;
-                    Plugin.Logger.LogDebug("Transpiler: Reset times nutcracker saw same player to 1, not 0");
+                    Plugin.Logger.LogDebug("Transpiler (Nutcracker aim): Reset times saw same player to 1, not 0");
                 }
                 else if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == inSpecialAnimation && codes[i - 2].opcode == OpCodes.Ldloc_1)
                 {
@@ -132,7 +132,7 @@ namespace ButteryFixes.Patches.Enemies
                         // change updatePositionThreshold to a smaller value
                         codes[i - 1].opcode = OpCodes.Ldc_R4;
                         codes[i - 1].operand = 0.3f;
-                        Plugin.Logger.LogDebug("Transpiler: Nutcracker will sync position while tiptoeing");
+                        Plugin.Logger.LogDebug("Transpiler (Nutcracker aim): Sync position while tiptoeing");
                     }
                     // instead of setting inSpecialAnimation to false
                     else
@@ -140,7 +140,7 @@ namespace ButteryFixes.Patches.Enemies
                         // change updatePositionThreshold to the original value
                         codes[i - 1].opcode = OpCodes.Ldsfld;
                         codes[i - 1].operand = AccessTools.Field(typeof(GlobalReferences), nameof(GlobalReferences.nutcrackerSyncDistance));
-                        Plugin.Logger.LogDebug("Transpiler: Dynamic update threshold for nutcracker");
+                        Plugin.Logger.LogDebug("Transpiler (Nutcracker aim): Dynamic update threshold");
                     }
                     codes[i].operand = updatePositionThreshold;
                 }

@@ -21,12 +21,12 @@ namespace ButteryFixes.Patches.Enemies
                 if (codes[i].opcode == OpCodes.Bge_Un && codes[i - 2].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 2].operand == angeredTimer)
                 {
                     codes[i].opcode = OpCodes.Bgt_Un;
-                    Plugin.Logger.LogDebug("Transpiler: Blob taming now possible without angering");
+                    Plugin.Logger.LogDebug("Transpiler (Hygrodere collision): Taming now possible without angering");
                     return codes;
                 }
             }
 
-            Plugin.Logger.LogError("Hygrodere anger transpiler failed");
+            Plugin.Logger.LogError("Hygrodere collision transpiler failed");
             return codes;
         }
     }

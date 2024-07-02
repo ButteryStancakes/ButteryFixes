@@ -65,7 +65,7 @@ namespace ButteryFixes.Patches.Items
                             if (insertAt >= 0 && codes[j].opcode == OpCodes.Br)
                             {
                                 codes.Insert(insertAt, new CodeInstruction(OpCodes.Br, codes[j].operand));
-                                Plugin.Logger.LogDebug("Transpiler: Fix ear-ringing severity in extremely close range");
+                                Plugin.Logger.LogDebug("Transpiler (Shotgun blast): Fix ear-ringing severity in extremely close range");
                                 fixEarsRinging = true;
                                 break;
                             }
@@ -78,7 +78,7 @@ namespace ButteryFixes.Patches.Items
                 else if (codes[i].opcode == OpCodes.Newarr && (System.Type)codes[i].operand == typeof(RaycastHit) && codes[i - 1].opcode == OpCodes.Ldc_I4_S && (sbyte)codes[i - 1].operand == 10)
                 {
                     codes[i - 1].operand = 50;
-                    Plugin.Logger.LogDebug("Transpiler: Resize shotgun collider array");
+                    Plugin.Logger.LogDebug("Transpiler (Shotgun blast): Resize target colliders array");
                 }
             }
 

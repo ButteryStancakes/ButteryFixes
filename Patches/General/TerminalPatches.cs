@@ -51,7 +51,7 @@ namespace ButteryFixes.Patches.General
                     if (str.Contains("\nn"))
                     {
                         codes[i].operand = str.Replace("\nn", "\n");
-                        Plugin.Logger.LogDebug("Transpiler: Fix \"n\" on terminal when viewing monitor");
+                        Plugin.Logger.LogDebug("Transpiler (Terminal): Fix \"n\" on terminal when viewing monitor");
                         return codes;
                     }
                 }

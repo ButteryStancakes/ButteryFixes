@@ -26,7 +26,7 @@ namespace ButteryFixes.Patches.Enemies
                         codes[j].opcode = OpCodes.Nop;
                         //codes[j].operand = null;
                     }
-                    Plugin.Logger.LogDebug("Transpiler: Remove timestamp check (replace with prefix)");
+                    Plugin.Logger.LogDebug("Transpiler (Butler collision): Remove timestamp check (replace with prefix)");
                     return codes;
                 }
                 else if (startAt == -1)

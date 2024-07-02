@@ -25,12 +25,12 @@ namespace ButteryFixes.Patches.Enemies
                         new CodeInstruction(OpCodes.Ldfld, ReflectionCache.IS_IN_HANGAR_SHIP_ROOM),
                         new CodeInstruction(OpCodes.Brtrue, codes[i].operand),
                     ]);
-                    Plugin.Logger.LogDebug("Transpiler: Forest giant no longer crushes players in the ship");
+                    Plugin.Logger.LogDebug("Transpiler (Forest giant death): No longer crush players in the ship");
                     return codes;
                 }
             }
 
-            Plugin.Logger.LogError("Forest giant crush transpiler failed");
+            Plugin.Logger.LogError("Forest giant death transpiler failed");
             return codes;
         }
     }

@@ -57,7 +57,7 @@ namespace ButteryFixes.Patches.General
                 if (codes[i].opcode == OpCodes.Ldarg_1 && codes[i + 1].opcode == OpCodes.Ldc_I4_S && (sbyte)codes[i + 1].operand == 20 && codes[i + 2].opcode == OpCodes.Bge)
                 {
                     codes[i + 1].operand = 10;
-                    Plugin.Logger.LogDebug("Transpiler: Fix critical injury popup threshold");
+                    Plugin.Logger.LogDebug("Transpiler (Health UI): Fix critical injury popup threshold");
                     return codes;
                 }
             }

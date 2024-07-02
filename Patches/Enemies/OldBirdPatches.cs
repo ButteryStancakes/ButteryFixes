@@ -30,7 +30,7 @@ namespace ButteryFixes.Patches.Enemies
                                 new CodeInstruction(OpCodes.Ldfld, ReflectionCache.IS_IN_HANGAR_SHIP_ROOM),
                                 new CodeInstruction(OpCodes.Brtrue, label)
                             ]);
-                            Plugin.Logger.LogDebug("Transpiler: Old Bird stomps don't damage players in ship");
+                            Plugin.Logger.LogDebug("Transpiler (Old Bird stomp): Don't damage players in ship");
                             return codes;
                         }
                     }

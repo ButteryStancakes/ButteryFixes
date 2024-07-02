@@ -24,7 +24,7 @@ namespace ButteryFixes.Patches.Enemies
                     {
                         if (codes[j].opcode == OpCodes.Ret)
                         {
-                            Plugin.Logger.LogDebug("Transpiler: Remove bracken aggro on hit (replace with postfix)");
+                            Plugin.Logger.LogDebug("Transpiler (Bracken damage): Remove aggro on hit (replace with postfix)");
                             return codes;
                         }
                         codes[j].opcode = OpCodes.Nop;
