@@ -142,6 +142,10 @@ namespace ButteryFixes.Utility
                             }
                         }
                         break;
+                    case "WeedKillerBottle":
+                        item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
+                        Plugin.Logger.LogInfo($"Audio rolloff: {item.itemName}");
+                        break;
                 }
 
                 // affects whoopie cushion primarily

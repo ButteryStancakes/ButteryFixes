@@ -8,6 +8,7 @@ namespace ButteryFixes.Utility
     {
         internal static readonly FieldInfo JETPACK_ACTIVATED = AccessTools.Field(typeof(JetpackItem), "jetpackActivated");
         internal static readonly FieldInfo JETPACK_ITEM_PREVIOUS_PLAYER_HELD_BY = AccessTools.Field(typeof(JetpackItem), "previousPlayerHeldBy");
+        internal static readonly FieldInfo JETPACK_BROKEN = AccessTools.Field(typeof(JetpackItem), "jetpackBroken");
 
         internal static readonly MethodInfo GLOBAL_NUTCRACKER_CLOCK = AccessTools.Method(typeof(NutcrackerEnemyAI), "GlobalNutcrackerClock");
         internal static readonly FieldInfo IS_LEADER_SCRIPT = AccessTools.Field(typeof(NutcrackerEnemyAI), "isLeaderScript");

@@ -16,12 +16,12 @@ namespace ButteryFixes.Patches
         {
             // cache all references to enemy types
             GlobalReferences.allEnemiesList.Clear();
-            List<SpawnableEnemyWithRarity>[] allEnemyLists = new List<SpawnableEnemyWithRarity>[]
-            {
+            List<SpawnableEnemyWithRarity>[] allEnemyLists =
+            [
                 __instance.testAllEnemiesLevel.Enemies,
                 __instance.testAllEnemiesLevel.OutsideEnemies,
                 __instance.testAllEnemiesLevel.DaytimeEnemies
-            };
+            ];
 
             foreach (List<SpawnableEnemyWithRarity> enemies in allEnemyLists)
                 foreach (SpawnableEnemyWithRarity spawnableEnemyWithRarity in enemies)
@@ -46,19 +46,12 @@ namespace ButteryFixes.Patches
         {
             ScriptableObjectOverrides.OverrideSelectableLevels();
 
-            switch (Plugin.configMusicDopplerLevel.Value)
+            GlobalReferences.dopplerLevelMult = Plugin.configMusicDopplerLevel.Value switch
             {
-                case MusicDopplerLevel.None:
-                    GlobalReferences.dopplerLevelMult = 0f;
-                    break;
-                case MusicDopplerLevel.Reduced:
-                    GlobalReferences.dopplerLevelMult = 0.333f;
-                    break;
-                default:
-                    GlobalReferences.dopplerLevelMult = 1f;
-                    break;
-            }
-
+                MusicDopplerLevel.None => 0f,
+                MusicDopplerLevel.Reduced => 0.333f,
+                _ => 1f,
+            };
             __instance.speakerAudioSource.dopplerLevel = GlobalReferences.dopplerLevelMult;
             Plugin.Logger.LogInfo("Doppler level: Ship speaker");
 
@@ -83,6 +76,9 @@ namespace ButteryFixes.Patches
                     }
                 }
             }
+
+            GlobalReferences.playerBody = StartOfRound.Instance.playerRagdolls[0].GetComponent<SkinnedMeshRenderer>().sharedMesh;
+            GlobalReferences.scavengerSuitBurnt = StartOfRound.Instance.playerRagdolls[6].GetComponent<SkinnedMeshRenderer>().sharedMaterial;
 
             ScriptableObjectOverrides.OverrideItems();
             AudioSource stickyNote = __instance.elevatorTransform.Find("StickyNoteItem")?.GetComponent<AudioSource>();
@@ -153,6 +149,7 @@ namespace ButteryFixes.Patches
                     musicFar.dopplerLevel = 0.6f * GlobalReferences.dopplerLevelMult;
                 Plugin.Logger.LogInfo("Doppler level: Dropship");
             }
+            // honestly just leave the vehicle version as-is, it's funny
         }
 
         [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.ShowPlayersFiredScreen))]
@@ -305,5 +302,28 @@ namespace ButteryFixes.Patches
         {
             __instance.ResetEnemyVariables();
         }
+
+        [HarmonyPatch(typeof(BreakerBox), nameof(BreakerBox.SetSwitchesOff))]
+        [HarmonyPostfix]
+        static void PostSetSwitchesOff(BreakerBox __instance)
+        {
+            __instance.breakerBoxHum.Stop();
+        }
+
+        // is it a bug that the breaker box hums after unplugging the apparatus? I'm not too sure
+        /*[HarmonyPatch(typeof(RoundManager), nameof(RoundManager.PowerSwitchOffClientRpc))]
+        [HarmonyPostfix]
+        static void PostPowerSwitchOffClientRpc()
+        {
+            Object.FindObjectOfType<BreakerBox>()?.breakerBoxHum.Stop();
+        }
+        
+        [HarmonyPatch(typeof(BreakerBox), nameof(BreakerBox.SwitchBreaker))]
+        [HarmonyPostfix]
+        static void PostSwitchBreaker(BreakerBox __instance)
+        {
+            if (__instance.breakerBoxHum.isPlaying && RoundManager.Instance.powerOffPermanently)
+                __instance.breakerBoxHum.Stop();
+        }*/
     }
 }

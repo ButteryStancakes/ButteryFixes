@@ -323,12 +323,12 @@ namespace ButteryFixes.Patches
                         if (codes[j].opcode == OpCodes.Dup)
                         {
                             codes[j - 1].labels.Add(label);
-                            codes.InsertRange(i + 3, new CodeInstruction[]
-                            {
+                            codes.InsertRange(i + 3,
+                            [
                                 new CodeInstruction(OpCodes.Ldloc_0),
                                 new CodeInstruction(OpCodes.Ldfld, ReflectionCache.IS_IN_HANGAR_SHIP_ROOM),
                                 new CodeInstruction(OpCodes.Brtrue, label)
-                            });
+                            ]);
                             Plugin.Logger.LogDebug("Transpiler: Old Bird stomps don't damage players in ship");
                             return codes;
                         }
@@ -543,7 +543,7 @@ namespace ButteryFixes.Patches
         public static bool DoorLockPreOnTriggerStay(Collider other)
         {
             // snare fleas and tulip snakes don't open door when latching to player
-            return !(other.CompareTag("Enemy") && other.TryGetComponent(out EnemyAICollisionDetect enemyAICollisionDetect) && ((enemyAICollisionDetect.mainScript as CentipedeAI)?.clingingToPlayer != null || (enemyAICollisionDetect.mainScript as FlowerSnakeEnemy)?.clingingToPlayer != null));
+            return !(other.CompareTag("Enemy") && other.TryGetComponent(out EnemyAICollisionDetect enemyAICollisionDetect) && (enemyAICollisionDetect.mainScript is CentipedeAI { clingingToPlayer: not null } || enemyAICollisionDetect.mainScript is FlowerSnakeEnemy { clingingToPlayer: not null }));
         }
 
         [HarmonyPatch(typeof(MaskedPlayerEnemy), nameof(MaskedPlayerEnemy.SetMaskType))]
@@ -569,6 +569,57 @@ namespace ButteryFixes.Patches
 
             // need to replace the vanilla behavior entirely because it's just too buggy
             return false;
+        }
+
+        [HarmonyPatch(typeof(ForestGiantAI), nameof(ForestGiantAI.AnimationEventA))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> ForestGiantAITransAnimationEventA(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            FieldInfo localPlayerController = AccessTools.Field(typeof(GameNetworkManager), nameof(GameNetworkManager.localPlayerController));
+            for (int i = 4; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Brfalse && codes[i - 2].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 2].operand == localPlayerController)
+                {
+                    codes.InsertRange(i + 1, [
+                        new CodeInstruction(codes[i - 4].opcode), // local variable
+                        new CodeInstruction(OpCodes.Ldfld, ReflectionCache.IS_IN_HANGAR_SHIP_ROOM),
+                        new CodeInstruction(OpCodes.Brtrue, codes[i].operand),
+                    ]);
+                    Plugin.Logger.LogDebug("Transpiler: Forest giant no longer crushes players in the ship");
+                    return codes;
+                }
+            }
+
+            Plugin.Logger.LogError("Forest giant crush transpiler failed");
+            return codes;
+        }
+
+        // fix barbers not speeding up throughout the day
+        [HarmonyPatch(typeof(ClaySurgeonAI), "HourChanged")]
+        [HarmonyPrefix]
+        static bool ClaySurgeonAIPreHourChanged(ClaySurgeonAI __instance)
+        {
+            // use float division instead of integer division to prevent truncation
+            __instance.currentInterval = Mathf.Lerp(__instance.startingInterval, __instance.endingInterval, (float)TimeOfDay.Instance.hour / TimeOfDay.Instance.numberOfHours);
+
+            // vanilla behavior doesn't work
+            return false;
+        }
+
+        // fix barbers freezing after "spam-snipping" players
+        [HarmonyPatch(typeof(ClaySurgeonAI), nameof(ClaySurgeonAI.KillPlayerClientRpc))]
+        [HarmonyPostfix]
+        static void ClaySurgeonAIPostKillPlayerClientRpc(ClaySurgeonAI __instance, ref float ___beatTimer, ref float ___snareIntervalTimer)
+        {
+            if (__instance.IsOwner && ___beatTimer > __instance.startingInterval + 2f)
+            {
+                ___beatTimer = __instance.startingInterval + 2f;
+                //Plugin.Logger.LogDebug("Barber is going to freeze, reduce beat timer");
+            }
+            if (___snareIntervalTimer > ___beatTimer - __instance.snareOffset)
+                ___snareIntervalTimer = ___beatTimer - __instance.snareOffset;
         }
     }
 }

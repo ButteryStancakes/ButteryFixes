@@ -25,12 +25,13 @@ namespace ButteryFixes
     [BepInDependency("e3s1.BetterLadders", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("ShaosilGaming.GeneralImprovements", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("Dev1A3.LethalFixes", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency("meow.ModelReplacementAPI", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.4.2";
         internal static new ManualLogSource Logger;
 
-        internal static bool DISABLE_LADDER_PATCH, ENABLE_SCAN_PATCH, GENERAL_IMPROVEMENTS, LETHAL_FIXES;
+        internal static bool DISABLE_LADDER_PATCH, ENABLE_SCAN_PATCH, DISABLE_PLAYERMODEL_PATCHES, GENERAL_IMPROVEMENTS, LETHAL_FIXES;
 
         internal static ConfigEntry<MusicDopplerLevel> configMusicDopplerLevel;
         internal static ConfigEntry<GameResolution> configGameResolution;
@@ -59,6 +60,12 @@ namespace ButteryFixes
                 Logger.LogInfo("CROSS-COMPATIBILITY - LethalFixes detected");
             }
 
+            if (Chainloader.PluginInfos.ContainsKey("meow.ModelReplacementAPI"))
+            {
+                DISABLE_PLAYERMODEL_PATCHES = true;
+                Logger.LogInfo("CROSS-COMPATIBILITY - Playermodel patches will be disabled");
+            }
+
             configGameResolution = Config.Bind(
                 "Visual",
                 "GameResolution",
@@ -71,7 +78,7 @@ namespace ButteryFixes
                 "Audio",
                 "MusicDopplerLevel",
                 MusicDopplerLevel.Vanilla,
-                "Controls how much Unity's simulated \"doppler effect\" applies to music sources like the dropship, boombox, etc. (This is what causes pitch distortion when moving towards/away from the source of the music)\n" +
+                "Controls how much Unity's simulated \"Doppler effect\" applies to music sources like the dropship, boombox, etc. (This is what causes pitch distortion when moving towards/away from the source of the music)\n" +
                 "\"Vanilla\" makes no changes. \"Reduced\" will make the effect more subtle. \"None\" will disable it completely (so music always plays at the correct pitch)");
 
             configMakeConductive = Config.Bind(

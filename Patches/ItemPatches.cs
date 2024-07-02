@@ -1,12 +1,10 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Reflection.Emit;
 using System.Linq;
 using UnityEngine;
 using ButteryFixes.Utility;
-using Unity.Netcode;
 
 namespace ButteryFixes.Patches
 {
@@ -191,6 +189,32 @@ namespace ButteryFixes.Patches
                 Plugin.Logger.LogInfo("Player is being converted by a Tragedy mask; about to replace mask prefab appearance");
                 NonPatchFunctions.ConvertMaskToTragedy(__instance.currentHeadMask.transform);
             }
+        }
+
+        [HarmonyPatch(typeof(JetpackItem), nameof(JetpackItem.ExplodeJetpackClientRpc))]
+        [HarmonyPostfix]
+        public static void PostExplodeJetpackClientRpc(JetpackItem __instance, PlayerControllerB ___previousPlayerHeldBy)
+        {
+            if (Plugin.DISABLE_PLAYERMODEL_PATCHES)
+                return;
+
+            foreach (DeadBodyInfo deadBodyInfo in Object.FindObjectsOfType<DeadBodyInfo>())
+            {
+                if (deadBodyInfo.playerScript == ___previousPlayerHeldBy)
+                {
+                    foreach (Renderer rend in deadBodyInfo.GetComponentsInChildren<Renderer>())
+                    {
+                        if (rend.gameObject.layer == 0 && (rend.name.StartsWith("BetaBadge") || rend.name.StartsWith("LevelSticker")))
+                            rend.forceRenderingOff = true;
+                        else if (rend.gameObject.layer == 20)
+                            rend.material = GlobalReferences.scavengerSuitBurnt;
+                    }
+
+                    Plugin.Logger.LogInfo("Jetpack exploded and burned player corpse");
+                }
+            }
+
+            Plugin.Logger.LogWarning("Jetpack exploded but the player that crashed it didn't spawn a body");
         }
     }
 }
