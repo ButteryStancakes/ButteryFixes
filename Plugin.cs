@@ -28,7 +28,7 @@ namespace ButteryFixes
     [BepInDependency("meow.ModelReplacementAPI", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.4.2";
+        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.5.0";
         internal static new ManualLogSource Logger;
 
         internal static bool DISABLE_LADDER_PATCH, ENABLE_SCAN_PATCH, DISABLE_PLAYERMODEL_PATCHES, GENERAL_IMPROVEMENTS, LETHAL_FIXES;
