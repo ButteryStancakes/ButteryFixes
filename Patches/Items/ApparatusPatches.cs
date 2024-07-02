@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using UnityEngine;
 
 namespace ButteryFixes.Patches.Items
 {
@@ -14,8 +15,19 @@ namespace ButteryFixes.Patches.Items
             {
                 if (scanNodeProperties.headerText == "Apparatice")
                     scanNodeProperties.headerText = "Apparatus";
-                scanNodeProperties.subText = $"Value: ${__instance.scrapValue}";
+                if (Plugin.configShowApparatusValue.Value)
+                {
+                    scanNodeProperties.scrapValue = __instance.scrapValue;
+                    scanNodeProperties.subText = $"Value: ${scanNodeProperties.scrapValue}";
+                }
                 Plugin.Logger.LogInfo("Scan node: Apparatus");
+            }
+
+            if (__instance.isLungDocked && StartOfRound.Instance != null && StartOfRound.Instance.inShipPhase)
+            {
+                Plugin.Logger.LogInfo("Player late-joined a lobby with a powered apparatus");
+                __instance.isLungDocked = false;
+                __instance.GetComponent<AudioSource>().Stop();
             }
         }
     }

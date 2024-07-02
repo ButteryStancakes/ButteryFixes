@@ -60,7 +60,7 @@ namespace ButteryFixes.Patches.Player
                     {
                         // fixes helmet
                         if (__instance.detachedHeadObject.name != "DecapitatedLegs")
-                            headRend.material = suitMaterial;
+                            headRend.sharedMaterial = suitMaterial;
                         // or legs, if you are killed by the barber
                         else
                         {
@@ -87,7 +87,7 @@ namespace ButteryFixes.Patches.Player
                             if (!__instance.setMaterialToPlayerSuit || burnt)
                             {
                                 foreach (Renderer tailRend in tail.GetComponentsInChildren<Renderer>())
-                                    tailRend.material = suitMaterial;
+                                    tailRend.sharedMaterial = suitMaterial;
                             }
                             // special offset for snipping
                             if (snipped)
@@ -116,7 +116,7 @@ namespace ButteryFixes.Patches.Player
                             if (!__instance.setMaterialToPlayerSuit || burnt)
                             {
                                 foreach (Renderer hatRend in hat.GetComponentsInChildren<Renderer>())
-                                    hatRend.material = suitMaterial;
+                                    hatRend.sharedMaterial = suitMaterial;
                             }
                             Plugin.Logger.LogInfo("Head attachment complete for player corpse");
                         }

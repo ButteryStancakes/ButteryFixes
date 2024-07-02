@@ -35,7 +35,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> configMusicDopplerLevel;
         internal static ConfigEntry<GameResolution> configGameResolution;
-        internal static ConfigEntry<bool> configMakeConductive, configMaskHornetsPower, configFixJumpCheese, configKeysAreScrap;
+        internal static ConfigEntry<bool> configMakeConductive, configMaskHornetsPower, configFixJumpCheese, configKeysAreScrap, configShowApparatusValue;
 
         void Awake()
         {
@@ -73,6 +73,12 @@ namespace ButteryFixes
                 "The internal resolution rendered by the game. There are unused resolution presets in the game data that you can enable using this option.\n" +
                 "\"DontChange\" makes no changes - vanilla is 860x520, but this setting is also compatible with other resolution mods.\n" +
                 "\"Low\" is 620x350. \"High\" is 970x580.");
+
+            configShowApparatusValue = Config.Bind(
+                "Gameplay",
+                "ShowApparatusValue",
+                false,
+                "Actually show the apparatus' value on the scanner instead of \"???\" (in vanilla, it is always $80)");
 
             configMusicDopplerLevel = Config.Bind(
                 "Audio",

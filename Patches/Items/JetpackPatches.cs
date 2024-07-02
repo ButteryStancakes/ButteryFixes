@@ -58,7 +58,7 @@ namespace ButteryFixes.Patches.Items
         [HarmonyPostfix]
         public static void PostExplodeJetpackClientRpc(JetpackItem __instance, PlayerControllerB ___previousPlayerHeldBy)
         {
-            if (Plugin.DISABLE_PLAYERMODEL_PATCHES)
+            if (__instance.IsOwner || Plugin.DISABLE_PLAYERMODEL_PATCHES)
                 return;
 
             foreach (DeadBodyInfo deadBodyInfo in Object.FindObjectsOfType<DeadBodyInfo>())
@@ -70,7 +70,7 @@ namespace ButteryFixes.Patches.Items
                         if (rend.gameObject.layer == 0 && (rend.name.StartsWith("BetaBadge") || rend.name.StartsWith("LevelSticker")))
                             rend.forceRenderingOff = true;
                         else if (rend.gameObject.layer == 20)
-                            rend.material = GlobalReferences.scavengerSuitBurnt;
+                            rend.sharedMaterial = GlobalReferences.scavengerSuitBurnt;
                     }
 
                     Plugin.Logger.LogInfo("Jetpack exploded and burned player corpse");

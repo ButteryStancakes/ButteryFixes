@@ -15,15 +15,15 @@ namespace ButteryFixes.Utility
                 {
                     case "RadMech":
                         enemy.Value.requireNestObjectsToSpawn = true;
-                        Plugin.Logger.LogInfo("Old Birds now require \"nest\" to spawn");
+                        Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Require \"nest\" to spawn");
                         break;
                     case "MaskedPlayerEnemy":
                         enemy.Value.isOutsideEnemy = false;
-                        Plugin.Logger.LogInfo("\"Masked\" now subtract from indoor power level");
+                        Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Subtract from indoor power, not outdoor power");
                         break;
                     case "Blob":
                         enemy.Value.canDie = false;
-                        Plugin.Logger.LogInfo("Hygroderes won't \"die\" when crushed by spike trap");
+                        Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Don't \"die\" when crushed by spike trap");
                         break;
                 }
                 // fix residue in ScriptableObject
@@ -93,6 +93,14 @@ namespace ButteryFixes.Utility
                         item.canBeInspected = false;
                         Plugin.Logger.LogInfo($"Inspectable: {item.itemName} (False)");
                         break;
+                    case "Flashlight":
+                    case "ProFlashlight":
+                        FlashlightItem flashlightItem = item.spawnPrefab.GetComponent<FlashlightItem>();
+                        Material[] sharedMaterials = flashlightItem.flashlightMesh.sharedMaterials;
+                        sharedMaterials[1] = flashlightItem.bulbDark;
+                        flashlightItem.flashlightMesh.sharedMaterials = sharedMaterials;
+                        Plugin.Logger.LogInfo($"Bulb off: {item.itemName}");
+                        break;
                     case "Hairdryer":
                         item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 2f;
                         Plugin.Logger.LogInfo("Use cooldown: Hairdryer");
@@ -116,8 +124,14 @@ namespace ButteryFixes.Utility
                         break;
                     case "Knife":
                         KnifeItem knifeItem = item.spawnPrefab.GetComponent<KnifeItem>();
-                        knifeItem.SetScrapValue(knifeItem.scrapValue);
-                        Plugin.Logger.LogInfo("Scan node: Kitchen knife");
+                        //knifeItem.SetScrapValue(knifeItem.scrapValue);
+                        ScanNodeProperties scanNodeProperties = knifeItem.GetComponentInChildren<ScanNodeProperties>();
+                        if (scanNodeProperties != null)
+                        {
+                            scanNodeProperties.scrapValue = knifeItem.scrapValue;
+                            scanNodeProperties.subText = $"Value: ${scanNodeProperties.scrapValue}";
+                            Plugin.Logger.LogInfo("Scan node: Kitchen knife");
+                        }
                         break;
                     case "MagnifyingGlass":
                     case "PillBottle":
@@ -203,7 +217,7 @@ namespace ButteryFixes.Utility
                 switch (unlockableItem.unlockableName)
                 {
                     /*case "Television":
-                        unlockableItem.prefabObject.GetComponentInChildren<TVScript>().tvSFX.dopplerLevel = MUSIC_DOPPLER_LEVEL;
+                        unlockableItem.prefabObject.GetComponentInChildren<TVScript>().tvSFX.dopplerLevel = 0f * MUSIC_DOPPLER_LEVEL;
                         Plugin.Logger.LogInfo("Doppler level: Television");
                         break;*/
                     case "Record player":

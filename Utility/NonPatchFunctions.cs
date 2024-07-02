@@ -53,7 +53,7 @@ namespace ButteryFixes.Utility
             if (mesh != null && GlobalReferences.tragedyMask != null && GlobalReferences.tragedyMaskMat != null)
             {
                 mesh.GetComponent<MeshFilter>().mesh = GlobalReferences.tragedyMask;
-                mesh.GetComponent<MeshRenderer>().material = GlobalReferences.tragedyMaskMat;
+                mesh.GetComponent<MeshRenderer>().sharedMaterial = GlobalReferences.tragedyMaskMat;
 
                 MeshFilter tragedyMaskEyesFilled = mesh.Find("EyesFilled")?.GetComponent<MeshFilter>();
                 if (tragedyMaskEyesFilled != null && GlobalReferences.tragedyMaskEyesFilled != null)
@@ -64,7 +64,7 @@ namespace ButteryFixes.Utility
                     if (tragedyMaskLOD != null && GlobalReferences.tragedyMaskLOD != null)
                     {
                         tragedyMaskLOD.mesh = GlobalReferences.tragedyMaskLOD;
-                        tragedyMaskLOD.GetComponent<MeshRenderer>().material = GlobalReferences.tragedyMaskMat;
+                        tragedyMaskLOD.GetComponent<MeshRenderer>().sharedMaterial = GlobalReferences.tragedyMaskMat;
 
                         Plugin.Logger.LogInfo("All mask attachment meshes replaced successfully");
                     }
