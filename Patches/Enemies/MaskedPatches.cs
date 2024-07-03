@@ -5,6 +5,7 @@ using UnityEngine.Rendering.HighDefinition;
 
 namespace ButteryFixes.Patches.Enemies
 {
+    [HarmonyPatch]
     internal class MaskedPatches
     {
         [HarmonyPatch(typeof(MaskedPlayerEnemy), nameof(MaskedPlayerEnemy.Update))]

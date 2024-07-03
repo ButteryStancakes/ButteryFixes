@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.Player
 {
+    [HarmonyPatch]
     internal class BodyPatches
     {
         [HarmonyPatch(typeof(DeadBodyInfo), "Start")]

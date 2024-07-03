@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 
 namespace ButteryFixes.Patches.Enemies
 {
+    [HarmonyPatch]
     internal class SlimePatches
     {
         [HarmonyPatch(typeof(BlobAI), nameof(BlobAI.OnCollideWithPlayer))]

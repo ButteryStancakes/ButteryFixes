@@ -7,6 +7,7 @@ using UnityEngine.Rendering;
 
 namespace ButteryFixes.Patches.Player
 {
+    [HarmonyPatch]
     internal class PlayerPatches
     {
         static List<PlayerControllerB> bunnyhoppingPlayers = [];

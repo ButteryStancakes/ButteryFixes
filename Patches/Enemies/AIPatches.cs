@@ -1,14 +1,10 @@
 ﻿using HarmonyLib;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using UnityEngine;
-using GameNetcodeStuff;
-using ButteryFixes.Utility;
 
 namespace ButteryFixes.Patches.Enemies
 {
+    [HarmonyPatch]
     internal class AIPatches
     {
         [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.EnableEnemyMesh))]

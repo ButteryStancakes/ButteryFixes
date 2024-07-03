@@ -1,12 +1,10 @@
 ﻿using ButteryFixes.Utility;
 using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 
 namespace ButteryFixes.Patches.General
 {
+    [HarmonyPatch]
     internal class ItemDropshipPatches
     {
         [HarmonyPatch(typeof(ItemDropship), "Start")]

@@ -3,6 +3,7 @@ using HarmonyLib;
 
 namespace ButteryFixes.Patches.General
 {
+    [HarmonyPatch]
     internal class RoundManagerPatches
     {
         [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.PredictAllOutsideEnemies))]

@@ -3,6 +3,7 @@ using HarmonyLib;
 
 namespace ButteryFixes.Patches.Enemies
 {
+    [HarmonyPatch]
     internal class SpiderPatches
     {
         // prevents nullref if bunker spider is shot by nutcracker. bug originally described (and fixed) in NutcrackerFixes

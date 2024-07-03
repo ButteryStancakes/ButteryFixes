@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.Player
 {
+    [HarmonyPatch]
     internal class SuitPatches
     {
         static bool localCostumeChanged = false;

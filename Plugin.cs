@@ -75,7 +75,7 @@ namespace ButteryFixes
                 "\"Low\" is 620x350. \"High\" is 970x580.");
 
             configShowApparatusValue = Config.Bind(
-                "Gameplay",
+                "Visual",
                 "ShowApparatusValue",
                 false,
                 "Actually show the apparatus' value on the scanner instead of \"???\" (in vanilla, it is always $80)");

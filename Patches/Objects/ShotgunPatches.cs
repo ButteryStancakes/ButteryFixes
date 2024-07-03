@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.Items
 {
+    [HarmonyPatch]
     internal class ShotgunPatches
     {
         [HarmonyPatch(typeof(ShotgunItem), nameof(ShotgunItem.ReloadGunEffectsClientRpc))]

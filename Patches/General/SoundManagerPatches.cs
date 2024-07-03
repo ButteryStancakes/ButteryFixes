@@ -2,9 +2,9 @@
 
 namespace ButteryFixes.Patches.General
 {
+    [HarmonyPatch]
     internal class SoundManagerPatches
     {
-
         [HarmonyPatch(typeof(SoundManager), "Start")]
         [HarmonyPostfix]
         static void SoundManagerPostStart(SoundManager __instance)

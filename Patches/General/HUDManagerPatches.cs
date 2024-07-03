@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.General
 {
+    [HarmonyPatch]
     internal class HUDManagerPatches
     {
         [HarmonyPatch(typeof(HUDManager), "UpdateScanNodes")]

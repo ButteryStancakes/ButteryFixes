@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.Enemies
 {
+    [HarmonyPatch]
     internal class ButlerPatches
     {
         [HarmonyPatch(typeof(ButlerEnemyAI), nameof(ButlerEnemyAI.OnCollideWithPlayer))]

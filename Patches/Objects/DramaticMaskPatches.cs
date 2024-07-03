@@ -3,6 +3,7 @@ using HarmonyLib;
 
 namespace ButteryFixes.Patches.Items
 {
+    [HarmonyPatch]
     internal class DramaticMaskPatches
     {
 

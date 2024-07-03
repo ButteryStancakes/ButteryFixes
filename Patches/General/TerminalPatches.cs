@@ -5,6 +5,7 @@ using System.Reflection.Emit;
 
 namespace ButteryFixes.Patches.General
 {
+    [HarmonyPatch]
     internal class TerminalPatches
     {
         [HarmonyPatch(typeof(Terminal), "Start")]

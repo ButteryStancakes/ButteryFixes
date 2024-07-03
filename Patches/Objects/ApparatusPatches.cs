@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.Items
 {
+    [HarmonyPatch]
     internal class ApparatusPatches
     {
         [HarmonyPatch(typeof(LungProp), nameof(LungProp.Start))]

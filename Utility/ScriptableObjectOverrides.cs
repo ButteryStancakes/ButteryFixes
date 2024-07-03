@@ -64,6 +64,7 @@ namespace ButteryFixes.Utility
                 { "SprayPaint", true },
                 //{ "SteeringWheel", true }
             };
+            ScanNodeProperties scanNodeProperties;
 
             foreach (Item item in StartOfRound.Instance.allItemsList.itemsList)
             {
@@ -114,7 +115,7 @@ namespace ButteryFixes.Utility
                         else
                         {
                             item.spawnPrefab.GetComponent<KeyItem>().scrapValue = 0;
-                            ScanNodeProperties scanNodeProperties = item.spawnPrefab.GetComponentInChildren<ScanNodeProperties>();
+                            scanNodeProperties = item.spawnPrefab.GetComponentInChildren<ScanNodeProperties>();
                             if (scanNodeProperties != null)
                             {
                                 scanNodeProperties.subText = string.Empty;
@@ -125,7 +126,7 @@ namespace ButteryFixes.Utility
                     case "Knife":
                         KnifeItem knifeItem = item.spawnPrefab.GetComponent<KnifeItem>();
                         //knifeItem.SetScrapValue(knifeItem.scrapValue);
-                        ScanNodeProperties scanNodeProperties = knifeItem.GetComponentInChildren<ScanNodeProperties>();
+                        scanNodeProperties = knifeItem.GetComponentInChildren<ScanNodeProperties>();
                         if (scanNodeProperties != null)
                         {
                             scanNodeProperties.scrapValue = knifeItem.scrapValue;

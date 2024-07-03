@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.General
 {
+    [HarmonyPatch]
     internal class GameNetworkManagerPatches
     {
         [HarmonyPatch(typeof(GameNetworkManager), nameof(GameNetworkManager.SaveGame))]

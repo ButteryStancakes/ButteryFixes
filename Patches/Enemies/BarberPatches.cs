@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.Enemies
 {
+    [HarmonyPatch]
     internal class BarberPatches
     {
         // fix barbers not speeding up throughout the day

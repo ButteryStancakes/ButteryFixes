@@ -3,6 +3,7 @@ using HarmonyLib;
 
 namespace ButteryFixes.Patches.Enemies
 {
+    [HarmonyPatch]
     internal class TulipSnakePatches
     {
         [HarmonyPatch(typeof(FlowerSnakeEnemy), "SetFlappingLocalClient")]

@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.Items
 {
+    [HarmonyPatch]
     internal class JetpackPatches
     {
         [HarmonyPatch(typeof(JetpackItem), "DeactivateJetpack")]

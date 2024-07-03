@@ -7,6 +7,7 @@ using System.Reflection.Emit;
 
 namespace ButteryFixes.Patches.Enemies
 {
+    [HarmonyPatch]
     internal class ForestGiantPatches
     {
         [HarmonyPatch(typeof(ForestGiantAI), nameof(ForestGiantAI.AnimationEventA))]

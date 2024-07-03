@@ -1,9 +1,8 @@
 ﻿using HarmonyLib;
-using UnityEngine;
-using ButteryFixes.Utility;
 
 namespace ButteryFixes.Patches.Items
 {
+    [HarmonyPatch]
     internal class ItemPatches
     {
         [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.ChargeBatteries))]
