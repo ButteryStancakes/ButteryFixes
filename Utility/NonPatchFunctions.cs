@@ -38,6 +38,61 @@ namespace ButteryFixes.Utility
             Plugin.Logger.LogInfo($"Finished animating shotgun shells (held by enemy: {shotgun.isHeldByEnemy})");
         }
 
+        public static void ShotgunPreProcess(Vector3 shotgunPosition, ref int num, ref RaycastHit[] results)
+        {
+            int index = 0;
+            HashSet<EnemyAI> enemies = [];
+            List<RaycastHit> invincibles = [];
+
+            // sort in order of distance
+            RaycastHit[] sortedResults = [.. results.Take(num).OrderBy(hit => Vector3.Distance(shotgunPosition, hit.point))];
+
+            // remove all duplicates
+            for (int i = 0; i < num; i++)
+            {
+                if (sortedResults[i].transform.TryGetComponent(out EnemyAICollisionDetect enemyCollider) && !enemyCollider.onlyCollideWhenGrounded)
+                {
+                    EnemyAI enemy = enemyCollider.mainScript;
+                    if (enemies.Add(enemy))
+                    {
+                        EnemyType enemyType = enemy.enemyType;
+                        // invincible enemies are low-priority
+                        if (!enemyType.canDie || enemyType.name == "RadMech" || enemyType.name == "DocileLocustBees")
+                            invincibles.Add(sortedResults[i]);
+                        else if (!enemy.isEnemyDead)
+                        {
+                            results[index] = sortedResults[i];
+                            index++;
+                            // only hit 10 targets max
+                            if (index == 10)
+                            {
+                                num = 10;
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // add invincible enemies at the end, if there are slots leftover
+            if (invincibles.Count > 0)
+            {
+                // slime is "medium priority" since they get angry when shot
+                foreach (RaycastHit invincible in invincibles.OrderByDescending(invincible => invincible.transform.GetComponent<EnemyAICollisionDetect>().mainScript is BlobAI))
+                {
+                    results[index] = invincible;
+                    index++;
+                    if (index == 10)
+                    {
+                        num = 10;
+                        return;
+                    }
+                }
+            }
+
+            num = index;
+        }
+
         internal static void FakeFootstepAlert(PlayerControllerB player)
         {
             bool noiseIsInsideClosedShip = player.isInHangarShipRoom && StartOfRound.Instance.hangarDoorsClosed;

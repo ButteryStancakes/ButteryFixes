@@ -35,7 +35,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> configMusicDopplerLevel;
         internal static ConfigEntry<GameResolution> configGameResolution;
-        internal static ConfigEntry<bool> configMakeConductive, configMaskHornetsPower, configFixJumpCheese, configKeysAreScrap, configShowApparatusValue;
+        internal static ConfigEntry<bool> configMakeConductive, configMaskHornetsPower, configFixJumpCheese, configKeysAreScrap, configShowApparatusValue, configRandomizeDefaultSeed, configScanOnShip;
 
         void Awake()
         {
@@ -110,6 +110,18 @@ namespace ButteryFixes
                 "KeysAreScrap",
                 false,
                 "(Host only) Enabling this will allow you to sell keys for $3 as listed, but will also cause them to be lost if all players die. If this is disabled, they will no longer show \"Value: $3\" on the scanner, instead.");
+
+            configRandomizeDefaultSeed = Config.Bind(
+                "Gameplay",
+                "RandomizeDefaultSeed",
+                true,
+                "(Host only) Randomizes the seed when starting a new save file, rather than always using the default of 0. (This changes starting weather and shop sales.)");
+
+            configScanOnShip = Config.Bind(
+                "Extra",
+                "ScanOnShip",
+                false,
+                "Allows the \"scan\" command on the terminal to count the number and value of the items on your ship when in orbit.");
 
             new Harmony(PLUGIN_GUID).PatchAll();
 

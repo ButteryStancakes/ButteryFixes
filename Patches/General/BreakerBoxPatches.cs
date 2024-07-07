@@ -12,12 +12,12 @@ namespace ButteryFixes.Patches.General
             __instance.breakerBoxHum.Stop();
         }
 
-        /*[HarmonyPatch(typeof(BreakerBox), nameof(BreakerBox.SwitchBreaker))]
+        [HarmonyPatch(typeof(BreakerBox), nameof(BreakerBox.SwitchBreaker))]
         [HarmonyPostfix]
         static void PostSwitchBreaker(BreakerBox __instance)
         {
             if (__instance.breakerBoxHum.isPlaying && RoundManager.Instance.powerOffPermanently)
                 __instance.breakerBoxHum.Stop();
-        }*/
+        }
     }
 }

@@ -74,6 +74,12 @@ namespace ButteryFixes.Patches.Player
                 Plugin.Logger.LogWarning("Ran into error fetching local player's badges");
                 Plugin.Logger.LogWarning(e);
             }
+
+            if (!Plugin.GENERAL_IMPROVEMENTS && __instance.playersManager.mapScreenPlayerName.text == "MONITORING: Player")
+            {
+                __instance.playersManager.mapScreenPlayerName.SetText($"MONITORING: {__instance.playersManager.mapScreen.radarTargets[__instance.playersManager.mapScreen.targetTransformIndex].name}");
+                Plugin.Logger.LogInfo("Fix \"MONITORING: Player\"");
+            }
         }
 
         [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.DestroyItemInSlot))]

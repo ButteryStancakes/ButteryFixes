@@ -23,16 +23,9 @@ namespace ButteryFixes.Patches.Enemies
 
         [HarmonyPatch(typeof(NutcrackerEnemyAI), nameof(NutcrackerEnemyAI.Start))]
         [HarmonyPostfix]
-        [HarmonyAfter("Dev1A3.LethalFixes")]
+        //[HarmonyAfter("Dev1A3.LethalFixes")]
         static void NutcrackerEnemyAIPostStart(NutcrackerEnemyAI __instance, ref bool ___isLeaderScript, ref int ___previousPlayerSeenWhenAiming)
         {
-            // 1 in vanilla, but LethalFixes makes it 0.5
-            if (__instance.updatePositionThreshold < GlobalReferences.nutcrackerSyncDistance)
-                GlobalReferences.nutcrackerSyncDistance = __instance.updatePositionThreshold;
-
-            // fixes nutcracker tiptoe being early when against the host
-            ___previousPlayerSeenWhenAiming = -1;
-
             // if numbersSpawned > 1, a leader might not have been assigned yet (if the first nutcracker spawned with another already queued in a vent)
             if (__instance.IsServer && !___isLeaderScript && __instance.enemyType.numberSpawned > 1)
             {
@@ -109,45 +102,25 @@ namespace ButteryFixes.Patches.Enemies
             }
         }
 
-        [HarmonyPatch(typeof(NutcrackerEnemyAI), "AimGun", MethodType.Enumerator)]
+        // probably unnecessary?
+        /*[HarmonyPatch(typeof(NutcrackerEnemyAI), "AimGun", MethodType.Enumerator)]
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> NutcrackerEnemyAITransAimGun(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
-            FieldInfo timesSeeingSamePlayer = AccessTools.Field(typeof(NutcrackerEnemyAI), "timesSeeingSamePlayer");
-            FieldInfo inSpecialAnimation = AccessTools.Field(typeof(EnemyAI), nameof(EnemyAI.inSpecialAnimation));
             FieldInfo updatePositionThreshold = AccessTools.Field(typeof(EnemyAI), nameof(EnemyAI.updatePositionThreshold));
             for (int i = 2; i < codes.Count - 1; i++)
             {
-                if (codes[i].opcode == OpCodes.Ldc_I4_0 && codes[i + 1].opcode == OpCodes.Stfld && (FieldInfo)codes[i + 1].operand == timesSeeingSamePlayer)
+                if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == updatePositionThreshold && codes[i - 1].opcode == OpCodes.Ldc_R4 && (float)codes[i - 1].operand == 0.45f)
                 {
-                    codes[i].opcode = OpCodes.Ldc_I4_1;
-                    Plugin.Logger.LogDebug("Transpiler (Nutcracker aim): Reset times saw same player to 1, not 0");
-                }
-                else if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == inSpecialAnimation && codes[i - 2].opcode == OpCodes.Ldloc_1)
-                {
-                    // instead of setting inSpecialAnimation to true
-                    if (codes[i - 1].opcode == OpCodes.Ldc_I4_1)
-                    {
-                        // change updatePositionThreshold to a smaller value
-                        codes[i - 1].opcode = OpCodes.Ldc_R4;
-                        codes[i - 1].operand = 0.3f;
-                        Plugin.Logger.LogDebug("Transpiler (Nutcracker aim): Sync position while tiptoeing");
-                    }
-                    // instead of setting inSpecialAnimation to false
-                    else
-                    {
-                        // change updatePositionThreshold to the original value
-                        codes[i - 1].opcode = OpCodes.Ldsfld;
-                        codes[i - 1].operand = AccessTools.Field(typeof(GlobalReferences), nameof(GlobalReferences.nutcrackerSyncDistance));
-                        Plugin.Logger.LogDebug("Transpiler (Nutcracker aim): Dynamic update threshold");
-                    }
-                    codes[i].operand = updatePositionThreshold;
+                    // change updatePositionThreshold to a smaller value
+                    codes[i - 1].operand = 0.3f;
+                    Plugin.Logger.LogDebug("Transpiler (Nutcracker aim): Improve positionaal accuracy during \"tiptoe\"");
                 }
             }
 
             return codes;
-        }
+        }*/
     }
 }

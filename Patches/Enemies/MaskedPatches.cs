@@ -97,7 +97,7 @@ namespace ButteryFixes.Patches.Enemies
         [HarmonyPostfix]
         static void MaskedPlayerEnemyPostSetEnemyOutside(MaskedPlayerEnemy __instance)
         {
-            if (__instance.timeSinceSpawn > 40f)
+            if (__instance.mimickingPlayer == null || __instance.timeSinceSpawn > 40f)
                 return;
 
             Transform spine003 = __instance.maskTypes[0].transform.parent.parent;

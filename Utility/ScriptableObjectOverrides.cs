@@ -25,6 +25,14 @@ namespace ButteryFixes.Utility
                         enemy.Value.canDie = false;
                         Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Don't \"die\" when crushed by spike trap");
                         break;
+                    case "ForestGiant":
+                        ScanNodeProperties scanNodeProperties = enemy.Value.enemyPrefab.GetComponentInChildren<ScanNodeProperties>();
+                        if (scanNodeProperties != null)
+                        {
+                            scanNodeProperties.headerText = "Forest Keeper";
+                            Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Rename scan node");
+                        }
+                        break;
                 }
                 // fix residue in ScriptableObject
                 enemy.Value.numberSpawned = 0;

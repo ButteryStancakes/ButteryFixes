@@ -59,7 +59,7 @@ namespace ButteryFixes.Patches.Items
         [HarmonyPostfix]
         public static void PostExplodeJetpackClientRpc(JetpackItem __instance, PlayerControllerB ___previousPlayerHeldBy)
         {
-            if (__instance.IsOwner || Plugin.DISABLE_PLAYERMODEL_PATCHES)
+            if (/*__instance.IsOwner ||*/ Plugin.DISABLE_PLAYERMODEL_PATCHES)
                 return;
 
             foreach (DeadBodyInfo deadBodyInfo in Object.FindObjectsOfType<DeadBodyInfo>())

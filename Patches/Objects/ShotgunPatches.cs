@@ -2,6 +2,7 @@
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
 
@@ -80,6 +81,17 @@ namespace ButteryFixes.Patches.Items
                 {
                     codes[i - 1].operand = 50;
                     Plugin.Logger.LogDebug("Transpiler (Shotgun blast): Resize target colliders array");
+                }
+                else if (codes[i].opcode == OpCodes.Call && codes[i].operand.ToString().Contains("SphereCastNonAlloc"))
+                {
+                    codes.InsertRange(i + 2, [
+                        new CodeInstruction(OpCodes.Ldarg_1),
+                        new CodeInstruction(OpCodes.Ldloca_S, codes[i + 1].operand),
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        new CodeInstruction(OpCodes.Ldflda, ReflectionCache.ENEMY_COLLIDERS),
+                        new CodeInstruction(OpCodes.Call, typeof(NonPatchFunctions).GetMethod(nameof(NonPatchFunctions.ShotgunPreProcess), BindingFlags.Static | BindingFlags.Public)),
+                    ]);
+                    Plugin.Logger.LogDebug("Transpiler: Pre-process shotgun targets");
                 }
             }
 

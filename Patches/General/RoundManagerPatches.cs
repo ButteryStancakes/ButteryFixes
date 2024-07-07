@@ -1,5 +1,6 @@
 ﻿using ButteryFixes.Utility;
 using HarmonyLib;
+using UnityEngine;
 
 namespace ButteryFixes.Patches.General
 {
@@ -23,12 +24,11 @@ namespace ButteryFixes.Patches.General
             __instance.ResetEnemyVariables();
         }
 
-        // is it a bug that the breaker box hums after unplugging the apparatus? I'm not too sure
-        /*[HarmonyPatch(typeof(RoundManager), nameof(RoundManager.PowerSwitchOffClientRpc))]
+        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.PowerSwitchOffClientRpc))]
         [HarmonyPostfix]
         static void PostPowerSwitchOffClientRpc()
         {
             Object.FindObjectOfType<BreakerBox>()?.breakerBoxHum.Stop();
-        }*/
+        }
     }
 }

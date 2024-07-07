@@ -130,5 +130,16 @@ namespace ButteryFixes.Patches.General
                 }
             }
         }
+
+        [HarmonyPatch(typeof(StartOfRound), "SetTimeAndPlanetToSavedSettings")]
+        [HarmonyPrefix]
+        static void PreSetTimeAndPlanetToSavedSettings()
+        {
+            if (!Plugin.GENERAL_IMPROVEMENTS && Plugin.configRandomizeDefaultSeed.Value && GameNetworkManager.Instance.currentSaveFileName != "LCChallengeFile" && !ES3.KeyExists("RandomSeed", GameNetworkManager.Instance.currentSaveFileName))
+            {
+                ES3.Save("RandomSeed", Random.Range(1, 100000000), GameNetworkManager.Instance.currentSaveFileName);
+                Plugin.Logger.LogInfo("Re-rolled starting seed");
+            }
+        }
     }
 }

@@ -28,19 +28,21 @@ namespace ButteryFixes.Patches.Player
 
                     // special handling for explosions
                     bool burnt = __instance.causeOfDeath == CauseOfDeath.Blast;
-                    if (!burnt && __instance.causeOfDeath == CauseOfDeath.Gravity)
+
+                    // this would actually cause players to be burnt if they die to fall damage etc with a broken jetpack on the map
+                    /*if (!burnt && __instance.causeOfDeath == CauseOfDeath.Gravity)
                     {
                         foreach (JetpackItem jetpack in Object.FindObjectsOfType<JetpackItem>())
                         {
                             // player died crashing (and exploding) a jetpack
-                            if ((bool)ReflectionCache.JETPACK_BROKEN.GetValue(jetpack) && (PlayerControllerB)ReflectionCache.JETPACK_ITEM_PREVIOUS_PLAYER_HELD_BY.GetValue(jetpack) == __instance.playerScript)
+                            if (jetpack.IsOwner && (bool)ReflectionCache.JETPACK_BROKEN.GetValue(jetpack) && (PlayerControllerB)ReflectionCache.JETPACK_ITEM_PREVIOUS_PLAYER_HELD_BY.GetValue(jetpack) == __instance.playerScript)
                             {
                                 burnt = true;
                                 Plugin.Logger.LogInfo("Player corpse should be burnt since they crashed a jetpack");
                                 break;
                             }
                         }
-                    }
+                    }*/
 
                     if (burnt)
                     {

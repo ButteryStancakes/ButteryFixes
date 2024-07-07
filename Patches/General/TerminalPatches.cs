@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using UnityEngine;
 
 namespace ButteryFixes.Patches.General
 {
@@ -12,6 +13,9 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void TerminalPostStart(Terminal __instance)
         {
+            if (!Plugin.GENERAL_IMPROVEMENTS)
+                __instance.SetItemSales(); // seems like this is necessary because InitializeItemSalesPercentages gets called after StartOfRound.Start
+
             foreach (TerminalNode enemyFile in __instance.enemyFiles)
             {
                 switch (enemyFile.name)
@@ -33,6 +37,9 @@ namespace ButteryFixes.Patches.General
                         break;
                 }
             }
+
+            // fix cruiser price shown as $400 after price buff
+            __instance.buyableVehicles[0].creditsWorth = 370;
         }
 
         [HarmonyPatch(typeof(Terminal), "TextPostProcess")]
@@ -60,6 +67,38 @@ namespace ButteryFixes.Patches.General
 
             Plugin.Logger.LogDebug("Terminal transpiler failed");
             return codes;
+        }
+
+        [HarmonyPatch(typeof(Terminal), "TextPostProcess")]
+        [HarmonyPrefix]
+        [HarmonyPriority(Priority.First)]
+        static void TerminalPreTextPostProcess(Terminal __instance, ref string modifiedDisplayText)
+        {
+            if (Plugin.configScanOnShip.Value && modifiedDisplayText.Contains("[scanForItems]"))
+            {
+                bool inOrbit = StartOfRound.Instance.inShipPhase;
+                if (!inOrbit)
+                {
+                    HangarShipDoor hangarShipDoor = Object.FindObjectOfType<HangarShipDoor>();
+                    if (hangarShipDoor != null && !hangarShipDoor.buttonsEnabled)
+                        inOrbit = true;
+                }
+
+                if (inOrbit)
+                {
+                    int objects = 0;
+                    int value = 0;
+                    foreach (GrabbableObject grabbableObject in Object.FindObjectsOfType<GrabbableObject>())
+                    {
+                        if (grabbableObject.itemProperties.isScrap && grabbableObject is not RagdollGrabbableObject)
+                        {
+                            objects++;
+                            value += grabbableObject.scrapValue;
+                        }
+                    }
+                    modifiedDisplayText = modifiedDisplayText.Replace("[scanForItems]", $"There are {objects} objects inside the ship, totalling at an exact value of ${value}.");
+                }
+            }
         }
     }
 }
