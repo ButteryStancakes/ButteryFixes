@@ -23,13 +23,6 @@ namespace ButteryFixes.Patches.Items
                 }
                 Plugin.Logger.LogInfo("Scan node: Apparatus");
             }
-
-            if (__instance.isLungDocked && StartOfRound.Instance != null && StartOfRound.Instance.inShipPhase)
-            {
-                Plugin.Logger.LogInfo("Player late-joined a lobby with a powered apparatus");
-                __instance.isLungDocked = false;
-                __instance.GetComponent<AudioSource>().Stop();
-            }
         }
     }
 }

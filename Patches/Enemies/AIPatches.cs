@@ -45,11 +45,12 @@ namespace ButteryFixes.Patches.Enemies
         [HarmonyPrefix]
         static void PreSubtractFromPowerLevel(EnemyAI __instance, ref bool ___removedPowerLevel)
         {
-            if (__instance is MaskedPlayerEnemy)
+            MaskedPlayerEnemy maskedPlayerEnemy = __instance as MaskedPlayerEnemy;
+            if (maskedPlayerEnemy != null)
             {
                 // should always work correctly for the host?
                 // I've only had mimickingPlayer desync on client
-                if (!___removedPowerLevel && (__instance as MaskedPlayerEnemy).mimickingPlayer != null)
+                if (!___removedPowerLevel && maskedPlayerEnemy.mimickingPlayer != null)
                 {
                     Plugin.Logger.LogInfo("\"Masked\" was mimicking a player; will not subtract from power level");
                     ___removedPowerLevel = true;
@@ -71,6 +72,21 @@ namespace ButteryFixes.Patches.Enemies
         {
             // snare fleas and tulip snakes don't open door when latching to player
             return !(other.CompareTag("Enemy") && other.TryGetComponent(out EnemyAICollisionDetect enemyAICollisionDetect) && (enemyAICollisionDetect.mainScript is CentipedeAI { clingingToPlayer: not null } || enemyAICollisionDetect.mainScript is FlowerSnakeEnemy { clingingToPlayer: not null }));
+        }
+
+        // prevents old bird "death" unless they are eaten by earth leviathan
+        // fixes old birds breaking when you hit them with the car
+        [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.KillEnemyOnOwnerClient))]
+        [HarmonyPrefix]
+        static bool PreKillEnemyOnOwnerClient(EnemyAI __instance, bool overrideDestroy)
+        {
+            if (__instance is RadMechAI && !overrideDestroy)
+            {
+                Plugin.Logger.LogInfo("Old Bird was \"killed\" but not destroyed, probably hit by Cruiser. Kill will be cancelled");
+                return false;
+            }
+
+            return true;
         }
     }
 }

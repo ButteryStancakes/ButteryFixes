@@ -14,5 +14,7 @@ namespace ButteryFixes.Utility
 
         internal static Mesh playerBody;
         internal static Material scavengerSuitBurnt;
+
+        internal static bool crashedJetpackAsLocalPlayer;
     }
 }

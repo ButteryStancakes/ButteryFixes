@@ -63,7 +63,7 @@ namespace ButteryFixes.Patches.General
                 }
             }
 
-            Plugin.Logger.LogDebug("Health UI transpiler failed");
+            Plugin.Logger.LogError("Health UI transpiler failed");
             return codes;
         }
 

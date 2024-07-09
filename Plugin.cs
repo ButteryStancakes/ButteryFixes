@@ -20,6 +20,13 @@ namespace ButteryFixes
         High
     }
 
+    internal enum ScanOnShip
+    {
+        DontChange = -1,
+        Low,
+        High
+    }
+
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
     [BepInDependency("inoyu.FastClimbing", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("e3s1.BetterLadders", BepInDependency.DependencyFlags.SoftDependency)]

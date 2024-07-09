@@ -19,8 +19,17 @@ namespace ButteryFixes.Patches.General
             {
                 try
                 {
-                    ES3.Save("ButteryFixes_DeliveryItems", terminal.orderedItemsFromTerminal, __instance.currentSaveFileName);
-                    Plugin.Logger.LogInfo($"Dropship inventory saved ({terminal.numberOfItemsInDropship} items)");
+                    ES3.Save("ButteryFixes_DeliveryVehicle", terminal.orderedVehicleFromTerminal, __instance.currentSaveFileName);
+                    if (terminal.vehicleInDropship)
+                    {
+                        //ES3.DeleteKey("ButteryFixes_DeliveryItems", __instance.currentSaveFileName);
+                        Plugin.Logger.LogInfo($"Dropship inventory saved (Vehicle)");
+                    }
+                    else
+                    {
+                        ES3.Save("ButteryFixes_DeliveryItems", terminal.orderedItemsFromTerminal, __instance.currentSaveFileName);
+                        Plugin.Logger.LogInfo($"Dropship inventory saved ({terminal.numberOfItemsInDropship} items)");
+                    }
                 }
                 catch (System.Exception e)
                 {

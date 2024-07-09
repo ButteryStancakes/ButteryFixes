@@ -112,7 +112,7 @@ namespace ButteryFixes.Utility
                         break;
                     case "Hairdryer":
                         item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 2f;
-                        Plugin.Logger.LogInfo("Use cooldown: Hairdryer");
+                        Plugin.Logger.LogInfo("Cooldown: Hairdryer");
                         break;
                     case "Key":
                         if (Plugin.configKeysAreScrap.Value)
@@ -236,6 +236,14 @@ namespace ButteryFixes.Utility
                     case "Disco Ball":
                         unlockableItem.prefabObject.GetComponentInChildren<CozyLights>().turnOnAudio.dopplerLevel = 0.92f * GlobalReferences.dopplerLevelMult;
                         Plugin.Logger.LogInfo("Doppler level: Disco ball");
+                        break;
+                    case "JackOLantern":
+                        unlockableItem.prefabObject.GetComponentInChildren<InteractTrigger>().cooldownTime = 0.5f;
+                        Plugin.Logger.LogInfo("Cooldown: Jack o' Lantern");
+                        break;
+                    case "Plushie pajama man":
+                        unlockableItem.prefabObject.GetComponentInChildren<InteractTrigger>().cooldownTime = 0.54f;
+                        Plugin.Logger.LogInfo("Cooldown: Plushie pajama man");
                         break;
                 }
             }

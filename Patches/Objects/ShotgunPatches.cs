@@ -91,7 +91,7 @@ namespace ButteryFixes.Patches.Items
                         new CodeInstruction(OpCodes.Ldflda, ReflectionCache.ENEMY_COLLIDERS),
                         new CodeInstruction(OpCodes.Call, typeof(NonPatchFunctions).GetMethod(nameof(NonPatchFunctions.ShotgunPreProcess), BindingFlags.Static | BindingFlags.Public)),
                     ]);
-                    Plugin.Logger.LogDebug("Transpiler: Pre-process shotgun targets");
+                    Plugin.Logger.LogDebug("Transpiler (Shotgun blast): Pre-process shotgun targets");
                 }
             }
 

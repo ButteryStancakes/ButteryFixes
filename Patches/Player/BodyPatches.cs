@@ -44,6 +44,14 @@ namespace ButteryFixes.Patches.Player
                         }
                     }*/
 
+                    if (!burnt && __instance.playerScript == GameNetworkManager.Instance.localPlayerController && GlobalReferences.crashedJetpackAsLocalPlayer)
+                    {
+                        burnt = true;
+                        GlobalReferences.crashedJetpackAsLocalPlayer = false;
+                        __instance.setMaterialToPlayerSuit = false;
+                        Plugin.Logger.LogInfo("Local player spawned a body after a jetpack crashed, caught in time to burn it");
+                    }
+
                     if (burnt)
                     {
                         // for landmines, old bird missiles, etc.

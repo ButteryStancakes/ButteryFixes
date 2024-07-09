@@ -86,10 +86,16 @@ namespace ButteryFixes.Patches.General
             {
                 Terminal terminal = Object.FindObjectOfType<Terminal>();
                 // empty the dropship on game over
-                if (terminal != null && terminal.orderedItemsFromTerminal.Count > 0)
+                if (terminal != null)
                 {
-                    terminal.orderedItemsFromTerminal.Clear();
-                    terminal.SyncGroupCreditsServerRpc(terminal.groupCredits, 0);
+                    if (terminal.orderedItemsFromTerminal.Count > 0)
+                    {
+                        terminal.orderedItemsFromTerminal.Clear();
+                        terminal.SyncGroupCreditsServerRpc(terminal.groupCredits, 0);
+                    }
+                    terminal.orderedVehicleFromTerminal = -1;
+                    terminal.hasWarrantyTicket = false;
+                    terminal.vehicleInDropship = false;
                     Plugin.Logger.LogInfo("Dropship inventory was emptied (game over)");
                 }
             }
@@ -114,13 +120,22 @@ namespace ButteryFixes.Patches.General
             {
                 try
                 {
-                    terminal.orderedItemsFromTerminal = ES3.Load("ButteryFixes_DeliveryItems", GameNetworkManager.Instance.currentSaveFileName, new List<int>());
-                    terminal.numberOfItemsInDropship = terminal.orderedItemsFromTerminal.Count;
-                    if (terminal.numberOfItemsInDropship > 0)
+                    terminal.orderedVehicleFromTerminal = ES3.Load("ButteryFixes_DeliveryVehicle", GameNetworkManager.Instance.currentSaveFileName, -1);
+                    if (terminal.orderedVehicleFromTerminal >= 0f)
                     {
-                        Plugin.Logger.LogInfo($"Dropship inventory was restocked from save file ({terminal.numberOfItemsInDropship} items):");
-                        for (int i = 0; i < terminal.numberOfItemsInDropship; i++)
-                            Plugin.Logger.LogInfo($"#{i + 1} - {terminal.buyableItemsList[terminal.orderedItemsFromTerminal[i]].itemName}");
+                        terminal.vehicleInDropship = true;
+                        Plugin.Logger.LogInfo($"Dropship inventory was restocked from save file (Vehicle: {terminal.buyableVehicles[terminal.orderedVehicleFromTerminal].vehicleDisplayName})");
+                    }
+                    else
+                    {
+                        terminal.orderedItemsFromTerminal = ES3.Load("ButteryFixes_DeliveryItems", GameNetworkManager.Instance.currentSaveFileName, new List<int>());
+                        terminal.numberOfItemsInDropship = terminal.orderedItemsFromTerminal.Count;
+                        if (terminal.numberOfItemsInDropship > 0)
+                        {
+                            Plugin.Logger.LogInfo($"Dropship inventory was restocked from save file ({terminal.numberOfItemsInDropship} items):");
+                            for (int i = 0; i < terminal.numberOfItemsInDropship; i++)
+                                Plugin.Logger.LogInfo($"#{i + 1} - {terminal.buyableItemsList[terminal.orderedItemsFromTerminal[i]].itemName}");
+                        }
                     }
                 }
                 catch (System.Exception e)
@@ -139,6 +154,37 @@ namespace ButteryFixes.Patches.General
             {
                 ES3.Save("RandomSeed", Random.Range(1, 100000000), GameNetworkManager.Instance.currentSaveFileName);
                 Plugin.Logger.LogInfo("Re-rolled starting seed");
+            }
+        }
+
+        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ReviveDeadPlayers))]
+        [HarmonyPostfix]
+        static void PostReviveDeadPlayers()
+        {
+            GlobalReferences.crashedJetpackAsLocalPlayer = false;
+        }
+
+        [HarmonyPatch(typeof(StartOfRound), "Start")]
+        [HarmonyPostfix]
+        static void StartOfRoundPostStart(StartOfRound __instance)
+        {
+            if (!__instance.IsServer && __instance.inShipPhase && !GameNetworkManager.Instance.gameHasStarted)
+            {
+                foreach (GrabbableObject grabbableObject in Object.FindObjectsOfType<GrabbableObject>())
+                {
+                    grabbableObject.scrapPersistedThroughRounds = true;
+                    grabbableObject.isInElevator = true;
+                    grabbableObject.isInShipRoom = true;
+
+                    LungProp lungProp = grabbableObject as LungProp;
+                    if (lungProp != null && lungProp.isLungDocked)
+                    {
+                        Plugin.Logger.LogInfo("Player late-joined a lobby with a powered apparatus");
+                        lungProp.isLungDocked = false;
+                        lungProp.GetComponent<AudioSource>().Stop();
+                    }
+                }
+                Plugin.Logger.LogInfo("Mark all scrap in the ship as collected (late join)");
             }
         }
     }

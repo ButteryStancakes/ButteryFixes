@@ -80,6 +80,8 @@ namespace ButteryFixes.Patches.Player
                 __instance.playersManager.mapScreenPlayerName.SetText($"MONITORING: {__instance.playersManager.mapScreen.radarTargets[__instance.playersManager.mapScreen.targetTransformIndex].name}");
                 Plugin.Logger.LogInfo("Fix \"MONITORING: Player\"");
             }
+
+            GlobalReferences.crashedJetpackAsLocalPlayer = false;
         }
 
         [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.DestroyItemInSlot))]
