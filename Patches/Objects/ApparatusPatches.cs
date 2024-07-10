@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
-using UnityEngine;
 
-namespace ButteryFixes.Patches.Items
+namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch]
     internal class ApparatusPatches

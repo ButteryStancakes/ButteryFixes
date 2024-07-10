@@ -1,12 +1,11 @@
 ﻿using ButteryFixes.Utility;
 using HarmonyLib;
 
-namespace ButteryFixes.Patches.Items
+namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch]
     internal class DramaticMaskPatches
     {
-
         [HarmonyPatch(typeof(HauntedMaskItem), nameof(HauntedMaskItem.MaskClampToHeadAnimationEvent))]
         [HarmonyPostfix]
         static void PostMaskClampToHeadAnimationEvent(HauntedMaskItem __instance)

@@ -2,8 +2,10 @@
 using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.HighDefinition;
 
 namespace ButteryFixes.Patches.Player
 {
@@ -82,6 +84,17 @@ namespace ButteryFixes.Patches.Player
             }
 
             GlobalReferences.crashedJetpackAsLocalPlayer = false;
+
+            // fix laser pointer shining through walls when pocketed
+            Light laserLight = __instance.allHelmetLights.FirstOrDefault(helmetLight => helmetLight.name == "laserLight");
+            foreach (Light light in __instance.allHelmetLights)
+            {
+                if (light.shadows == LightShadows.None)
+                {
+                    light.shadows = LightShadows.Hard;
+                    light.GetComponent<HDAdditionalLightData>().shadowNearPlane = 0.66f;
+                }
+            }
         }
 
         [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.DestroyItemInSlot))]

@@ -132,5 +132,33 @@ namespace ButteryFixes.Utility
             else
                 Plugin.Logger.LogWarning("Failed to replace mask attachment mesh");
         }
+
+        internal static void ForceRefreshAllHelmetLights(PlayerControllerB player, bool forceOff = false)
+        {
+            for (int i = 0; i < player.allHelmetLights.Length; i++)
+            {
+                bool enable = false;
+                if (!forceOff)
+                {
+                    for (int j = 0; j < player.ItemSlots.Length; j++)
+                    {
+                        if (player.ItemSlots[j] != null)
+                        {
+                            FlashlightItem flashlightItem = player.ItemSlots[j] as FlashlightItem;
+                            if (flashlightItem != null && flashlightItem.flashlightTypeID == i && flashlightItem.isPocketed)
+                            {
+                                enable = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (player.allHelmetLights[i].enabled != enable)
+                {
+                    player.allHelmetLights[i].enabled = enable;
+                    Plugin.Logger.LogInfo($"Fixed erroneous active state of {player.playerUsername}'s helmet light \"{player.allHelmetLights[i].name}\" (now {enable})");
+                }
+            }
+        }
     }
 }

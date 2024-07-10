@@ -187,5 +187,19 @@ namespace ButteryFixes.Patches.General
                 Plugin.Logger.LogInfo("Mark all scrap in the ship as collected (late join)");
             }
         }
+
+        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ReviveDeadPlayers))]
+        [HarmonyPrefix]
+        static void PreReviveDeadPlayers(StartOfRound __instance)
+        {
+            if (Plugin.GENERAL_IMPROVEMENTS)
+                return;
+
+            for (int i = 0; i < __instance.allPlayerScripts.Length; i++)
+            {
+                if (__instance.allPlayerScripts[i].isPlayerDead)
+                    NonPatchFunctions.ForceRefreshAllHelmetLights(__instance.allPlayerScripts[i], true);
+            }
+        }
     }
 }

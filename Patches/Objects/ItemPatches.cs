@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 
-namespace ButteryFixes.Patches.Items
+namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch]
     internal class ItemPatches

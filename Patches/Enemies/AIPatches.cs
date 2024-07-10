@@ -80,7 +80,7 @@ namespace ButteryFixes.Patches.Enemies
         [HarmonyPrefix]
         static bool PreKillEnemyOnOwnerClient(EnemyAI __instance, bool overrideDestroy)
         {
-            if (__instance is RadMechAI && !overrideDestroy)
+            if (__instance.IsOwner && __instance is RadMechAI && !overrideDestroy)
             {
                 Plugin.Logger.LogInfo("Old Bird was \"killed\" but not destroyed, probably hit by Cruiser. Kill will be cancelled");
                 return false;
