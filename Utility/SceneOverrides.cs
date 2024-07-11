@@ -23,6 +23,9 @@ namespace ButteryFixes.Utility
                         Plugin.Logger.LogInfo("Fixed factory ambience");
                     }
                     break;
+                case "Level2Assurance":
+                    Plugin.Logger.LogInfo("Detected landing on Assurance");
+                    break;
                 case "Level3Vow":
                     Plugin.Logger.LogInfo("Detected landing on Vow");
                     rotateFireExit = false;
@@ -44,6 +47,9 @@ namespace ButteryFixes.Utility
                             Plugin.Logger.LogInfo("Fixed rotation of external fire exit #3");
                         }
                     }
+                    break;
+                case "Level5Rend":
+                    Plugin.Logger.LogInfo("Detected landing on Rend");
                     break;
                 case "Level6Dine":
                     Plugin.Logger.LogInfo("Detected landing on Dine");
@@ -68,9 +74,12 @@ namespace ButteryFixes.Utility
                     Plugin.Logger.LogInfo("Detected landing on Titan");
                     if (bigMachine != null)
                     {
-                        bigMachine.localPosition = new Vector3(-53.7923737f, 47.6299973f, 11.5287f);
+                        bigMachine.localPosition = new Vector3(-36.0699997f, 55.1199989f, 26.1499996f);
                         Plugin.Logger.LogInfo("Fixed factory ambience");
                     }
+                    break;
+                case "Level9Artifice":
+                    Plugin.Logger.LogInfo("Detected landing on Artifice");
                     break;
                 case "Level10Adamance":
                     Plugin.Logger.LogInfo("Detected landing on Adamance");
@@ -85,9 +94,13 @@ namespace ButteryFixes.Utility
                     Plugin.Logger.LogInfo("Detected landing on Embrion");
                     if (bigMachine != null)
                     {
-                        bigMachine.localPosition = new Vector3(201.975769f, 15.1521587f, 25.3148899f);
+                        bigMachine.localPosition = new Vector3(202.604599f, 14.0158f, 3.28045521f);
                         Plugin.Logger.LogInfo("Fixed factory ambience");
                     }
+                    break;
+                default:
+                    Plugin.Logger.LogInfo("Landed on unknown moon");
+                    rotateFireExit = false;
                     break;
             }
 

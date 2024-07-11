@@ -40,16 +40,18 @@ namespace ButteryFixes.Patches.General
             {
                 foreach (EntranceTeleport entranceTeleport in Object.FindObjectsOfType<EntranceTeleport>())
                 {
-                    if (entranceTeleport.transform.parent == __instance.mapPropsContainer.transform)
+                    //if (entranceTeleport.transform.parent == __instance.mapPropsContainer.transform)
+                    if (entranceTeleport.entranceId > 0 && !entranceTeleport.isEntranceToBuilding)
                     {
-                        entranceTeleport.transform.localRotation = Quaternion.Euler(entranceTeleport.transform.localEulerAngles.x, entranceTeleport.transform.localEulerAngles.y + 180f, entranceTeleport.transform.localEulerAngles.z);
-                        Plugin.Logger.LogInfo("Flipped internal fire exit");
+                        entranceTeleport.entrancePoint.localRotation = Quaternion.Euler(entranceTeleport.entrancePoint.localEulerAngles.x, entranceTeleport.entrancePoint.localEulerAngles.y + 180f, entranceTeleport.entrancePoint.localEulerAngles.z);
+                        Plugin.Logger.LogInfo("Fixed rotation of internal fire exit");
                     }
                 }
             }
         }
 
-        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.DespawnPropsAtEndOfRound))]
+        // let mattyfixes handle it
+        /*[HarmonyPatch(typeof(RoundManager), nameof(RoundManager.DespawnPropsAtEndOfRound))]
         [HarmonyPostfix]
         static void PostDespawnPropsAtEndOfRound(RoundManager __instance, bool despawnAllItems)
         {
@@ -68,6 +70,6 @@ namespace ButteryFixes.Patches.General
                     networkObject.Despawn(true);
                 }
             }
-        }
+        }*/
     }
 }
