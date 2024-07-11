@@ -1,5 +1,6 @@
 ﻿using ButteryFixes.Utility;
 using HarmonyLib;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace ButteryFixes.Patches.General
@@ -29,6 +30,44 @@ namespace ButteryFixes.Patches.General
         static void PostPowerSwitchOffClientRpc()
         {
             Object.FindObjectOfType<BreakerBox>()?.breakerBoxHum.Stop();
+        }
+
+        [HarmonyPatch(typeof(RoundManager), "SetExitIDs")]
+        [HarmonyPostfix]
+        static void PostSetExitIDs(RoundManager __instance)
+        {
+            if (Plugin.configFixFireExits.Value)
+            {
+                foreach (EntranceTeleport entranceTeleport in Object.FindObjectsOfType<EntranceTeleport>())
+                {
+                    if (entranceTeleport.transform.parent == __instance.mapPropsContainer.transform)
+                    {
+                        entranceTeleport.transform.localRotation = Quaternion.Euler(entranceTeleport.transform.localEulerAngles.x, entranceTeleport.transform.localEulerAngles.y + 180f, entranceTeleport.transform.localEulerAngles.z);
+                        Plugin.Logger.LogInfo("Flipped internal fire exit");
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.DespawnPropsAtEndOfRound))]
+        [HarmonyPostfix]
+        static void PostDespawnPropsAtEndOfRound(RoundManager __instance, bool despawnAllItems)
+        {
+            if (!__instance.IsServer)
+                return;
+
+            foreach (GrabbableObject grabbableObject in Object.FindObjectsOfType<GrabbableObject>())
+            {
+                NetworkObject networkObject = grabbableObject.GetComponent<NetworkObject>();
+                if (networkObject == null || !networkObject.IsSpawned)
+                    continue;
+
+                if (!grabbableObject.isHeld && (despawnAllItems || (grabbableObject.itemProperties.isScrap && StartOfRound.Instance.allPlayersDead)))
+                {
+                    Plugin.Logger.LogInfo($"Item \"{grabbableObject.name}\" #{grabbableObject.GetInstanceID()} was not deleted during team wipe");
+                    networkObject.Despawn(true);
+                }
+            }
         }
     }
 }

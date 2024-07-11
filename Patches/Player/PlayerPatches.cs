@@ -183,5 +183,18 @@ namespace ButteryFixes.Patches.Player
         static void PostUpdatePlayerAnimationClientRpc(PlayerControllerB __instance)
         {
         }*/
+
+        [HarmonyPatch(typeof(PlayerControllerB), "QEItemInteract_performed")]
+        [HarmonyPatch(typeof(PlayerControllerB), "ItemSecondaryUse_performed")]
+        [HarmonyPatch(typeof(PlayerControllerB), "ItemTertiaryUse_performed")]
+        [HarmonyPrefix]
+        static void PreItem_performed(PlayerControllerB __instance)
+        {
+            if (__instance.equippedUsableItemQE && __instance.currentlyHeldObjectServer != null && (__instance.currentlyHeldObjectServer is FlashlightItem || __instance.currentlyHeldObjectServer is JetpackItem))
+            {
+                __instance.equippedUsableItemQE = false;
+                Plugin.Logger.LogInfo("Tried to use Q/E controls on an item with no secondary/tertiary use. This shouldn't happen");
+            }
+        }
     }
 }

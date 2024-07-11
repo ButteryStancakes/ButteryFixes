@@ -145,7 +145,7 @@ namespace ButteryFixes.Utility
                         if (player.ItemSlots[j] != null)
                         {
                             FlashlightItem flashlightItem = player.ItemSlots[j] as FlashlightItem;
-                            if (flashlightItem != null && flashlightItem.flashlightTypeID == i && flashlightItem.isPocketed)
+                            if (flashlightItem != null && flashlightItem.flashlightTypeID == i && flashlightItem.isPocketed && flashlightItem.isBeingUsed && flashlightItem.insertedBattery.charge > 0f)
                             {
                                 enable = true;
                                 break;

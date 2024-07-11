@@ -84,7 +84,7 @@ namespace ButteryFixes.Patches.General
         {
             if (Plugin.configScanOnShip.Value && modifiedDisplayText.Contains("[scanForItems]"))
             {
-                bool inOrbit = StartOfRound.Instance.inShipPhase;
+                bool inOrbit = StartOfRound.Instance.inShipPhase || StartOfRound.Instance.currentLevel.name == "CompanyBuildingLevel";
                 if (!inOrbit)
                 {
                     HangarShipDoor hangarShipDoor = Object.FindObjectOfType<HangarShipDoor>();
@@ -98,7 +98,7 @@ namespace ButteryFixes.Patches.General
                     int value = 0;
                     foreach (GrabbableObject grabbableObject in Object.FindObjectsOfType<GrabbableObject>())
                     {
-                        if (grabbableObject.itemProperties.isScrap && grabbableObject is not RagdollGrabbableObject)
+                        if ((grabbableObject.isInShipRoom || grabbableObject.isInElevator) && grabbableObject.itemProperties.isScrap && grabbableObject is not RagdollGrabbableObject)
                         {
                             objects++;
                             value += grabbableObject.scrapValue;

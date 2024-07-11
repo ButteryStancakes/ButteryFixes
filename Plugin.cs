@@ -2,7 +2,9 @@
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using ButteryFixes.Utility;
 using HarmonyLib;
+using UnityEngine.SceneManagement;
 
 namespace ButteryFixes
 {
@@ -35,14 +37,14 @@ namespace ButteryFixes
     [BepInDependency("meow.ModelReplacementAPI", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.5.0";
+        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.5.2";
         internal static new ManualLogSource Logger;
 
         internal static bool DISABLE_LADDER_PATCH, ENABLE_SCAN_PATCH, DISABLE_PLAYERMODEL_PATCHES, GENERAL_IMPROVEMENTS, LETHAL_FIXES;
 
         internal static ConfigEntry<MusicDopplerLevel> configMusicDopplerLevel;
         internal static ConfigEntry<GameResolution> configGameResolution;
-        internal static ConfigEntry<bool> configMakeConductive, configMaskHornetsPower, configFixJumpCheese, configKeysAreScrap, configShowApparatusValue, configRandomizeDefaultSeed, configScanOnShip;
+        internal static ConfigEntry<bool> configMakeConductive, configMaskHornetsPower, configFixJumpCheese, configKeysAreScrap, configShowApparatusValue, configRandomizeDefaultSeed, configScanOnShip, configFixFireExits;
 
         void Awake()
         {
@@ -124,13 +126,21 @@ namespace ButteryFixes
                 true,
                 "(Host only) Randomizes the seed when starting a new save file, rather than always using the default of 0. (This changes starting weather and shop sales.)");
 
+            configFixFireExits = Config.Bind(
+                "Gameplay",
+                "FixFireExits",
+                true,
+                "Fix fire exit rotation so you are always facing away from the door when you leave. This applies to interiors, as well as the exteriors of the original game's moons.");
+
             configScanOnShip = Config.Bind(
                 "Extra",
                 "ScanOnShip",
                 false,
-                "Allows the \"scan\" command on the terminal to count the number and value of the items on your ship when in orbit.");
+                "Allows the \"scan\" command on the terminal to count the number and value of the items on your ship, when in orbit or parked at Gordion.");
 
             new Harmony(PLUGIN_GUID).PatchAll();
+
+            SceneManager.sceneLoaded += SceneOverrides.OnSceneLoaded;
 
             Logger.LogInfo($"{PLUGIN_NAME} v{PLUGIN_VERSION} loaded");
         }

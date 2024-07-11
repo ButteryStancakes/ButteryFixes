@@ -16,6 +16,8 @@ namespace ButteryFixes.Utility
                     case "RadMech":
                         enemy.Value.requireNestObjectsToSpawn = true;
                         Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Require \"nest\" to spawn");
+                        /*ParticleSystem.MainModule main = enemy.Value.enemyPrefab.GetComponent<RadMechAI>().blowtorchParticle.main;
+                        main.cullingMode = ParticleSystemCullingMode.AlwaysSimulate;*/
                         break;
                     case "MaskedPlayerEnemy":
                         enemy.Value.isOutsideEnemy = false;
