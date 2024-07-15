@@ -1,7 +1,9 @@
-﻿using HarmonyLib;
+﻿using ButteryFixes.Utility;
+using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace ButteryFixes.Patches.General
@@ -13,7 +15,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void PostUpdateScanNodes(HUDManager __instance, Dictionary<RectTransform, ScanNodeProperties> ___scanNodes)
         {
-            if (!Plugin.ENABLE_SCAN_PATCH || GameNetworkManager.Instance.localPlayerController == null)
+            if (!GlobalReferences.patchScanNodes || GameNetworkManager.Instance.localPlayerController == null)
                 return;
 
             Rect rect = __instance.playerScreenTexture.GetComponent<RectTransform>().rect;
@@ -80,6 +82,27 @@ namespace ButteryFixes.Patches.General
                     return;
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.FillEndGameStats))]
+        [HarmonyPostfix]
+        static void PostFillEndGameStats(HUDManager __instance, int scrapCollected = 0)
+        {
+            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
+                return;
+
+            int scrapNotCollected = 0;
+            foreach (GrabbableObject grabbableObject in Object.FindObjectsOfType<GrabbableObject>())
+            {
+                NetworkObject networkObject = grabbableObject.GetComponent<NetworkObject>();
+                if (networkObject == null || !networkObject.IsSpawned)
+                    continue;
+
+                if (grabbableObject.itemProperties.isScrap && grabbableObject.scrapValue > 0 && !grabbableObject.isInElevator && !grabbableObject.isInShipRoom && !grabbableObject.scrapPersistedThroughRounds && !grabbableObject.isHeld && grabbableObject is not RagdollGrabbableObject)
+                    scrapNotCollected += grabbableObject.scrapValue;
+            }
+
+            __instance.statsUIElements.quotaDenominator.text = (scrapCollected + scrapNotCollected).ToString();
         }
     }
 }

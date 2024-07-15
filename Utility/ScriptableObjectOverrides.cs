@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace ButteryFixes.Utility
 {
@@ -33,6 +34,15 @@ namespace ButteryFixes.Utility
                         {
                             scanNodeProperties.headerText = "Forest Keeper";
                             Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Rename scan node");
+                        }
+                        break;
+                    case "ClaySurgeon":
+                        enemy.Value.enemyPrefab.GetComponent<NavMeshAgent>().speed = 0f;
+                        Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Don't slide around on fresh spawn");
+                        foreach (Renderer rend in enemy.Value.enemyPrefab.GetComponentsInChildren<Renderer>())
+                        {
+                            if (rend.gameObject.layer == 19)
+                                rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                         }
                         break;
                 }
@@ -117,7 +127,7 @@ namespace ButteryFixes.Utility
                         Plugin.Logger.LogInfo("Cooldown: Hairdryer");
                         break;
                     case "Key":
-                        if (Plugin.configKeysAreScrap.Value)
+                        if (Configuration.keysAreScrap.Value)
                         {
                             item.isScrap = true;
                             Plugin.Logger.LogInfo("Scrap: Key");
@@ -129,6 +139,7 @@ namespace ButteryFixes.Utility
                             if (scanNodeProperties != null)
                             {
                                 scanNodeProperties.subText = string.Empty;
+                                scanNodeProperties.scrapValue = 0;
                                 Plugin.Logger.LogInfo("Scan node: Key");
                             }
                         }
@@ -168,8 +179,10 @@ namespace ButteryFixes.Utility
                         }
                         break;
                     case "WeedKillerBottle":
+                        item.canBeInspected = true;
+                        Plugin.Logger.LogInfo($"Inspectable: Weed killer (True)");
                         item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
-                        Plugin.Logger.LogInfo($"Audio rolloff: {item.itemName}");
+                        Plugin.Logger.LogInfo($"Audio rolloff: Weed killer");
                         break;
                 }
 
@@ -215,7 +228,7 @@ namespace ButteryFixes.Utility
 
                 if (conductiveItems.ContainsKey(item.name))
                 {
-                    item.isConductiveMetal = conductiveItems[item.name] && Plugin.configMakeConductive.Value;
+                    item.isConductiveMetal = conductiveItems[item.name] && Configuration.makeConductive.Value;
                     Plugin.Logger.LogInfo($"Conductive: {item.itemName} ({item.isConductiveMetal})");
                 }
             }

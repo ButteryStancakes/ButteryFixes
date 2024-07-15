@@ -15,7 +15,7 @@ namespace ButteryFixes.Patches.General
         {
             ScriptableObjectOverrides.OverrideSelectableLevels();
 
-            GlobalReferences.dopplerLevelMult = Plugin.configMusicDopplerLevel.Value switch
+            GlobalReferences.dopplerLevelMult = Configuration.musicDopplerLevel.Value switch
             {
                 MusicDopplerLevel.None => 0f,
                 MusicDopplerLevel.Reduced => 0.333f,
@@ -150,7 +150,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPrefix]
         static void PreSetTimeAndPlanetToSavedSettings()
         {
-            if (!Plugin.GENERAL_IMPROVEMENTS && Plugin.configRandomizeDefaultSeed.Value && GameNetworkManager.Instance.currentSaveFileName != "LCChallengeFile" && !ES3.KeyExists("RandomSeed", GameNetworkManager.Instance.currentSaveFileName))
+            if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && Configuration.randomizeDefaultSeed.Value && GameNetworkManager.Instance.currentSaveFileName != "LCChallengeFile" && !ES3.KeyExists("RandomSeed", GameNetworkManager.Instance.currentSaveFileName))
             {
                 ES3.Save("RandomSeed", Random.Range(1, 100000000), GameNetworkManager.Instance.currentSaveFileName);
                 Plugin.Logger.LogInfo("Re-rolled starting seed");
@@ -192,7 +192,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPrefix]
         static void PreReviveDeadPlayers(StartOfRound __instance)
         {
-            if (Plugin.GENERAL_IMPROVEMENTS)
+            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
                 return;
 
             for (int i = 0; i < __instance.allPlayerScripts.Length; i++)
@@ -200,6 +200,14 @@ namespace ButteryFixes.Patches.General
                 if (__instance.allPlayerScripts[i].isPlayerDead)
                     NonPatchFunctions.ForceRefreshAllHelmetLights(__instance.allPlayerScripts[i], true);
             }
+        }
+
+        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.LateUpdate))]
+        [HarmonyPostfix]
+        static void StartOfRoundPostLateUpdate(StartOfRound __instance)
+        {
+            if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && GlobalReferences.shipNode != null)
+                GlobalReferences.shipNode.position = StartOfRound.Instance.elevatorTransform.position + GlobalReferences.shipNodeOffset;
         }
     }
 }

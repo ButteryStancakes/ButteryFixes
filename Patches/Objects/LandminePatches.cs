@@ -16,7 +16,7 @@ namespace ButteryFixes.Patches.Objects
                 scanSphere.forceRenderingOff = true;
                 Plugin.Logger.LogInfo("Landmine: Hide radar dot after detonation");
             }
-            if (!Plugin.GENERAL_IMPROVEMENTS)
+            if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
             {
                 ScanNodeProperties scanNodeProperties = __instance.transform.parent?.GetComponentInChildren<ScanNodeProperties>();
                 if (scanNodeProperties != null)
@@ -30,6 +30,13 @@ namespace ButteryFixes.Patches.Objects
                     Plugin.Logger.LogInfo("Landmine: Hide terminal code after detonation");
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(Landmine), nameof(Landmine.SetOffMineAnimation))]
+        [HarmonyPrefix]
+        static bool PreSetOffMineAnimation(Landmine __instance)
+        {
+            return !__instance.hasExploded || __instance.GetComponent<Renderer>().enabled;
         }
     }
 }

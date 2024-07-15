@@ -14,7 +14,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void TerminalPostStart(Terminal __instance)
         {
-            if (!Plugin.GENERAL_IMPROVEMENTS)
+            if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
                 __instance.SetItemSales(); // seems like this is necessary because InitializeItemSalesPercentages gets called after StartOfRound.Start
 
             foreach (TerminalNode enemyFile in __instance.enemyFiles)
@@ -48,13 +48,21 @@ namespace ButteryFixes.Patches.General
                 clipboardCruiser.rolloffMode = AudioRolloffMode.Linear;
                 Plugin.Logger.LogInfo($"Audio rolloff: Clipboard (Cruiser)");
             }
+
+
+            TerminalNode buyWelcomeMat = __instance.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.name == "Buy")?.compatibleNouns.FirstOrDefault(noun => noun.noun.name == "WelcomeMat")?.result;
+            if (buyWelcomeMat != null)
+            {
+                buyWelcomeMat.itemCost = 40;
+                Plugin.Logger.LogInfo($"Price: Welcome mat");
+            }
         }
 
         [HarmonyPatch(typeof(Terminal), "TextPostProcess")]
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> TransTextPostProcess(IEnumerable<CodeInstruction> instructions)
         {
-            if (Plugin.GENERAL_IMPROVEMENTS)
+            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
                 return instructions;
 
             List<CodeInstruction> codes = instructions.ToList();
@@ -82,7 +90,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPriority(Priority.First)]
         static void TerminalPreTextPostProcess(Terminal __instance, ref string modifiedDisplayText)
         {
-            if (Plugin.configScanOnShip.Value && modifiedDisplayText.Contains("[scanForItems]"))
+            if (Configuration.scanOnShip.Value && modifiedDisplayText.Contains("[scanForItems]"))
             {
                 bool inOrbit = StartOfRound.Instance.inShipPhase || StartOfRound.Instance.currentLevel.name == "CompanyBuildingLevel";
                 if (!inOrbit)
@@ -116,7 +124,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> TransParsePlayerSentence(IEnumerable<CodeInstruction> instructions)
         {
-            if (Plugin.GENERAL_IMPROVEMENTS)
+            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
                 return instructions;
 
             List<CodeInstruction> codes = instructions.ToList();
@@ -156,7 +164,7 @@ namespace ButteryFixes.Patches.General
 
                     if (codes[i].opcode == OpCodes.Callvirt)
                     {
-                        string methodName = codes[i]/*.operand*/.ToString();
+                        string methodName = codes[i].ToString();
                         if (methodName.Contains("System.Collections.Generic.List") && methodName.Contains("Add"))
                         {
                             if (shovel && walkies)

@@ -12,7 +12,7 @@ namespace ButteryFixes.Patches.Enemies
         static void EnemyAIPreEnableEnemyMesh(EnemyAI __instance)
         {
             // minor optimization; this bug only really affects mimics
-            if (__instance is not MaskedPlayerEnemy)
+            if (Compatibility.DISABLE_ENEMY_MESH_PATCH && __instance is not MaskedPlayerEnemy)
                 return;
 
             if (__instance.skinnedMeshRenderers.Length > 0)
@@ -58,7 +58,7 @@ namespace ButteryFixes.Patches.Enemies
             }
             else if (__instance is ButlerEnemyAI)
             {
-                if (Plugin.configMaskHornetsPower.Value)
+                if (Configuration.maskHornetsPower.Value)
                 {
                     Plugin.Logger.LogInfo("Butler died, but mask hornets don't decrease power level");
                     ___removedPowerLevel = true;

@@ -43,6 +43,7 @@ namespace ButteryFixes.Patches.Enemies
             return codes;
         }
 
+        // temporary until lethalfixes
         [HarmonyPatch(typeof(RadMechAI), nameof(RadMechAI.CancelTorchPlayerAnimation))]
         [HarmonyPrefix]
         static void PreCancelTorchPlayerAnimation(RadMechAI __instance)

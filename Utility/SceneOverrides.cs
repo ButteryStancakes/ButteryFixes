@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace ButteryFixes.Utility
@@ -12,7 +13,7 @@ namespace ButteryFixes.Utility
 
             // factory ambience
             Transform bigMachine = GameObject.Find("/Environment/Map/DiageticAmbiance/BigMachine")?.transform;
-            bool rotateFireExit = Plugin.configFixFireExits.Value;
+            bool rotateFireExit = Configuration.fixFireExits.Value;
             switch (scene.name)
             {
                 case "Level1Experimentation":
@@ -21,6 +22,32 @@ namespace ButteryFixes.Utility
                     {
                         bigMachine.localPosition = new Vector3(-112.04f, bigMachine.localPosition.y, bigMachine.localPosition.z);
                         Plugin.Logger.LogInfo("Fixed factory ambience");
+                    }
+                    // fix fog triggers from the water tower
+                    Transform cube7 = GameObject.Find("/Environment/ReverbTriggers (1)/Cube (7)")?.transform;
+                    if (cube7 != null)
+                    {
+                        cube7.localPosition = new Vector3(-147.8f, cube7.localPosition.y, -81.2f);
+                        cube7.localScale = new Vector3(129.6264f, cube7.localScale.y, 184.7249f);
+                        Transform cube9 = GameObject.Find("/Environment/ReverbTriggers (1)/Cube (9)")?.transform;
+                        if (cube9 != null)
+                        {
+                            cube9.localPosition = new Vector3(-145.4f, cube9.localPosition.y, -42.1f);
+                            cube9.localScale = new Vector3(171.2598f, cube9.localScale.y, 326.2066f);
+                            Transform cube8 = GameObject.Find("/Environment/ReverbTriggers (1)/Cube (8)")?.transform;
+                            if (cube8 != null)
+                            {
+                                cube8.localPosition = new Vector3(-117.39f, cube8.localPosition.y, -87.23f);
+                                cube8.localScale = new Vector3(10.4316f, cube8.localScale.y, 15.95104f);
+                                Plugin.Logger.LogInfo("Adjusted water tower fog triggers");
+                            }
+                        }
+                    }
+                    Transform steelDoor = GameObject.Find("/Environment/SteelDoor")?.transform;
+                    if (steelDoor != null)
+                    {
+                        steelDoor.localPosition = new Vector3(-194.668f, 19.788f, steelDoor.localPosition.z);
+                        Plugin.Logger.LogInfo("Fixed old back entrance");
                     }
                     break;
                 case "Level2Assurance":
@@ -113,6 +140,12 @@ namespace ButteryFixes.Utility
                     entranceTeleportB.localRotation = Quaternion.Euler(0f, 180f, 0f);
                     Plugin.Logger.LogInfo("Fixed rotation of external fire exit #1");
                 }
+            }
+
+            if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
+            {
+                GlobalReferences.shipNode = Object.FindObjectsOfType<ScanNodeProperties>().FirstOrDefault(scanNodeProperties => scanNodeProperties.headerText == "Ship")?.transform;
+                GlobalReferences.shipNodeOffset = GlobalReferences.shipNode.position - GlobalReferences.shipDefaultPos;
             }
         }
     }

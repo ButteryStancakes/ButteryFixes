@@ -1,5 +1,4 @@
 ﻿using ButteryFixes.Utility;
-using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
 
@@ -8,11 +7,13 @@ namespace ButteryFixes.Patches.Player
     [HarmonyPatch]
     internal class BodyPatches
     {
+        static bool dontCheckBadges = true;
+
         [HarmonyPatch(typeof(DeadBodyInfo), "Start")]
         [HarmonyPostfix]
         static void DeadBodyInfoPostStart(DeadBodyInfo __instance)
         {
-            if (Plugin.DISABLE_PLAYERMODEL_PATCHES)
+            if (Compatibility.DISABLE_PLAYERMODEL_PATCHES)
                 return;
 
             SkinnedMeshRenderer mesh = __instance.GetComponentInChildren<SkinnedMeshRenderer>();
@@ -28,23 +29,7 @@ namespace ButteryFixes.Patches.Player
 
                     // special handling for explosions
                     bool burnt = __instance.causeOfDeath == CauseOfDeath.Blast;
-
-                    // this would actually cause players to be burnt if they die to fall damage etc with a broken jetpack on the map
-                    /*if (!burnt && __instance.causeOfDeath == CauseOfDeath.Gravity)
-                    {
-                        foreach (JetpackItem jetpack in Object.FindObjectsOfType<JetpackItem>())
-                        {
-                            // player died crashing (and exploding) a jetpack
-                            if (jetpack.IsOwner && (bool)ReflectionCache.JETPACK_BROKEN.GetValue(jetpack) && (PlayerControllerB)ReflectionCache.JETPACK_ITEM_PREVIOUS_PLAYER_HELD_BY.GetValue(jetpack) == __instance.playerScript)
-                            {
-                                burnt = true;
-                                Plugin.Logger.LogInfo("Player corpse should be burnt since they crashed a jetpack");
-                                break;
-                            }
-                        }
-                    }*/
-
-                    if (!burnt && __instance.playerScript == GameNetworkManager.Instance.localPlayerController && GlobalReferences.crashedJetpackAsLocalPlayer)
+                    if (!burnt && GlobalReferences.crashedJetpackAsLocalPlayer && __instance.playerScript == GameNetworkManager.Instance.localPlayerController)
                     {
                         burnt = true;
                         GlobalReferences.crashedJetpackAsLocalPlayer = false;
@@ -62,7 +47,11 @@ namespace ButteryFixes.Patches.Player
                         }
                         // blowing up the cruiser probably shouldn't spawn the "melted" player corpse, instead use the normal model
                         else
+                        {
+                            dontCheckBadges = true;
                             __instance.ChangeMesh(GlobalReferences.playerBody);
+                            dontCheckBadges = false;
+                        }
                     }
 
                     bool snipped = false;
@@ -158,7 +147,10 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPostfix]
         static void DeadBodyInfoPostChangeMesh(DeadBodyInfo __instance)
         {
-            if (Plugin.DISABLE_PLAYERMODEL_PATCHES)
+            if (Compatibility.DISABLE_PLAYERMODEL_PATCHES)
+                return;
+
+            if (dontCheckBadges)
                 return;
 
             foreach (Renderer rend in __instance.GetComponentsInChildren<Renderer>())
@@ -169,6 +161,14 @@ namespace ButteryFixes.Patches.Player
                     Plugin.Logger.LogInfo($"Player corpse transformed; hide badge \"{rend.name}\"");
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(RagdollGrabbableObject), nameof(RagdollGrabbableObject.Start))]
+        [HarmonyPostfix]
+        static void RagdollGrabbableObjectPostStart(RagdollGrabbableObject __instance)
+        {
+            if (StartOfRound.Instance != null && !StartOfRound.Instance.isChallengeFile && StartOfRound.Instance.currentLevel.name != "CompanyBuildingLevel")
+                __instance.scrapValue = 0;
         }
     }
 }

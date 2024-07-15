@@ -14,7 +14,7 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPrefix]
         static void PreChangePlayerCostumeElement(ref Transform costumeContainer, GameObject newCostume)
         {
-            if (Plugin.DISABLE_PLAYERMODEL_PATCHES)
+            if (Compatibility.DISABLE_PLAYERMODEL_PATCHES)
                 return;
 
             // MoreCompany changes player suits before the local player is initialized which would cause this function to throw an exception

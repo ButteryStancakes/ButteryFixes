@@ -19,7 +19,7 @@ namespace ButteryFixes.Patches.Player
         static void PlayerControllerBPostUpdate(PlayerControllerB __instance, bool ___isWalking)
         {
             // ladder patches are disabled for Fast Climbing & BetterLadders compatibility
-            if (__instance.isClimbingLadder && !Plugin.DISABLE_LADDER_PATCH)
+            if (__instance.isClimbingLadder && !Compatibility.DISABLE_LADDER_PATCH)
             {
                 __instance.isSprinting = false;
                 // fixes residual slope speed
@@ -32,10 +32,10 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPostfix]
         static void PostConnectClientToPlayerObject(PlayerControllerB __instance)
         {
-            if (Plugin.configGameResolution.Value != GameResolution.DontChange)
+            if (Configuration.gameResolution.Value != GameResolution.DontChange)
             {
                 RenderTexture playerScreen = __instance.gameplayCamera.targetTexture;
-                if (Plugin.configGameResolution.Value == GameResolution.High)
+                if (Configuration.gameResolution.Value == GameResolution.High)
                 {
                     playerScreen.width = 970;
                     playerScreen.height = 580;
@@ -47,16 +47,17 @@ namespace ButteryFixes.Patches.Player
                     playerScreen.height = 350;
                     Plugin.Logger.LogInfo("Low resolution applied");
                 }
-                Plugin.ENABLE_SCAN_PATCH = true;
+                GlobalReferences.patchScanNodes = true;
             }
             else
             {
-                Plugin.ENABLE_SCAN_PATCH = false;
-                Plugin.Logger.LogInfo("Resolution changes reverted");
+                if (GlobalReferences.patchScanNodes)
+                    Plugin.Logger.LogInfo("Resolution changes reverted");
+                GlobalReferences.patchScanNodes = false;
             }
 
             // fix some oddities with local player rendering
-            if (!Plugin.DISABLE_PLAYERMODEL_PATCHES)
+            if (!Compatibility.DISABLE_PLAYERMODEL_PATCHES)
             {
                 Renderer scavengerHelmet = __instance.localVisor.Find("ScavengerHelmet")?.GetComponent<Renderer>();
                 if (scavengerHelmet != null)
@@ -77,7 +78,7 @@ namespace ButteryFixes.Patches.Player
                 Plugin.Logger.LogWarning(e);
             }
 
-            if (!Plugin.GENERAL_IMPROVEMENTS && __instance.playersManager.mapScreenPlayerName.text == "MONITORING: Player")
+            if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && __instance.playersManager.mapScreenPlayerName.text == "MONITORING: Player")
             {
                 __instance.playersManager.mapScreenPlayerName.SetText($"MONITORING: {__instance.playersManager.mapScreen.radarTargets[__instance.playersManager.mapScreen.targetTransformIndex].name}");
                 Plugin.Logger.LogInfo("Fix \"MONITORING: Player\"");
@@ -102,7 +103,7 @@ namespace ButteryFixes.Patches.Player
         static void PostDestroyItemInSlot(PlayerControllerB __instance, int itemSlot)
         {
             // this fix is redundant with LethalFixes, but here just in case the user doesn't have it installed...
-            if (!Plugin.LETHAL_FIXES && !__instance.IsOwner && !HUDManager.Instance.itemSlotIcons[itemSlot].enabled && GameNetworkManager.Instance.localPlayerController.ItemSlots[itemSlot] != null)
+            if (!Compatibility.INSTALLED_LETHAL_FIXES && !__instance.IsOwner && !HUDManager.Instance.itemSlotIcons[itemSlot].enabled && GameNetworkManager.Instance.localPlayerController.ItemSlots[itemSlot] != null)
             {
                 HUDManager.Instance.itemSlotIcons[itemSlot].enabled = true;
                 Plugin.Logger.LogInfo("Re-enabled inventory icon (likely that another player has just reloaded a shotgun, and it was erroneously disabled)");
@@ -113,7 +114,7 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPostfix]
         static void PostPlayJumpAudio(PlayerControllerB __instance, bool ___isWalking)
         {
-            if (!Plugin.configFixJumpCheese.Value || !__instance.IsServer || StartOfRound.Instance.inShipPhase)
+            if (!Configuration.fixJumpCheese.Value || !__instance.IsServer || StartOfRound.Instance.inShipPhase)
             {
                 if (bunnyhoppingPlayers.Count > 0)
                 {
@@ -159,7 +160,7 @@ namespace ButteryFixes.Patches.Player
 
             Plugin.Logger.LogInfo($"Player \"{__instance.playerUsername}\" landed from bunnyhop");
 
-            if (Plugin.configFixJumpCheese.Value && __instance.IsServer)
+            if (Configuration.fixJumpCheese.Value && __instance.IsServer)
             {
                 EnemyType mouthDog = GlobalReferences.allEnemiesList["MouthDog"];
                 if (mouthDog != null && mouthDog.numberSpawned >= 1)
