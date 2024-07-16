@@ -145,7 +145,8 @@ namespace ButteryFixes.Utility
             if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
             {
                 GlobalReferences.shipNode = Object.FindObjectsOfType<ScanNodeProperties>().FirstOrDefault(scanNodeProperties => scanNodeProperties.headerText == "Ship")?.transform;
-                GlobalReferences.shipNodeOffset = GlobalReferences.shipNode.position - GlobalReferences.shipDefaultPos;
+                if (GlobalReferences.shipNode != null)
+                    GlobalReferences.shipNodeOffset = GlobalReferences.shipNode.position - GlobalReferences.shipDefaultPos;
             }
         }
     }

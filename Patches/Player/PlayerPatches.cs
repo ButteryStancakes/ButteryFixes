@@ -191,7 +191,7 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPrefix]
         static void PreItem_performed(PlayerControllerB __instance)
         {
-            if (__instance.equippedUsableItemQE && __instance.currentlyHeldObjectServer != null && (__instance.currentlyHeldObjectServer is FlashlightItem || __instance.currentlyHeldObjectServer is JetpackItem))
+            if (__instance.equippedUsableItemQE && __instance.currentlyHeldObjectServer != null && (__instance.currentlyHeldObjectServer is FlashlightItem || __instance.currentlyHeldObjectServer is JetpackItem || __instance.currentlyHeldObjectServer is BoomboxItem || __instance.currentlyHeldObjectServer.itemProperties.name == "Hairdryer"))
             {
                 __instance.equippedUsableItemQE = false;
                 Plugin.Logger.LogInfo("Tried to use Q/E controls on an item with no secondary/tertiary use. This shouldn't happen");
