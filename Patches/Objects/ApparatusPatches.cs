@@ -15,7 +15,7 @@ namespace ButteryFixes.Patches.Objects
             {
                 if (scanNodeProperties.headerText == "Apparatice")
                     scanNodeProperties.headerText = "Apparatus";
-                if (Plugin.configShowApparatusValue.Value)
+                if (Configuration.showApparatusValue.Value)
                 {
                     scanNodeProperties.scrapValue = __instance.scrapValue;
                     scanNodeProperties.subText = $"Value: ${scanNodeProperties.scrapValue}";

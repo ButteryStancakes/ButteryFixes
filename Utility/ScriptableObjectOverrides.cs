@@ -260,6 +260,14 @@ namespace ButteryFixes.Utility
                         unlockableItem.prefabObject.GetComponentInChildren<InteractTrigger>().cooldownTime = 0.54f;
                         Plugin.Logger.LogInfo("Cooldown: Plushie pajama man");
                         break;
+                    case "Inverse Teleporter":
+                        if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
+                        {
+                            InteractTrigger buttonTrigger = unlockableItem.prefabObject.GetComponentInChildren<ShipTeleporter>().buttonTrigger;
+                            buttonTrigger.hoverTip = buttonTrigger.hoverTip.Replace("Beam up", "Beam out");
+                            Plugin.Logger.LogInfo("Text: Inverse teleporter");
+                        }
+                        break;
                 }
             }
         }

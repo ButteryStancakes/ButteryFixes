@@ -46,7 +46,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void ApplyPenalty(HUDManager __instance, int playersDead, int bodiesInsured)
         {
-            __instance.statsUIElements.penaltyAddition.text = $"{playersDead} casualties: -{Mathf.Clamp((20 * (playersDead - bodiesInsured)) + (8 * bodiesInsured), 0, 100)}%\n({bodiesInsured} bodies recovered)";
+            __instance.statsUIElements.penaltyAddition.SetText($"{playersDead} casualties: -{Mathf.Clamp((20 * (playersDead - bodiesInsured)) + (8 * bodiesInsured), 0, 100)}%\n({bodiesInsured} bodies recovered)");
         }
 
         [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.UpdateHealthUI))]
@@ -98,11 +98,11 @@ namespace ButteryFixes.Patches.General
                 if (networkObject == null || !networkObject.IsSpawned)
                     continue;
 
-                if (grabbableObject.itemProperties.isScrap && grabbableObject.scrapValue > 0 && !grabbableObject.isInElevator && !grabbableObject.isInShipRoom && !grabbableObject.scrapPersistedThroughRounds && !grabbableObject.isHeld && grabbableObject is not RagdollGrabbableObject)
+                if (grabbableObject.itemProperties.isScrap && grabbableObject.scrapValue > 0 && ((grabbableObject is not GiftBoxItem && grabbableObject.deactivated) || (!grabbableObject.isInShipRoom && !grabbableObject.isInElevator && !grabbableObject.isHeld)) && !grabbableObject.scrapPersistedThroughRounds && grabbableObject is not RagdollGrabbableObject)
                     scrapNotCollected += grabbableObject.scrapValue;
             }
 
-            __instance.statsUIElements.quotaDenominator.text = (scrapCollected + scrapNotCollected).ToString();
+            __instance.statsUIElements.quotaDenominator.SetText((scrapCollected + scrapNotCollected).ToString());
         }
     }
 }

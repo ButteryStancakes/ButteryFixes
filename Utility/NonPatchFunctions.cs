@@ -12,6 +12,9 @@ namespace ButteryFixes.Utility
 
         internal static IEnumerator ShellsAppearAfterDelay(ShotgunItem shotgun)
         {
+            bool wasHeldByEnemy = shotgun.isHeldByEnemy;
+            float timeSinceStart = Time.realtimeSinceStartup;
+
             yield return new WaitForSeconds(shotgun.isHeldByEnemy ? 0.85f : 1.9f);
 
             if (shotgun.isHeldByEnemy)
@@ -29,8 +32,8 @@ namespace ButteryFixes.Utility
 
             yield return new WaitForSeconds(shotgun.isHeldByEnemy ? 0.66f : 0.75f);
 
-            if (!shotgun.isHeldByEnemy)
-                yield return new WaitUntil(() => !shotgun.isReloading);
+            if (!wasHeldByEnemy)
+                yield return new WaitUntil(() => !shotgun.isReloading || Time.realtimeSinceStartup - timeSinceStart > 3f);
 
             // disables shells rendering when the gun is closed, to prevent bleedthrough with LOD1 model
             shotgun.shotgunShellLeft.forceRenderingOff = true;
