@@ -2,6 +2,7 @@
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.UIElements;
 
 namespace ButteryFixes.Patches.Enemies
 {
@@ -46,8 +47,11 @@ namespace ButteryFixes.Patches.Enemies
 
         [HarmonyPatch(typeof(MaskedPlayerEnemy), nameof(MaskedPlayerEnemy.KillEnemy))]
         [HarmonyPostfix]
-        static void MaskedPlayerEnemyPostKillEnemy(MaskedPlayerEnemy __instance)
+        static void MaskedPlayerEnemyPostKillEnemy(MaskedPlayerEnemy __instance, bool destroy)
         {
+            if (destroy)
+                return;
+
             Animator mapDot = __instance.transform.Find("Misc/MapDot")?.GetComponent<Animator>();
             if (mapDot != null)
             {
@@ -160,6 +164,14 @@ namespace ButteryFixes.Patches.Enemies
 
             // need to replace the vanilla behavior entirely because it's just too buggy
             return false;
+        }
+
+        [HarmonyPatch(typeof(MaskedPlayerEnemy), nameof(MaskedPlayerEnemy.Start))]
+        [HarmonyPostfix]
+        static void MaskedPlayerEnemyPostStart(EnemyAI __instance)
+        {
+            if (!RoundManager.Instance.SpawnedEnemies.Contains(__instance))
+                RoundManager.Instance.SpawnedEnemies.Add(__instance);
         }
     }
 }

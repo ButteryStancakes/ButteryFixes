@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using ButteryFixes.Utility;
+using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -39,22 +40,41 @@ namespace ButteryFixes.Patches.General
                 }
             }
 
-            // fix cruiser price shown as $400 after price buff
-            __instance.buyableVehicles[0].creditsWorth = 370;
+            TerminalKeyword buy = __instance.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.name == "Buy");
 
-            AudioSource clipboardCruiser = __instance.buyableVehicles[0].secondaryPrefab?.transform.GetComponent<AudioSource>();
-            if (clipboardCruiser != null)
+            BuyableVehicle cruiser = __instance.buyableVehicles.FirstOrDefault(buyableVehicle => buyableVehicle.vehicleDisplayName == "Cruiser");
+            if (cruiser != null)
             {
-                clipboardCruiser.rolloffMode = AudioRolloffMode.Linear;
-                Plugin.Logger.LogInfo($"Audio rolloff: Clipboard (Cruiser)");
+                if (buy != null)
+                {
+                    TerminalNode buyCruiser = buy.compatibleNouns.FirstOrDefault(noun => noun.noun.name == "Cruiser")?.result;
+                    if (buyCruiser != null)
+                    {
+                        // fix cruiser price shown as $400 after price buff
+                        cruiser.creditsWorth = buyCruiser.itemCost;
+                        Plugin.Logger.LogInfo("Price: Cruiser");
+                    }
+                }
+
+                AudioSource clipboardCruiser = cruiser.secondaryPrefab?.transform.GetComponent<AudioSource>();
+                if (clipboardCruiser != null)
+                {
+                    clipboardCruiser.rolloffMode = AudioRolloffMode.Linear;
+                    Plugin.Logger.LogInfo("Audio rolloff: Clipboard (Cruiser)");
+                }
+
+                cruiser.vehiclePrefab.GetComponent<VehicleController>().radioAudio.dopplerLevel = GlobalReferences.dopplerLevelMult;
+                Plugin.Logger.LogInfo("Doppler level: Cruiser");
             }
 
-
-            TerminalNode buyWelcomeMat = __instance.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.name == "Buy")?.compatibleNouns.FirstOrDefault(noun => noun.noun.name == "WelcomeMat")?.result;
-            if (buyWelcomeMat != null)
+            if (buy != null)
             {
-                buyWelcomeMat.itemCost = 40;
-                Plugin.Logger.LogInfo($"Price: Welcome mat");
+                TerminalNode buyWelcomeMat = buy.compatibleNouns.FirstOrDefault(noun => noun.noun.name == "WelcomeMat")?.result;
+                if (buyWelcomeMat != null)
+                {
+                    buyWelcomeMat.itemCost = 40;
+                    Plugin.Logger.LogInfo("Price: Welcome mat");
+                }
             }
         }
 
@@ -168,20 +188,19 @@ namespace ButteryFixes.Patches.General
                         if (methodName.Contains("System.Collections.Generic.List") && methodName.Contains("Add"))
                         {
                             if (shovel && walkies)
-                            {
-                                Plugin.Logger.LogDebug("Transpiler (Survival kit): Boomboxes -> walkie-talkies, stun grenade -> shovel");
                                 return codes;
-                            }
 
                             if (!shovel && codes[i - 1].opcode == OpCodes.Ldc_I4_5)
                             {
                                 shovel = true;
                                 codes[i - 1].opcode = OpCodes.Ldc_I4_2;
+                                Plugin.Logger.LogDebug("Transpiler (Survival kit): Stun grenade -> shovel");
                             }
                             else if (!walkies && codes[i - 1].opcode == OpCodes.Ldc_I4_6)
                             {
                                 walkies = true;
                                 codes[i - 1].opcode = OpCodes.Ldc_I4_0;
+                                Plugin.Logger.LogDebug("Transpiler (Survival kit): Boomboxes -> walkie-talkies");
                             }
                         }
                     }

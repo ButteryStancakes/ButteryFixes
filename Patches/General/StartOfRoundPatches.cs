@@ -2,6 +2,7 @@
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace ButteryFixes.Patches.General
@@ -208,6 +209,39 @@ namespace ButteryFixes.Patches.General
         {
             if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && GlobalReferences.shipNode != null)
                 GlobalReferences.shipNode.position = StartOfRound.Instance.elevatorTransform.position + GlobalReferences.shipNodeOffset;
+        }
+
+        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ShipHasLeft))]
+        [HarmonyPostfix]
+        static void PostShipHasLeft(StartOfRound __instance)
+        {
+            // this needs to run before the scene unloads or it will miss the apparatus
+            GlobalReferences.scrapNotCollected = 0;
+            foreach (GrabbableObject grabbableObject in Object.FindObjectsOfType<GrabbableObject>())
+            {
+                NetworkObject networkObject = grabbableObject.GetComponent<NetworkObject>();
+                if (networkObject == null || !networkObject.IsSpawned)
+                    continue;
+
+                if (grabbableObject.itemProperties.isScrap && grabbableObject.scrapValue > 0 && ((grabbableObject is not GiftBoxItem && grabbableObject.deactivated) || (!grabbableObject.isInShipRoom && !grabbableObject.isInElevator && !grabbableObject.isHeld) || grabbableObject.isInFactory) && !grabbableObject.scrapPersistedThroughRounds && grabbableObject is not RagdollGrabbableObject)
+                {
+                    GlobalReferences.scrapNotCollected += grabbableObject.scrapValue;
+                    Plugin.Logger.LogDebug($"Did not collect: {grabbableObject.itemProperties.itemName} (${grabbableObject.scrapValue})");
+                }
+            }
+            // unkilled butlers are still worth the knife they didn't drop
+            foreach (ButlerEnemyAI butlerEnemyAI in Object.FindObjectsOfType<ButlerEnemyAI>())
+            {
+                if (!butlerEnemyAI.isEnemyDead)
+                {
+                    KnifeItem knife = butlerEnemyAI.knifePrefab?.GetComponent<KnifeItem>();
+                    if (knife != null)
+                    {
+                        GlobalReferences.scrapNotCollected += knife.scrapValue;
+                        Plugin.Logger.LogDebug($"Did not kill Butler (${knife.scrapValue})");
+                    }
+                }
+            }
         }
     }
 }

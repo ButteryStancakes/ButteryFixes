@@ -42,24 +42,5 @@ namespace ButteryFixes.Patches.Enemies
             Plugin.Logger.LogError("Old Bird stomp transpiler failed");
             return codes;
         }
-
-        // temporary until lethalfixes
-        [HarmonyPatch(typeof(RadMechAI), nameof(RadMechAI.CancelTorchPlayerAnimation))]
-        [HarmonyPrefix]
-        static void PreCancelTorchPlayerAnimation(RadMechAI __instance)
-        {
-            if (__instance.inSpecialAnimationWithPlayer != null && __instance.blowtorchParticle != null)
-            {
-                // reset blowtorch particles
-                __instance.blowtorchParticle.gameObject.SetActive(false);
-                __instance.blowtorchParticle.gameObject.SetActive(true);
-                if (__instance.blowtorchParticle.transform.childCount > 0)
-                {
-                    GameObject blowtorchParticle2 = __instance.blowtorchParticle.transform.GetChild(0).gameObject;
-                    blowtorchParticle2.gameObject.SetActive(false);
-                    blowtorchParticle2.gameObject.SetActive(true);
-                }
-            }
-        }
     }
 }

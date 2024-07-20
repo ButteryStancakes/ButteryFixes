@@ -9,9 +9,10 @@ namespace ButteryFixes
         internal const string LETHAL_FIXES_GUID = "Dev1A3.LethalFixes";
         internal const string MODEL_REPLACEMENT_API_GUID = "meow.ModelReplacementAPI";
         internal const string STARLANCER_AI_FIX_GUID = "AudioKnight.StarlancerAIFix";
+        internal const string BETTER_SPRAY_PAINT_GUID = "taffyko.BetterSprayPaint";
 
         internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_LETHAL_FIXES;
-        internal static bool DISABLE_LADDER_PATCH, DISABLE_PLAYERMODEL_PATCHES, DISABLE_ENEMY_MESH_PATCH;
+        internal static bool DISABLE_LADDER_PATCH, DISABLE_PLAYERMODEL_PATCHES, DISABLE_ENEMY_MESH_PATCH, DISABLE_SPRAY_PAINT_PATCHES;
 
         internal static void Init()
         {
@@ -43,6 +44,12 @@ namespace ButteryFixes
             {
                 DISABLE_ENEMY_MESH_PATCH = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - EnableEnemyMesh patch will be disabled");
+            }
+
+            if (Chainloader.PluginInfos.ContainsKey(BETTER_SPRAY_PAINT_GUID))
+            {
+                DISABLE_SPRAY_PAINT_PATCHES = true;
+                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Spray paint patches will be disabled");
             }
         }
     }

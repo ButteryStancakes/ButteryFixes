@@ -29,7 +29,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits/*, fancyEntranceDoors*/;
 
         internal static void Init(ConfigFile cfg)
         {
@@ -56,6 +56,12 @@ namespace ButteryFixes
                 "ShowApparatusValue",
                 false,
                 "Actually show the apparatus' value on the scanner instead of \"???\" (in vanilla, it is always $80)");
+
+            /*fancyEntranceDoors = configFile.Bind(
+                "Visual",
+                "FancyEntranceDoors",
+                true,
+                "Changes the front doors on Rend, Dine, and Artifice to match how they look on the inside of the manor.");*/
         }
 
         static void AudioConfig()

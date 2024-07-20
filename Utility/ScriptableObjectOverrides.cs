@@ -84,6 +84,15 @@ namespace ButteryFixes.Utility
                 { "SprayPaint", true },
                 //{ "SteeringWheel", true }
             };
+            Dictionary<string, bool> grabbableBeforeStart = new()
+            {
+                { "Airhorn", false },
+                { "CashRegister", false },
+                { "ChemicalJug", true },
+                { "ClownHorn", false },
+                { "ComedyMask", false },
+                { "TragedyMask", false }
+            };
             ScanNodeProperties scanNodeProperties;
 
             foreach (Item item in StartOfRound.Instance.allItemsList.itemsList)
@@ -93,6 +102,8 @@ namespace ButteryFixes.Utility
                     Plugin.Logger.LogWarning("Encountered a missing item in StartOfRound.allItemsList; this is probably an issue with another mod");
                     continue;
                 }
+
+                bool linearRolloff = false;
 
                 switch (item.name)
                 {
@@ -104,10 +115,8 @@ namespace ButteryFixes.Utility
                     case "EasterEgg":
                     case "FishTestProp":
                     case "MapDevice":
-                    case "RedLocustHive":
                     case "ZapGun":
-                        item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Linear;
-                        Plugin.Logger.LogInfo($"Audio rolloff: {item.itemName}");
+                        linearRolloff = true;
                         break;
                     case "ExtensionLadder":
                     case "RadarBooster":
@@ -160,6 +169,11 @@ namespace ButteryFixes.Utility
                         item.canBeInspected = true;
                         Plugin.Logger.LogInfo($"Inspectable: {item.itemName} (True)");
                         break;
+                    case "RedLocustHive":
+                        linearRolloff = true;
+                        item.spawnPrefab.GetComponent<PhysicsProp>().isInFactory = false;
+                        Plugin.Logger.LogInfo("Factory: Hive");
+                        break;
                     case "TragedyMask":
                         GlobalReferences.tragedyMaskRandomClips = item.spawnPrefab.GetComponent<RandomPeriodicAudioPlayer>()?.randomClips;
                         MeshFilter maskMesh = item.spawnPrefab.transform.Find("MaskMesh")?.GetComponent<MeshFilter>();
@@ -180,10 +194,16 @@ namespace ButteryFixes.Utility
                         break;
                     case "WeedKillerBottle":
                         item.canBeInspected = true;
-                        Plugin.Logger.LogInfo($"Inspectable: Weed killer (True)");
+                        Plugin.Logger.LogInfo("Inspectable: Weed killer (True)");
                         item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
-                        Plugin.Logger.LogInfo($"Audio rolloff: Weed killer");
+                        Plugin.Logger.LogInfo("Audio rolloff: Weed killer");
                         break;
+                }
+
+                if (linearRolloff)
+                {
+                    item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Linear;
+                    Plugin.Logger.LogInfo($"Audio rolloff: {item.itemName}");
                 }
 
                 // affects whoopie cushion primarily
@@ -230,6 +250,12 @@ namespace ButteryFixes.Utility
                 {
                     item.isConductiveMetal = conductiveItems[item.name] && Configuration.makeConductive.Value;
                     Plugin.Logger.LogInfo($"Conductive: {item.itemName} ({item.isConductiveMetal})");
+                }
+
+                if (grabbableBeforeStart.ContainsKey(item.name))
+                {
+                    item.canBeGrabbedBeforeGameStart = grabbableBeforeStart[item.name];
+                    Plugin.Logger.LogInfo($"Hold before ship has landed: {item.itemName} ({item.canBeGrabbedBeforeGameStart})");
                 }
             }
         }

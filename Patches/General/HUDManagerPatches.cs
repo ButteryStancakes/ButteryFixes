@@ -1,10 +1,12 @@
 ﻿using ButteryFixes.Utility;
+using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 namespace ButteryFixes.Patches.General
 {
@@ -88,21 +90,50 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void PostFillEndGameStats(HUDManager __instance, int scrapCollected = 0)
         {
-            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
+            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || StartOfRound.Instance.allPlayersDead)
                 return;
 
-            int scrapNotCollected = 0;
-            foreach (GrabbableObject grabbableObject in Object.FindObjectsOfType<GrabbableObject>())
+            int trueTotal = scrapCollected + GlobalReferences.scrapNotCollected;
+
+            __instance.statsUIElements.quotaDenominator.SetText(trueTotal.ToString());
+
+            int grade = 0;
+
+            float scrapPercentage = (float)scrapCollected / trueTotal;
+            if (scrapPercentage >= 0.99f)
+                grade += 2;
+            else if (scrapPercentage >= 0.6f)
+                grade++;
+            else if (scrapPercentage <= 0.25f)
+                grade--;
+
+            int numPlayers = 0;
+            int livingPlayers = 0;
+            foreach (PlayerControllerB player in StartOfRound.Instance.allPlayerScripts)
             {
-                NetworkObject networkObject = grabbableObject.GetComponent<NetworkObject>();
-                if (networkObject == null || !networkObject.IsSpawned)
-                    continue;
-
-                if (grabbableObject.itemProperties.isScrap && grabbableObject.scrapValue > 0 && ((grabbableObject is not GiftBoxItem && grabbableObject.deactivated) || (!grabbableObject.isInShipRoom && !grabbableObject.isInElevator && !grabbableObject.isHeld)) && !grabbableObject.scrapPersistedThroughRounds && grabbableObject is not RagdollGrabbableObject)
-                    scrapNotCollected += grabbableObject.scrapValue;
+                if (player.isPlayerControlled && !player.disconnectedMidGame)
+                {
+                    numPlayers++;
+                    if (!player.isPlayerDead)
+                        livingPlayers++;
+                }
             }
+            if (numPlayers == livingPlayers)
+                grade++;
+            else if ((numPlayers - livingPlayers) > 1)
+                grade--;
 
-            __instance.statsUIElements.quotaDenominator.SetText((scrapCollected + scrapNotCollected).ToString());
+            string[] grades = { "D", "C", "B", "A", "S" };
+            __instance.statsUIElements.gradeLetter.SetText(grades[Mathf.Clamp(grade + 1, 0, grades.Length)]);
+        }
+
+        [HarmonyPatch(typeof(HUDManager), "SetPlayerLevelSmoothly")]
+        [HarmonyPrefix]
+        static void PreSetPlayerLevelSmoothly(ref int XPGain)
+        {
+            // prevent NaN from decreasing XP all the way to 0
+            if (XPGain < -8)
+                XPGain = -8;
         }
     }
 }

@@ -16,6 +16,9 @@ namespace ButteryFixes.Patches.Player
             if (Compatibility.DISABLE_PLAYERMODEL_PATCHES)
                 return;
 
+            if (__instance.causeOfDeath == CauseOfDeath.Stabbing)
+                __instance.MakeCorpseBloody();
+
             SkinnedMeshRenderer mesh = __instance.GetComponentInChildren<SkinnedMeshRenderer>();
             if (mesh == null || StartOfRound.Instance != null)
             {
@@ -169,6 +172,20 @@ namespace ButteryFixes.Patches.Player
         {
             if (StartOfRound.Instance != null && !StartOfRound.Instance.isChallengeFile && StartOfRound.Instance.currentLevel.name != "CompanyBuildingLevel")
                 __instance.scrapValue = 0;
+        }
+
+        [HarmonyPatch(typeof(DeadBodyInfo), nameof(DeadBodyInfo.SetRagdollPositionSafely))]
+        [HarmonyPostfix]
+        static void PostSetRagdollPositionSafely(DeadBodyInfo __instance, Vector3 newPosition)
+        {
+            if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && __instance.grabBodyObject != null && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(newPosition))
+            {
+                if (!__instance.grabBodyObject.isInElevator && !__instance.grabBodyObject.isInShipRoom)
+                    StartOfRound.Instance.currentShipItemCount++;
+                __instance.grabBodyObject.isInElevator = true;
+                __instance.grabBodyObject.isInShipRoom = true;
+                RoundManager.Instance.CollectNewScrapForThisRound(__instance.grabBodyObject);
+            }
         }
     }
 }
