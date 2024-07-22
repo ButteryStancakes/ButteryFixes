@@ -226,7 +226,7 @@ namespace ButteryFixes.Patches.General
                 if (grabbableObject.itemProperties.isScrap && grabbableObject.scrapValue > 0 && ((grabbableObject is not GiftBoxItem && grabbableObject.deactivated) || (!grabbableObject.isInShipRoom && !grabbableObject.isInElevator && !grabbableObject.isHeld) || grabbableObject.isInFactory) && !grabbableObject.scrapPersistedThroughRounds && grabbableObject is not RagdollGrabbableObject)
                 {
                     GlobalReferences.scrapNotCollected += grabbableObject.scrapValue;
-                    Plugin.Logger.LogDebug($"Did not collect: {grabbableObject.itemProperties.itemName} (${grabbableObject.scrapValue})");
+                    //Plugin.Logger.LogDebug($"Did not collect: {grabbableObject.itemProperties.itemName} (${grabbableObject.scrapValue})");
                 }
             }
             // unkilled butlers are still worth the knife they didn't drop
@@ -238,7 +238,7 @@ namespace ButteryFixes.Patches.General
                     if (knife != null)
                     {
                         GlobalReferences.scrapNotCollected += knife.scrapValue;
-                        Plugin.Logger.LogDebug($"Did not kill Butler (${knife.scrapValue})");
+                        //Plugin.Logger.LogDebug($"Did not kill Butler (${knife.scrapValue})");
                     }
                 }
             }

@@ -59,21 +59,6 @@ namespace ButteryFixes.Utility
                     break;
                 case "Level4March":
                     Plugin.Logger.LogInfo("Detected landing on March");
-                    if (rotateFireExit)
-                    {
-                        Transform entranceTeleportC = GameObject.Find("/Environment/Teleports/EntranceTeleportC/telePoint")?.transform;
-                        if (entranceTeleportC != null)
-                        {
-                            entranceTeleportC.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                            Plugin.Logger.LogInfo("Fixed rotation of external fire exit #2");
-                        }
-                        Transform entranceTeleportD = GameObject.Find("/Environment/Teleports/EntranceTeleportD/telePoint")?.transform;
-                        if (entranceTeleportD != null)
-                        {
-                            entranceTeleportD.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                            Plugin.Logger.LogInfo("Fixed rotation of external fire exit #3");
-                        }
-                    }
                     break;
                 case "Level5Rend":
                     Plugin.Logger.LogInfo("Detected landing on Rend");
@@ -131,14 +116,16 @@ namespace ButteryFixes.Utility
                     break;
             }
 
-            // fire exit #1
+            // fire exits
             if (rotateFireExit)
             {
-                Transform entranceTeleportB = GameObject.Find("/Environment/Teleports/EntranceTeleportB/telePoint")?.transform;
-                if (entranceTeleportB != null)
+                foreach (EntranceTeleport entranceTeleport in Object.FindObjectsOfType<EntranceTeleport>())
                 {
-                    entranceTeleportB.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                    Plugin.Logger.LogInfo("Fixed rotation of external fire exit #1");
+                    if (entranceTeleport.isEntranceToBuilding && entranceTeleport.entranceId > 0)
+                    {
+                        entranceTeleport.entrancePoint.localRotation = Quaternion.Euler(0f, 180f, 0f);
+                        Plugin.Logger.LogInfo($"Fixed rotation of external fire exit #{entranceTeleport.entranceId}");
+                    }
                 }
             }
 

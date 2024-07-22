@@ -33,7 +33,8 @@ namespace ButteryFixes.Patches.Objects
                 {
                     if (rend.gameObject.layer == 0 && (rend.name.StartsWith("BetaBadge") || rend.name.StartsWith("LevelSticker")))
                         rend.forceRenderingOff = true;
-                    else if (rend.gameObject.layer == 20)
+                    // don't change ParticleSystem renderers
+                    else if (rend.gameObject.layer == 20 && (rend is SkinnedMeshRenderer || rend is MeshRenderer))
                         rend.sharedMaterial = GlobalReferences.scavengerSuitBurnt;
                 }
                 Plugin.Logger.LogInfo("Jetpack exploded and burned player corpse");

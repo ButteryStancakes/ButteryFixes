@@ -112,7 +112,7 @@ namespace ButteryFixes.Patches.General
         {
             if (Configuration.scanOnShip.Value && modifiedDisplayText.Contains("[scanForItems]"))
             {
-                bool inOrbit = StartOfRound.Instance.inShipPhase || StartOfRound.Instance.currentLevel.name == "CompanyBuildingLevel";
+                bool inOrbit = StartOfRound.Instance.inShipPhase;
                 if (!inOrbit)
                 {
                     HangarShipDoor hangarShipDoor = Object.FindObjectOfType<HangarShipDoor>();
@@ -120,19 +120,24 @@ namespace ButteryFixes.Patches.General
                         inOrbit = true;
                 }
 
-                if (inOrbit)
+                string vehicleText = string.Empty;
+                if (inOrbit || StartOfRound.Instance.currentLevel.name == "CompanyBuildingLevel")
                 {
                     int objects = 0;
                     int value = 0;
+                    Transform cruiser = Object.FindObjectOfType<VehicleController>()?.transform;
                     foreach (GrabbableObject grabbableObject in Object.FindObjectsOfType<GrabbableObject>())
                     {
-                        if ((grabbableObject.isInShipRoom || grabbableObject.isInElevator) && grabbableObject.itemProperties.isScrap && grabbableObject is not RagdollGrabbableObject)
+                        bool inVehicle = StartOfRound.Instance.isObjectAttachedToMagnet && cruiser != null && grabbableObject.transform.parent == cruiser;
+                        if ((grabbableObject.isInShipRoom || grabbableObject.isInElevator || inOrbit || inVehicle) && grabbableObject.itemProperties.isScrap && grabbableObject is not RagdollGrabbableObject)
                         {
                             objects++;
                             value += grabbableObject.scrapValue;
+                            if (inVehicle && string.IsNullOrEmpty(vehicleText))
+                                vehicleText = " and Cruiser";
                         }
                     }
-                    modifiedDisplayText = modifiedDisplayText.Replace("[scanForItems]", $"There are {objects} objects inside the ship, totalling at an exact value of ${value}.");
+                    modifiedDisplayText = modifiedDisplayText.Replace("[scanForItems]", $"There are {objects} objects inside the ship{vehicleText}, totalling at an exact value of ${value}.");
                 }
             }
 
