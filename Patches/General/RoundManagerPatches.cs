@@ -88,7 +88,7 @@ namespace ButteryFixes.Patches.General
                 {
                     codes.InsertRange(i - 2, [
                         new CodeInstruction(OpCodes.Ldarg_0),
-                        new CodeInstruction(OpCodes.Ldfld, ReflectionCache.SPAWN_PROBABILITIES),
+                        new CodeInstruction(OpCodes.Ldflda, ReflectionCache.SPAWN_PROBABILITIES),
                         new CodeInstruction(OpCodes.Ldarg_0),
                         new CodeInstruction(OpCodes.Ldfld, ReflectionCache.CURRENT_LEVEL),
                         new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(SelectableLevel), enemies)),
@@ -96,8 +96,6 @@ namespace ButteryFixes.Patches.General
                     ]);
                     Plugin.Logger.LogDebug($"Transpiler ({id}): Post process probabilities");
                     //i += 6;
-                    for (int j = 0; j < codes.Count; j++)
-                        Plugin.Logger.LogDebug(codes[j]);
                     return codes;
                 }
             }

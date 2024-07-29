@@ -164,7 +164,7 @@ namespace ButteryFixes.Utility
             }
         }
 
-        internal static void SpawnProbabilitiesPostProcess(ref List<int> spawnProbabilities, ref List<SpawnableEnemyWithRarity> enemies)
+        public static void SpawnProbabilitiesPostProcess(ref List<int> spawnProbabilities, List<SpawnableEnemyWithRarity> enemies)
         {
             for (int i = 0; i < spawnProbabilities.Count; i++)
             {
