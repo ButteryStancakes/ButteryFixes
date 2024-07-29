@@ -1,5 +1,9 @@
 ﻿using ButteryFixes.Utility;
 using HarmonyLib;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using UnityEngine;
 
 namespace ButteryFixes.Patches.General
@@ -73,6 +77,54 @@ namespace ButteryFixes.Patches.General
                         Plugin.Logger.LogInfo($"Skinned boulders for snowy moon \"{StartOfRound.Instance.currentLevel.name}\"");
                 }
             }
+        }
+
+        static IEnumerable<CodeInstruction> TransSpawnRandomEnemy(List<CodeInstruction> codes, string firstTime, string enemies, string id)
+        {
+            FieldInfo firstTimeSpawning = AccessTools.Field(typeof(RoundManager), firstTime);
+            for (int i = 2; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == firstTimeSpawning)
+                {
+                    codes.InsertRange(i - 2, [
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        new CodeInstruction(OpCodes.Ldfld, ReflectionCache.SPAWN_PROBABILITIES),
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        new CodeInstruction(OpCodes.Ldfld, ReflectionCache.CURRENT_LEVEL),
+                        new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(SelectableLevel), enemies)),
+                        new CodeInstruction(OpCodes.Call, ReflectionCache.SPAWN_PROBABILITIES_POST_PROCESS)
+                    ]);
+                    Plugin.Logger.LogDebug($"Transpiler ({id}): Post process probabilities");
+                    //i += 6;
+                    for (int j = 0; j < codes.Count; j++)
+                        Plugin.Logger.LogDebug(codes[j]);
+                    return codes;
+                }
+            }
+
+            Plugin.Logger.LogError($"{id} transpiler failed");
+            return codes;
+        }
+
+        [HarmonyPatch(typeof(RoundManager), "AssignRandomEnemyToVent")]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> TransAssignRandomEnemyToVent(IEnumerable<CodeInstruction> instructions)
+        {
+            return TransSpawnRandomEnemy(instructions.ToList(), "firstTimeSpawningEnemies", nameof(SelectableLevel.Enemies), "Spawner");
+        }
+
+        [HarmonyPatch(typeof(RoundManager), "SpawnRandomOutsideEnemy")]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> TransSpawnRandomOutsideEnemy(IEnumerable<CodeInstruction> instructions)
+        {
+            return TransSpawnRandomEnemy(instructions.ToList(), "firstTimeSpawningOutsideEnemies", nameof(SelectableLevel.OutsideEnemies), "Outside spawner");
+        }
+
+        [HarmonyPatch(typeof(RoundManager), "SpawnRandomDaytimeEnemy")]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> TransSpawnRandomDaytimeEnemy(IEnumerable<CodeInstruction> instructions)
+        {
+            return TransSpawnRandomEnemy(instructions.ToList(), "firstTimeSpawningDaytimeEnemies", nameof(SelectableLevel.DaytimeEnemies), "Daytime spawner");
         }
     }
 }

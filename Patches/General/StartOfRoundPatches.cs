@@ -11,6 +11,7 @@ namespace ButteryFixes.Patches.General
     internal class StartOfRoundPatches
     {
         [HarmonyPatch(typeof(StartOfRound), "Awake")]
+        [HarmonyBefore(Compatibility.GENERAL_IMPROVEMENTS_GUID)]
         [HarmonyPostfix]
         static void StartOfRoundPostAwake(StartOfRound __instance)
         {
@@ -67,6 +68,8 @@ namespace ButteryFixes.Patches.General
             }
 
             ScriptableObjectOverrides.OverrideUnlockables();
+
+            GlobalReferences.shipAnimator = __instance.shipAnimatorObject.GetComponent<Animator>();
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetStats))]

@@ -163,5 +163,25 @@ namespace ButteryFixes.Utility
                 }
             }
         }
+
+        internal static void SpawnProbabilitiesPostProcess(ref List<int> spawnProbabilities, ref List<SpawnableEnemyWithRarity> enemies)
+        {
+            for (int i = 0; i < spawnProbabilities.Count; i++)
+            {
+                EnemyType enemyType = enemies[i].enemyType;
+                // prevent old birds from eating up spawns when there are no dormant nests left
+                if (enemyType.requireNestObjectsToSpawn && spawnProbabilities[i] > 0 && !Object.FindObjectsOfType<EnemyAINestSpawnObject>().Any(nest => nest.enemyType == enemyType))
+                {
+                    Plugin.Logger.LogDebug($"Enemy \"{enemyType.enemyName}\" spawning is disabled; no nests present on map");
+                    spawnProbabilities[i] = 0;
+                }
+                // prevents spawn weight from exceeding "maximum"
+                else if (Configuration.limitSpawnChance.Value && spawnProbabilities[i] > 100 && StartOfRound.Instance.currentLevelID < GlobalReferences.NUM_LEVELS)
+                {
+                    Plugin.Logger.LogDebug($"Enemy \"{enemyType.enemyName}\" is exceeding maximum spawn weight ({spawnProbabilities[i]} > 100)");
+                    spawnProbabilities[i] = 100;
+                }
+            }
+        }
     }
 }

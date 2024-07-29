@@ -15,5 +15,18 @@ namespace ButteryFixes.Patches.Objects
                 Plugin.Logger.LogInfo("Fixed broken extension ladder warning");
             }
         }
+
+        [HarmonyPatch(typeof(ExtensionLadderItem), nameof(ExtensionLadderItem.Update))]
+        [HarmonyPostfix]
+        static void ExtensionLadderItemPostUpdate(ExtensionLadderItem __instance)
+        {
+            if (StartOfRound.Instance != null && StartOfRound.Instance.suckingPlayersOutOfShip && !__instance.itemUsedUp)
+            {
+                __instance.itemUsedUp = true;
+                for (int i = 0; i < __instance.propColliders.Length; i++)
+                    __instance.propColliders[i].excludeLayers = -1;
+                Plugin.Logger.LogInfo("Suck players through ladder");
+            }
+        }
     }
 }

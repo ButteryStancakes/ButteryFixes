@@ -10,9 +10,8 @@ namespace ButteryFixes
         internal const string MODEL_REPLACEMENT_API_GUID = "meow.ModelReplacementAPI";
         internal const string STARLANCER_AI_FIX_GUID = "AudioKnight.StarlancerAIFix";
         internal const string BETTER_SPRAY_PAINT_GUID = "taffyko.BetterSprayPaint";
-        internal const string EVERYTHING_CAN_DIE_GUID = "nwnt.EverythingCanDie";
 
-        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_LETHAL_FIXES, INSTALLED_EVERYTHING_CAN_DIE;
+        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_LETHAL_FIXES;
         internal static bool DISABLE_LADDER_PATCH, DISABLE_PLAYERMODEL_PATCHES, DISABLE_ENEMY_MESH_PATCH, DISABLE_SPRAY_PAINT_PATCHES;
 
         internal static void Init()
@@ -51,12 +50,6 @@ namespace ButteryFixes
             {
                 DISABLE_SPRAY_PAINT_PATCHES = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Spray paint patches will be disabled");
-            }
-
-            if (Chainloader.PluginInfos.ContainsKey(EVERYTHING_CAN_DIE_GUID))
-            {
-                INSTALLED_EVERYTHING_CAN_DIE = true;
-                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Everything Can Die detected");
             }
         }
     }

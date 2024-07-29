@@ -1,76 +1,20 @@
 ﻿using ButteryFixes.Utility;
 using GameNetcodeStuff;
 using HarmonyLib;
-using UnityEngine;
 
 namespace ButteryFixes.Patches.Enemies
 {
     [HarmonyPatch]
     internal class NutcrackerPatches
     {
-        [HarmonyPatch(typeof(NutcrackerEnemyAI), nameof(NutcrackerEnemyAI.Update))]
-        [HarmonyPostfix]
-        static void NutcrackerEnemyAIPostUpdate(NutcrackerEnemyAI __instance, bool ___isLeaderScript)
-        {
-            // if the leader is dead, manually update the clock
-            if (___isLeaderScript && __instance.isEnemyDead)
-                ReflectionCache.GLOBAL_NUTCRACKER_CLOCK.Invoke(__instance, null);
-        }
-
         [HarmonyPatch(typeof(NutcrackerEnemyAI), nameof(NutcrackerEnemyAI.Start))]
         [HarmonyPostfix]
-        //[HarmonyAfter("Dev1A3.LethalFixes")]
-        static void NutcrackerEnemyAIPostStart(NutcrackerEnemyAI __instance, ref bool ___isLeaderScript, ref int ___previousPlayerSeenWhenAiming)
+        static void NutcrackerEnemyAIPostStart(NutcrackerEnemyAI __instance, ref bool ___isLeaderScript)
         {
-            // if numbersSpawned > 1, a leader might not have been assigned yet (if the first nutcracker spawned with another already queued in a vent)
-            if (__instance.IsServer && !___isLeaderScript && __instance.enemyType.numberSpawned > 1)
-            {
-                NutcrackerEnemyAI[] nutcrackers = Object.FindObjectsOfType<NutcrackerEnemyAI>();
-                foreach (NutcrackerEnemyAI nutcracker in nutcrackers)
-                {
-                    if (nutcracker != __instance && (bool)ReflectionCache.IS_LEADER_SCRIPT.GetValue(nutcracker))
-                    {
-                        Plugin.Logger.LogDebug($"NUTCRACKER CLOCK: Nutcracker #{__instance.GetInstanceID()} spawned, #{nutcracker.GetInstanceID()} is already leader");
-                        return;
-                    }
-                }
-                ___isLeaderScript = true;
-                Plugin.Logger.LogInfo($"NUTCRACKER CLOCK: \"Leader\" is still unassigned, promoting #{__instance.GetInstanceID()}");
-            }
+            // GlobalNutcrackerClock()'s logic naturally prevents it from ticking multiple times at once, so there's no issue just marking every nutcracker as a "leader"
+            // this is more optimized than using reflection to ensure there is only 1 leader (even if it's less "proper")
+            ___isLeaderScript = true;
         }
-
-        // DEBUGGING: Verbose Nutcracker global clock logs
-        /*
-        static float prevInspection = -1f;
-
-        [HarmonyPatch(typeof(NutcrackerEnemyAI), "GlobalNutcrackerClock")]
-        [HarmonyPrefix]
-        static void PreGlobalNutcrackerClock(bool ___isLeaderScript)
-        {
-            if (___isLeaderScript && Time.realtimeSinceStartup - NutcrackerEnemyAI.timeAtNextInspection > 2f)
-                prevInspection = Time.realtimeSinceStartup;
-        }
-
-        [HarmonyPatch(typeof(NutcrackerEnemyAI), "GlobalNutcrackerClock")]
-        [HarmonyPostfix]
-        static void PostGlobalNutcrackerClock(NutcrackerEnemyAI __instance)
-        {
-            if (prevInspection >= 0f)
-            {
-                string status = __instance.isEnemyDead ? "dead" : "alive";
-                Plugin.Logger.LogDebug($"NUTCRACKER CLOCK: Leader #{__instance.GetInstanceID()} is {status}, ticked at {prevInspection}, next tick at {NutcrackerEnemyAI.timeAtNextInspection + 2f}");
-                prevInspection = -1f;
-            }
-        }
-
-        [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.SwitchToBehaviourStateOnLocalClient))]
-        [HarmonyPrefix]
-        static void PreSwitchToBehaviourStateOnLocalClient(EnemyAI __instance, int stateIndex)
-        {
-            if (__instance is NutcrackerEnemyAI && stateIndex == 1 && __instance.currentBehaviourStateIndex != 1)
-                Plugin.Logger.LogDebug($"NUTCRACKER CLOCK: Nutcracker #{__instance.GetInstanceID()} began inspection at {Time.realtimeSinceStartup}, global inspection time is {NutcrackerEnemyAI.timeAtNextInspection}");
-        }
-        */
 
         [HarmonyPatch(typeof(NutcrackerEnemyAI), nameof(NutcrackerEnemyAI.ReloadGunClientRpc))]
         [HarmonyPostfix]

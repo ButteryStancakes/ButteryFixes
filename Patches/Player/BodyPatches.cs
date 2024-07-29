@@ -178,7 +178,7 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPostfix]
         static void PostSetRagdollPositionSafely(DeadBodyInfo __instance, Vector3 newPosition)
         {
-            if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && __instance.grabBodyObject != null && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(newPosition))
+            if (/*!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS &&*/ __instance.grabBodyObject != null && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(newPosition))
             {
                 if (!__instance.grabBodyObject.isInElevator && !__instance.grabBodyObject.isInShipRoom)
                     StartOfRound.Instance.currentShipItemCount++;

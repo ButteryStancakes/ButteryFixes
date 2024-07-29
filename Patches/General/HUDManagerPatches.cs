@@ -17,7 +17,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void PostUpdateScanNodes(HUDManager __instance, Dictionary<RectTransform, ScanNodeProperties> ___scanNodes)
         {
-            if (!GlobalReferences.patchScanNodes || GameNetworkManager.Instance.localPlayerController == null)
+            if (!GlobalReferences.patchScanNodes || GameNetworkManager.Instance?.localPlayerController == null)
                 return;
 
             Rect rect = __instance.playerScreenTexture.GetComponent<RectTransform>().rect;

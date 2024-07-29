@@ -5,6 +5,9 @@ namespace ButteryFixes.Utility
 {
     internal class GlobalReferences
     {
+        // Experimentation, Assurance, Vow, Gordion, March, Adamance, Rend, Dine, Offense, Titan, Artifice, Liquidation, Embrion
+        internal const int NUM_LEVELS = 13;
+
         internal static Dictionary<string, EnemyType> allEnemiesList = [];
 
         internal static float dopplerLevelMult = 1f;
@@ -29,5 +32,8 @@ namespace ButteryFixes.Utility
 
         // for end-of-round scrap counter
         internal static int scrapNotCollected;
+
+        // for cozy lights
+        internal static Animator shipAnimator;
     }
 }

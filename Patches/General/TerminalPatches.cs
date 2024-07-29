@@ -129,7 +129,7 @@ namespace ButteryFixes.Patches.General
                     foreach (GrabbableObject grabbableObject in Object.FindObjectsOfType<GrabbableObject>())
                     {
                         bool inVehicle = StartOfRound.Instance.isObjectAttachedToMagnet && cruiser != null && grabbableObject.transform.parent == cruiser;
-                        if ((grabbableObject.isInShipRoom || grabbableObject.isInElevator || inOrbit || inVehicle) && grabbableObject.itemProperties.isScrap && grabbableObject is not RagdollGrabbableObject)
+                        if ((grabbableObject.isInShipRoom || grabbableObject.isInElevator || inVehicle) && grabbableObject.itemProperties.isScrap && grabbableObject is not RagdollGrabbableObject)
                         {
                             objects++;
                             value += grabbableObject.scrapValue;

@@ -15,10 +15,13 @@ namespace ButteryFixes.Utility
                 switch (enemy.Key)
                 {
                     case "RadMech":
-                        enemy.Value.requireNestObjectsToSpawn = true;
-                        Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Require \"nest\" to spawn");
-                        /*ParticleSystem.MainModule main = enemy.Value.enemyPrefab.GetComponent<RadMechAI>().blowtorchParticle.main;
-                        main.cullingMode = ParticleSystemCullingMode.AlwaysSimulate;*/
+                        if (!Configuration.unlimitedOldBirds.Value)
+                        {
+                            enemy.Value.requireNestObjectsToSpawn = true;
+                            Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Require \"nest\" to spawn");
+                        }
+                        else
+                            enemy.Value.requireNestObjectsToSpawn = false;
                         break;
                     case "MaskedPlayerEnemy":
                         enemy.Value.isOutsideEnemy = false;
@@ -57,6 +60,9 @@ namespace ButteryFixes.Utility
             {
                 switch (selectableLevel.name)
                 {
+                    case "OffenseLevel":
+                        selectableLevel.videoReel = null;
+                        break;
                     case "RendLevel":
                         SpawnableMapObject spikeRoofTrapHazard = selectableLevel.spawnableMapObjects.FirstOrDefault(spawnableMapObject => spawnableMapObject.prefabToSpawn?.name == "SpikeRoofTrapHazard");
                         if (spikeRoofTrapHazard != null)
@@ -78,6 +84,7 @@ namespace ButteryFixes.Utility
                 { "FancyCup", true },
                 { "Flask", false },
                 //{ "Hairdryer", true },
+                { "LockPicker", true },
                 { "MoldPan", true },
                 //{ "Phone", true },
                 { "Shotgun", true },
@@ -95,6 +102,7 @@ namespace ButteryFixes.Utility
             };
             ScanNodeProperties scanNodeProperties;
 
+            Item shovel = null, tatteredMetalSheet = null;
             foreach (Item item in StartOfRound.Instance.allItemsList.itemsList)
             {
                 if (item == null)
@@ -110,6 +118,10 @@ namespace ButteryFixes.Utility
                     case "Boombox":
                         item.spawnPrefab.GetComponent<BoomboxItem>().boomboxAudio.dopplerLevel = 0.3f * GlobalReferences.dopplerLevelMult;
                         Plugin.Logger.LogInfo("Doppler level: Boombox");
+                        break;
+                    case "ClownHorn":
+                        item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 0.4f;
+                        Plugin.Logger.LogInfo("Cooldown: Clown horn");
                         break;
                     case "Cog1":
                     case "EasterEgg":
@@ -169,10 +181,16 @@ namespace ButteryFixes.Utility
                         item.canBeInspected = true;
                         Plugin.Logger.LogInfo($"Inspectable: {item.itemName} (True)");
                         break;
+                    case "MetalSheet":
+                        tatteredMetalSheet = item;
+                        break;
                     case "RedLocustHive":
                         linearRolloff = true;
                         item.spawnPrefab.GetComponent<PhysicsProp>().isInFactory = false;
                         Plugin.Logger.LogInfo("Factory: Hive");
+                        break;
+                    case "Shovel":
+                        shovel = item;
                         break;
                     case "TragedyMask":
                         GlobalReferences.tragedyMaskRandomClips = item.spawnPrefab.GetComponent<RandomPeriodicAudioPlayer>()?.randomClips;
@@ -257,6 +275,12 @@ namespace ButteryFixes.Utility
                     item.canBeGrabbedBeforeGameStart = grabbableBeforeStart[item.name];
                     Plugin.Logger.LogInfo($"Hold before ship has landed: {item.itemName} ({item.canBeGrabbedBeforeGameStart})");
                 }
+            }
+
+            if (tatteredMetalSheet != null && shovel != null)
+            {
+                tatteredMetalSheet.grabSFX = shovel.grabSFX;
+                Plugin.Logger.LogInfo("Audio: Metal sheet");
             }
         }
 
