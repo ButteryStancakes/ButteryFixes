@@ -124,16 +124,16 @@ namespace ButteryFixes.Utility
                         tragedyMaskLOD.mesh = GlobalReferences.tragedyMaskLOD;
                         tragedyMaskLOD.GetComponent<MeshRenderer>().sharedMaterial = GlobalReferences.tragedyMaskMat;
 
-                        Plugin.Logger.LogInfo("All mask attachment meshes replaced successfully");
+                        Plugin.Logger.LogInfo("All mask meshes replaced successfully");
                     }
                     else
-                        Plugin.Logger.LogWarning("Failed to replace mask attachment eyes");
+                        Plugin.Logger.LogWarning("Failed to replace mask eyes");
                 }
                 else
-                    Plugin.Logger.LogWarning("Failed to replace mask attachment LOD");
+                    Plugin.Logger.LogWarning("Failed to replace mask LOD");
             }
             else
-                Plugin.Logger.LogWarning("Failed to replace mask attachment mesh");
+                Plugin.Logger.LogWarning("Failed to replace mask mesh");
         }
 
         internal static void ForceRefreshAllHelmetLights(PlayerControllerB player, bool forceOff = false)
@@ -182,6 +182,36 @@ namespace ButteryFixes.Utility
                     spawnProbabilities[i] = 100;
                 }
             }
+        }
+
+        public static void OldBirdSpawnsFromApparatus()
+        {
+            if (Configuration.unlimitedOldBirds.Value)
+                return;
+
+            if (GlobalReferences.allEnemiesList.TryGetValue("RadMech", out EnemyType oldBird))
+            {
+                oldBird.numberSpawned++;
+                RoundManager.Instance.currentOutsideEnemyPower += oldBird.PowerLevel;
+                Plugin.Logger.LogInfo("Old Bird spawned from apparatus");
+            }
+        }
+
+        internal static void SmokingHotCorpse(Transform body)
+        {
+            if (GlobalReferences.smokeParticle == null || !body.TryGetComponent(out SkinnedMeshRenderer mesh))
+                return;
+
+            foreach (Transform child in body)
+                if (child.name.StartsWith(GlobalReferences.smokeParticle.name))
+                    return;
+
+            GameObject smokeParticle = Object.Instantiate(GlobalReferences.smokeParticle, body.transform);
+            smokeParticle.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            smokeParticle.transform.localScale = Vector3.one;
+            ParticleSystem.ShapeModule shape = smokeParticle.GetComponent<ParticleSystem>().shape;
+            shape.skinnedMeshRenderer = mesh;
+            Plugin.Logger.LogInfo("Smoke from freshly burnt corpse");
         }
     }
 }

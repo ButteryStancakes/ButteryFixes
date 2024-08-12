@@ -111,13 +111,14 @@ namespace ButteryFixes.Patches.General
             int livingPlayers = 0;
             foreach (PlayerControllerB player in StartOfRound.Instance.allPlayerScripts)
             {
-                if (player.isPlayerControlled && !player.disconnectedMidGame)
+                if ((player.isPlayerControlled || player.isPlayerDead) && !player.disconnectedMidGame)
                 {
                     numPlayers++;
                     if (!player.isPlayerDead)
                         livingPlayers++;
                 }
             }
+            Plugin.Logger.LogDebug($"End-of-round: {livingPlayers}/{numPlayers} survived");
             if (numPlayers == livingPlayers)
                 grade++;
             else if ((numPlayers - livingPlayers) > 1)

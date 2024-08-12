@@ -37,6 +37,7 @@ namespace ButteryFixes.Patches.Objects
                     else if (rend.gameObject.layer == 20 && (rend is SkinnedMeshRenderer || rend is MeshRenderer))
                         rend.sharedMaterial = GlobalReferences.scavengerSuitBurnt;
                 }
+                NonPatchFunctions.SmokingHotCorpse(playerBody.transform);
                 Plugin.Logger.LogInfo("Jetpack exploded and burned player corpse");
             }
             else

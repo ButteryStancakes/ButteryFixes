@@ -21,6 +21,7 @@ namespace ButteryFixes.Utility
         internal static Mesh playerBody;
         internal static Material scavengerSuitBurnt;
         internal static bool crashedJetpackAsLocalPlayer;
+        internal static GameObject smokeParticle;
 
         // for making ship node follow the ship
         internal static Transform shipNode;

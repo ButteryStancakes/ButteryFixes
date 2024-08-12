@@ -50,6 +50,7 @@ namespace ButteryFixes.Patches.General
 
             GlobalReferences.playerBody = StartOfRound.Instance.playerRagdolls[0].GetComponent<SkinnedMeshRenderer>().sharedMesh;
             GlobalReferences.scavengerSuitBurnt = StartOfRound.Instance.playerRagdolls[6].GetComponent<SkinnedMeshRenderer>().sharedMaterial;
+            GlobalReferences.smokeParticle = StartOfRound.Instance.playerRagdolls[6].transform.Find("SmokeParticle")?.gameObject;
 
             ScriptableObjectOverrides.OverrideItems();
             AudioSource stickyNote = __instance.elevatorTransform.Find("StickyNoteItem")?.GetComponent<AudioSource>();
@@ -245,6 +246,15 @@ namespace ButteryFixes.Patches.General
                     }
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetShip))]
+        [HarmonyPostfix]
+        static void PostResetShip(StartOfRound __instance)
+        {
+            // fix Experimentation weather on screen after being fired
+            if (!__instance.isChallengeFile)
+                __instance.SetMapScreenInfoToCurrentLevel();
         }
     }
 }

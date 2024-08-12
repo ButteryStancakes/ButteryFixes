@@ -20,7 +20,7 @@ namespace ButteryFixes.Patches.Player
                 __instance.MakeCorpseBloody();
 
             SkinnedMeshRenderer mesh = __instance.GetComponentInChildren<SkinnedMeshRenderer>();
-            if (mesh == null || StartOfRound.Instance != null)
+            if (mesh != null && StartOfRound.Instance != null)
             {
                 UnlockableItem suit = StartOfRound.Instance.unlockablesList.unlockables[__instance.playerScript.currentSuitID];
                 if (suit == null)
@@ -47,6 +47,8 @@ namespace ButteryFixes.Patches.Player
                         {
                             suitMaterial = GlobalReferences.scavengerSuitBurnt;
                             mesh.sharedMaterial = suitMaterial;
+
+                            NonPatchFunctions.SmokingHotCorpse(__instance.transform);
                         }
                         // blowing up the cruiser probably shouldn't spawn the "melted" player corpse, instead use the normal model
                         else

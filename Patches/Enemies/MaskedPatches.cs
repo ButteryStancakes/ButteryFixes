@@ -1,8 +1,13 @@
 ﻿using ButteryFixes.Utility;
 using HarmonyLib;
+using System.Collections.Generic;
+using System.Reflection.Emit;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
+using System.Reflection;
 using UnityEngine.UIElements;
+using Unity.Netcode;
 
 namespace ButteryFixes.Patches.Enemies
 {
@@ -15,14 +20,14 @@ namespace ButteryFixes.Patches.Enemies
         {
             if (__instance.maskFloodParticle.isEmitting && __instance.inSpecialAnimationWithPlayer != null)
             {
-                // bonus effect: cover the player's face with blood
-                __instance.inSpecialAnimationWithPlayer.bodyBloodDecals[3].SetActive(true);
                 // enables the blood spillage effect that Zeekerss removed in v49
                 if (__instance.inSpecialAnimationWithPlayer == GameNetworkManager.Instance.localPlayerController && !HUDManager.Instance.HUDAnimator.GetBool("biohazardDamage"))
                 {
                     HUDManager.Instance.HUDAnimator.SetBool("biohazardDamage", true);
                     Plugin.Logger.LogInfo("Enable screen blood for mask vomit animation");
                 }
+                // bonus effect: cover the player's face with blood
+                __instance.inSpecialAnimationWithPlayer.bodyBloodDecals[3].SetActive(true);
             }
         }
 
@@ -172,6 +177,31 @@ namespace ButteryFixes.Patches.Enemies
         {
             if (!RoundManager.Instance.SpawnedEnemies.Contains(__instance))
                 RoundManager.Instance.SpawnedEnemies.Add(__instance);
+        }
+        [HarmonyPatch(typeof(MaskedPlayerEnemy), nameof(MaskedPlayerEnemy.HitEnemy))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> MaskedPlayerEnemyTransHitEnemy(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            MethodInfo randomRange = AccessTools.Method(typeof(Random), nameof(Random.Range), [typeof(int), typeof(int)]);
+            for (int i = 0; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Call && (MethodInfo)codes[i].operand == randomRange)
+                {
+                    codes.InsertRange(i - 2,
+                    [
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        new CodeInstruction(OpCodes.Call, AccessTools.DeclaredPropertyGetter(typeof(NetworkBehaviour), nameof(NetworkBehaviour.IsOwner))),
+                        new CodeInstruction(OpCodes.Brfalse, codes[i + 3].operand)
+                    ]);
+                    Plugin.Logger.LogDebug("Transpiler (Masked stun): Roll 40% chance to sprint only once");
+                    return codes;
+                }
+            }
+
+            Plugin.Logger.LogError("Masked stun transpiler failed");
+            return codes;
         }
     }
 }

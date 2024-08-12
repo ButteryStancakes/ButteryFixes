@@ -17,8 +17,16 @@ namespace ButteryFixes.Utility
                     case "RadMech":
                         if (!Configuration.unlimitedOldBirds.Value)
                         {
-                            enemy.Value.requireNestObjectsToSpawn = true;
-                            Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Require \"nest\" to spawn");
+                            if (Compatibility.INSTALLED_LETHAL_QUANTITIES)
+                            {
+                                Plugin.Logger.LogWarning("Config setting \"UnlimitedOldBirds\" is disabled, but you have Lethal Quantities installed. This usually prevents Old Birds from being able to spawn due to a conflict. The config setting will be ignored for this session, but consider enabling it to hide this warning in the future.");
+                                enemy.Value.requireNestObjectsToSpawn = false;
+                            }
+                            else
+                            {
+                                enemy.Value.requireNestObjectsToSpawn = true;
+                                Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Require \"nest\" to spawn");
+                            }
                         }
                         else
                             enemy.Value.requireNestObjectsToSpawn = false;

@@ -45,23 +45,26 @@ namespace ButteryFixes.Patches.Enemies
         [HarmonyPrefix]
         static void PreSubtractFromPowerLevel(EnemyAI __instance, ref bool ___removedPowerLevel)
         {
-            MaskedPlayerEnemy maskedPlayerEnemy = __instance as MaskedPlayerEnemy;
-            if (maskedPlayerEnemy != null)
+            if (!___removedPowerLevel)
             {
-                // should always work correctly for the host?
-                // I've only had mimickingPlayer desync on client
-                if (!___removedPowerLevel && maskedPlayerEnemy.mimickingPlayer != null)
+                MaskedPlayerEnemy maskedPlayerEnemy = __instance as MaskedPlayerEnemy;
+                if (maskedPlayerEnemy != null)
                 {
-                    Plugin.Logger.LogInfo("\"Masked\" was mimicking a player; will not subtract from power level");
-                    ___removedPowerLevel = true;
+                    // should always work correctly for the host?
+                    // I've only had mimickingPlayer desync on client
+                    if (maskedPlayerEnemy.mimickingPlayer != null)
+                    {
+                        Plugin.Logger.LogInfo("\"Masked\" was mimicking a player; will not subtract from power level");
+                        ___removedPowerLevel = true;
+                    }
                 }
-            }
-            else if (__instance is ButlerEnemyAI)
-            {
-                if (Configuration.maskHornetsPower.Value)
+                else if (__instance is ButlerEnemyAI)
                 {
-                    Plugin.Logger.LogInfo("Butler died, but mask hornets don't decrease power level");
-                    ___removedPowerLevel = true;
+                    if (Configuration.maskHornetsPower.Value)
+                    {
+                        Plugin.Logger.LogInfo("Butler died, but mask hornets don't decrease power level");
+                        ___removedPowerLevel = true;
+                    }
                 }
             }
         }
