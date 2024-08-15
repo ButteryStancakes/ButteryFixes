@@ -186,6 +186,7 @@ namespace ButteryFixes.Utility
                         break;
                     case "MagnifyingGlass":
                     case "PillBottle":
+                    case "SprayPaint":
                         item.canBeInspected = true;
                         Plugin.Logger.LogInfo($"Inspectable: {item.itemName} (True)");
                         break;

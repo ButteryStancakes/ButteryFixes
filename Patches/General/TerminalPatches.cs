@@ -62,9 +62,6 @@ namespace ButteryFixes.Patches.General
                     clipboardCruiser.rolloffMode = AudioRolloffMode.Linear;
                     Plugin.Logger.LogInfo("Audio rolloff: Clipboard (Cruiser)");
                 }
-
-                cruiser.vehiclePrefab.GetComponent<VehicleController>().radioAudio.dopplerLevel = Configuration.musicDopplerLevel.Value == MusicDopplerLevel.Reduced ? 0.18f : GlobalReferences.dopplerLevelMult;
-                Plugin.Logger.LogInfo("Doppler level: Cruiser");
             }
 
             if (buy != null)

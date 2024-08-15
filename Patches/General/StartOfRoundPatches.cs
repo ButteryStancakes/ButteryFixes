@@ -71,6 +71,9 @@ namespace ButteryFixes.Patches.General
             ScriptableObjectOverrides.OverrideUnlockables();
 
             GlobalReferences.shipAnimator = __instance.shipAnimatorObject.GetComponent<Animator>();
+
+            __instance.VehiclesList.FirstOrDefault(vehicle => vehicle.name == "CompanyCruiser").GetComponent<VehicleController>().radioAudio.dopplerLevel = Configuration.musicDopplerLevel.Value == MusicDopplerLevel.Reduced ? 0.37f : GlobalReferences.dopplerLevelMult;
+            Plugin.Logger.LogInfo("Doppler level: Cruiser");
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetStats))]
