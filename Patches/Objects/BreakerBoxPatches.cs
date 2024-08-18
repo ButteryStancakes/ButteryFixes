@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 
-namespace ButteryFixes.Patches.General
+namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch]
     internal class BreakerBoxPatches

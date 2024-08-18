@@ -62,9 +62,9 @@ namespace ButteryFixes.Patches.Objects
         {
             if (!Compatibility.DISABLE_SPRAY_PAINT_PATCHES && !__instance.isWeedKillerSprayBottle)
             {
-                __instance.sprayIntervalSpeed = 0.05f;
-                // 600 * (0.08 / 0.05) * (0.175 / 0.1) = 1680, rounded to multiple of 200
-                __instance.maxSprayPaintDecals = 1600;
+                __instance.sprayIntervalSpeed = 0.037f; // 0.05
+                // 600 * (0.08 / 0.037) * (0.175 / 0.1) = 2270, rounded to multiple of 200
+                __instance.maxSprayPaintDecals = 2200;
             }
         }
 

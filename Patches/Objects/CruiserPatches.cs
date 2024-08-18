@@ -52,7 +52,7 @@ namespace ButteryFixes.Patches.Objects
         [HarmonyPostfix]
         static void PostSetRadioValues(VehicleController __instance)
         {
-            if (__instance.IsServer && __instance.radioAudio.isPlaying && Time.realtimeSinceStartup >= radioPingTimestamp)
+            if (__instance.IsServer && __instance.radioAudio.isPlaying && Time.realtimeSinceStartup > radioPingTimestamp)
             {
                 radioPingTimestamp = Time.realtimeSinceStartup + 2f;
                 RoundManager.Instance.PlayAudibleNoise(__instance.radioAudio.transform.position, 16f, Mathf.Min((__instance.radioAudio.volume + __instance.radioInterference.volume) * 0.5f, 0.9f), 0, false, 2692);

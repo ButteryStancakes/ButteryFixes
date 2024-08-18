@@ -192,7 +192,7 @@ namespace ButteryFixes.Patches.General
                         lungProp.GetComponent<AudioSource>().Stop();
                     }
                 }
-                Plugin.Logger.LogInfo("Mark all scrap in the ship as collected (late join)");
+                Plugin.Logger.LogInfo("Mark all scrap already in the ship as collected");
             }
         }
 

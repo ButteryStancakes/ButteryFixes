@@ -122,7 +122,6 @@ namespace ButteryFixes.Utility
                     break;
                 case "Level5Rend":
                     Plugin.Logger.LogInfo("Detected landing on Rend");
-                    SetUpFancyEntranceDoors(new Vector3(50.5449982f, -16.8225021f, -152.716583f), Quaternion.Euler(-90f, 180f, 64.342f));
                     break;
                 case "Level6Dine":
                     Plugin.Logger.LogInfo("Detected landing on Dine");
@@ -134,7 +133,6 @@ namespace ButteryFixes.Utility
                         killTrigger4.localScale = new Vector3(35.3778f, killTrigger4.localScale.y, killTrigger4.localScale.z);
                         Plugin.Logger.LogInfo("Fixed fire exit death pit");
                     }
-                    SetUpFancyEntranceDoors(new Vector3(-156.552994f, -15.1260004f, 12.1549997f), Quaternion.Euler(-90f, -90f, 84.136f));
                     break;
                 case "Level7Offense":
                     Plugin.Logger.LogInfo("Detected landing on Offense");
@@ -167,7 +165,6 @@ namespace ButteryFixes.Utility
                     break;
                 case "Level9Artifice":
                     Plugin.Logger.LogInfo("Detected landing on Artifice");
-                    SetUpFancyEntranceDoors(new Vector3(52.3199997f, -0.665000021f, -156.145996f), Quaternion.Euler(-90f, -90f, 0f));
                     break;
                 case "Level10Adamance":
                     Plugin.Logger.LogInfo("Detected landing on Adamance");
@@ -234,18 +231,59 @@ namespace ButteryFixes.Utility
             }
         }
 
-        static void SetUpFancyEntranceDoors(Vector3 pos, Quaternion rot)
+        internal static void SwapEntranceDoors()
         {
-            if (!Configuration.fancyEntranceDoors.Value)
+            if (RoundManager.Instance.dungeonFlowTypes[RoundManager.Instance.currentDungeonType].dungeonFlow?.name != "Level2Flow" || !Configuration.fancyEntranceDoors.Value)
                 return;
 
-            GameObject steelDoorFake = GameObject.Find("SteelDoorFake");
-            GameObject steelDoorFake2 = GameObject.Find("SteelDoorFake (1)");
+            switch (StartOfRound.Instance.currentLevel.name)
+            {
+                case "ExperimentationLevel":
+                    SetUpFancyEntranceDoors(new Vector3(-113.911003f, 2.89499998f, -17.6700001f), Quaternion.Euler(-90f, 0f, 0f), true);
+                    break;
+                case "AssuranceLevel":
+                    SetUpFancyEntranceDoors(new Vector3(135.248993f, 6.45200014f, 74.4899979f), Quaternion.Euler(-90f, 180f, 0f));
+                    break;
+                case "VowLevel":
+                    SetUpFancyEntranceDoors(new Vector3(-29.2789993f, -1.176f, 151.069f), Quaternion.Euler(-90f, 90f, 0f));
+                    break;
+                case "OffenseLevel":
+                    SetUpFancyEntranceDoors(new Vector3(128.936005f, 16.3500004f, -53.7130013f), Quaternion.Euler(-90f, 180f, -73.621f));
+                    break;
+                /*case "MarchLevel":
+                    break;*/
+                case "AdamanceLevel":
+                    SetUpFancyEntranceDoors(new Vector3(-122.031998f, 1.84300005f, -3.6170001f), Quaternion.Euler(-90f, 0f, 0f), true);
+                    break;
+                case "EmbrionLevel":
+                    SetUpFancyEntranceDoors(new Vector3(-195.470001f, 6.35699987f, -7.82999992f), Quaternion.Euler(-90f, 0f, 39.517f));
+                    break;
+                case "RendLevel":
+                    SetUpFancyEntranceDoors(new Vector3(50.5449982f, -16.8225021f, -152.716583f), Quaternion.Euler(-90f, 180f, 64.342f));
+                    break;
+                case "DineLevel":
+                    SetUpFancyEntranceDoors(new Vector3(-120.620003f, -16.6870003f, -5.80000019f), Quaternion.Euler(-90f, 0f, 87.213f));
+                    break;
+                case "TitanLevel":
+                    SetUpFancyEntranceDoors(new Vector3(-35.8769989f, 47.64f, 8.93900013f), Quaternion.Euler(-90f, 0f, 35.333f));
+                    break;
+                case "ArtificeLevel":
+                    SetUpFancyEntranceDoors(new Vector3(52.3199997f, -0.665000021f, -156.145996f), Quaternion.Euler(-90f, -90f, 0f));
+                    break;
+                default:
+                    return;
+            }
+        }
+
+        static void SetUpFancyEntranceDoors(Vector3 pos, Quaternion rot, bool noFrame = false)
+        {
+            GameObject steelDoorFake = GameObject.Find(StartOfRound.Instance.currentLevel.name == "ExperimentationLevel" ? "SteelDoor (5)" : "SteelDoorFake");
+            GameObject steelDoorFake2 = GameObject.Find(StartOfRound.Instance.currentLevel.name == "ExperimentationLevel" ? "SteelDoor (6)" : "SteelDoorFake (1)");
             if (steelDoorFake != null && steelDoorFake2 != null)
             {
                 Transform plane = steelDoorFake.transform.parent.Find("Plane");
                 Transform doorFrame = steelDoorFake.transform.parent.Find("DoorFrame (1)");
-                if (plane != null && doorFrame != null)
+                if (noFrame || (plane != null && doorFrame != null))
                 {
                     GameObject wideDoorFrame = null;
                     try
@@ -264,14 +302,19 @@ namespace ButteryFixes.Utility
                         steelDoorFake.SetActive(false);
                         steelDoorFake2.SetActive(false);
 
-                        Object.Instantiate(wideDoorFrame, pos, rot);
+                        Transform wideDoorFrameClone = Object.Instantiate(wideDoorFrame, pos, rot).transform;
 
-                        doorFrame.localScale = new Vector3(doorFrame.localScale.x, doorFrame.localScale.y + 0.05f, doorFrame.localScale.z);
+                        if (noFrame)
+                            wideDoorFrameClone.localScale = new Vector3(wideDoorFrameClone.localScale.x, wideDoorFrameClone.localScale.y * 1.07f, wideDoorFrameClone.localScale.z);
+                        else
+                        {
+                            doorFrame.localScale = new Vector3(doorFrame.localScale.x, doorFrame.localScale.y + 0.05f, doorFrame.localScale.z);
 
-                        plane.localPosition = new Vector3(plane.localPosition.x, plane.localPosition.y - 1f, plane.localPosition.z);
-                        plane.localScale = new Vector3(plane.localScale.x + 0.047f, plane.localScale.y, plane.localScale.z + 0.237f);
+                            plane.localPosition = new Vector3(plane.localPosition.x, plane.localPosition.y - 1f, plane.localPosition.z);
+                            plane.localScale = new Vector3(plane.localScale.x + 0.047f, plane.localScale.y, plane.localScale.z + 0.237f);
+                        }
 
-                        Plugin.Logger.LogInfo("Manor map: Use fancy doors at main entrance");
+                        Plugin.Logger.LogInfo($"{StartOfRound.Instance.currentLevel.PlanetName} generated manor; use fancy doors at main entrance");
                     }
                     else
                         Plugin.Logger.LogWarning("The \"FancyEntranceDoors\" setting is enabled, but will be skipped because there was an error loading the manor door assets.");

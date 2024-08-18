@@ -12,7 +12,7 @@ namespace ButteryFixes.Patches.Enemies
         static void EnemyAIPreEnableEnemyMesh(EnemyAI __instance)
         {
             // minor optimization; this bug only really affects mimics
-            if (Compatibility.DISABLE_ENEMY_MESH_PATCH && __instance is not MaskedPlayerEnemy)
+            if (Compatibility.DISABLE_ENEMY_MESH_PATCH || __instance is not MaskedPlayerEnemy)
                 return;
 
             if (__instance.skinnedMeshRenderers.Length > 0)
@@ -75,21 +75,6 @@ namespace ButteryFixes.Patches.Enemies
         {
             // snare fleas and tulip snakes don't open door when latching to player
             return !(other.CompareTag("Enemy") && other.TryGetComponent(out EnemyAICollisionDetect enemyAICollisionDetect) && (enemyAICollisionDetect.mainScript is CentipedeAI { clingingToPlayer: not null } || enemyAICollisionDetect.mainScript is FlowerSnakeEnemy { clingingToPlayer: not null }));
-        }
-
-        // prevents old bird "death" unless they are eaten by earth leviathan
-        // fixes old birds breaking when you hit them with the car
-        [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.KillEnemyOnOwnerClient))]
-        [HarmonyPrefix]
-        static bool PreKillEnemyOnOwnerClient(EnemyAI __instance, bool overrideDestroy)
-        {
-            if (__instance.IsOwner && __instance is RadMechAI && !overrideDestroy && !Configuration.killOldBirds.Value)
-            {
-                Plugin.Logger.LogInfo("Old Bird was \"killed\" but not destroyed, probably hit by Cruiser. Kill will be cancelled");
-                return false;
-            }
-
-            return true;
         }
     }
 }

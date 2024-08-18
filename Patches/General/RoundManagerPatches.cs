@@ -124,5 +124,12 @@ namespace ButteryFixes.Patches.General
         {
             return TransSpawnRandomEnemy(instructions.ToList(), "firstTimeSpawningDaytimeEnemies", nameof(SelectableLevel.DaytimeEnemies), "Daytime spawner");
         }
+
+        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.GenerateNewFloor))]
+        [HarmonyPostfix]
+        static void PostGenerateNewFloor()
+        {
+            SceneOverrides.SwapEntranceDoors();
+        }
     }
 }

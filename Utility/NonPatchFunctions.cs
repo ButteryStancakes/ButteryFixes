@@ -60,7 +60,7 @@ namespace ButteryFixes.Utility
                     {
                         EnemyType enemyType = enemy.enemyType;
                         // invincible enemies are low-priority
-                        if (!enemyType.canDie || enemyType.name == "RadMech" || enemyType.name == "DocileLocustBees")
+                        if (!enemyType.canDie || enemyType.name == "DocileLocustBees")
                             invincibles.Add(sortedResults[i]);
                         else if (!enemy.isEnemyDead)
                         {

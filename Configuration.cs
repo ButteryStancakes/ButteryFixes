@@ -22,7 +22,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, fancyEntranceDoors, killOldBirds, unlimitedOldBirds, restoreShipIcon, limitSpawnChance;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, fancyEntranceDoors, unlimitedOldBirds, restoreShipIcon, limitSpawnChance;
 
         internal static void Init(ConfigFile cfg)
         {
@@ -63,7 +63,7 @@ namespace ButteryFixes
             limitSpawnChance = configFile.Bind(
                 "Gameplay",
                 "LimitSpawnChance",
-                false,
+                true,
                 "(Host only) Prevents enemy spawn weight from exceeding 100 (likely the intended maximum) if its spawn curves would normally allow it to do so.\nThis will prevent some enemies from spawning out of control on certain maps.");
 
             unlimitedOldBirds = configFile.Bind(
@@ -77,12 +77,6 @@ namespace ButteryFixes
                 "MaskHornetsPower",
                 false,
                 "(Host only) Mask hornets internally have the same power level as butlers, but because they spawn in a non-standard way, they don't contribute to the indoor power. Enabling this will prevent additional monsters spawning to replace dead butlers.");
-
-            killOldBirds = configFile.Bind(
-                "Gameplay",
-                "KillOldBirds",
-                false,
-                "(Host only) Allows Old Birds to be \"killed\" without being destroyed, like in vanilla. This will cause Old Birds to freeze in place when you crash the Cruiser into them at high speeds.");
 
             fixJumpCheese = configFile.Bind(
                 "Gameplay",
@@ -104,8 +98,8 @@ namespace ButteryFixes
             fancyEntranceDoors = configFile.Bind(
                 "Visual",
                 "FancyEntranceDoors",
-                true,
-                "Changes the front doors on Rend, Dine, and Artifice to match how they look on the inside of the manor.");
+                false,
+                "Changes the front doors to match how they look on the inside when a manor interior generates. (Works for ONLY vanilla levels!)");
 
             restoreShipIcon = configFile.Bind(
                 "Visual",

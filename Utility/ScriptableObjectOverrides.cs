@@ -56,6 +56,10 @@ namespace ButteryFixes.Utility
                                 rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                         }
                         break;
+                    case "CaveDweller":
+                        enemy.Value.enemyPrefab.GetComponent<CaveDwellerPhysicsProp>().itemProperties.isConductiveMetal = false;
+                        Plugin.Logger.LogInfo($"Conductive: {enemy.Value.enemyName} (False)");
+                        break;
                 }
                 // fix residue in ScriptableObject
                 enemy.Value.numberSpawned = 0;
@@ -88,6 +92,7 @@ namespace ButteryFixes.Utility
             Dictionary<string, bool> conductiveItems = new()
             {
                 //{ "Airhorn", true },
+                { "Clock", false },
                 //{ "DustPan", true },
                 { "FancyCup", true },
                 { "Flask", false },
@@ -95,9 +100,14 @@ namespace ButteryFixes.Utility
                 { "LockPicker", true },
                 { "MoldPan", true },
                 //{ "Phone", true },
+                { "PlasticCup", false },
                 { "Shotgun", true },
+                { "SoccerBall", false },
                 { "SprayPaint", true },
-                //{ "SteeringWheel", true }
+                //{ "SteeringWheel", true },
+                { "ToiletPaperRolls", false },
+                { "ToyTrain", false },
+                { "Zeddog", false }
             };
             Dictionary<string, bool> grabbableBeforeStart = new()
             {
@@ -224,6 +234,10 @@ namespace ButteryFixes.Utility
                         Plugin.Logger.LogInfo("Inspectable: Weed killer (True)");
                         item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
                         Plugin.Logger.LogInfo("Audio rolloff: Weed killer");
+                        break;
+                    case "Zeddog":
+                        item.dropSFX = item.grabSFX;
+                        Plugin.Logger.LogInfo($"Audio: {item.itemName}");
                         break;
                 }
 

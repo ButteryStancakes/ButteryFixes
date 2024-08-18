@@ -2,7 +2,6 @@
 using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -12,7 +11,7 @@ namespace ButteryFixes.Patches.Player
     [HarmonyPatch]
     internal class PlayerPatches
     {
-        static List<PlayerControllerB> bunnyhoppingPlayers = [];
+        static List<PlayerControllerB> bunnyhoppingPlayers = new(50);
 
         [HarmonyPatch(typeof(PlayerControllerB), "Update")]
         [HarmonyPostfix]

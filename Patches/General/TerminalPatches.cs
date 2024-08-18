@@ -15,9 +15,6 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void TerminalPostStart(Terminal __instance)
         {
-            if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
-                __instance.SetItemSales(); // seems like this is necessary because InitializeItemSalesPercentages gets called after StartOfRound.Start
-
             foreach (TerminalNode enemyFile in __instance.enemyFiles)
             {
                 switch (enemyFile.name)
@@ -30,7 +27,7 @@ namespace ButteryFixes.Patches.General
                         }
                         break;
                     case "RadMechFile":
-                        enemyFile.displayText = enemyFile.displayText.Replace("\n The subject of who developed the Old Birds has been an intense debate since their first recorded appearance on", "");
+                        enemyFile.displayText = enemyFile.displayText.Replace("OLD BIRDS", "OLD BIRDS\n\nSigurd's danger level: 95%").Replace("\n The subject of who developed the Old Birds has been an intense debate since their first recorded appearance on December 18 of 2143, when a large number of Old Birds invaded the", "\n The subject of who developed the Old Birds has been an intense debate since their first recorded appearance on December 18 of 2143, when over fifty Old Birds invaded the Anglen Capital. This is considered one of the first major causes for the downfall of the Anglen Empire. The most commonly upheld theory takes into account the tension between the Anglen and Buemoch military throughout the 2100's, however nothing has been proven in the centuries since.") + " DON'T MESS AROUND OR THEYLL GIVE YOU A RIDE.tHEY LOSE TRACK QUICK AND THEY CANT TURN VERY FAST, THEYRE DUMB AND THEY WONT SHUT UP sorry caps";
                         Plugin.Logger.LogInfo("Bestiary: Old Birds");
                         break;
                     case "MaskHornetsFile":
