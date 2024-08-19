@@ -233,7 +233,7 @@ namespace ButteryFixes.Utility
 
         internal static void SwapEntranceDoors()
         {
-            if (RoundManager.Instance.dungeonFlowTypes[RoundManager.Instance.currentDungeonType].dungeonFlow?.name != "Level2Flow" || !Configuration.fancyEntranceDoors.Value)
+            if (!Configuration.fancyEntranceDoors.Value || RoundManager.Instance.currentDungeonType < 0 || RoundManager.Instance.currentDungeonType >= RoundManager.Instance.dungeonFlowTypes.Length || RoundManager.Instance.dungeonFlowTypes[RoundManager.Instance.currentDungeonType].dungeonFlow?.name != "Level2Flow")
                 return;
 
             switch (StartOfRound.Instance.currentLevel.name)
@@ -250,8 +250,9 @@ namespace ButteryFixes.Utility
                 case "OffenseLevel":
                     SetUpFancyEntranceDoors(new Vector3(128.936005f, 16.3500004f, -53.7130013f), Quaternion.Euler(-90f, 180f, -73.621f));
                     break;
-                /*case "MarchLevel":
-                    break;*/
+                case "MarchLevel":
+                    SetUpFancyEntranceDoors(new Vector3(-158.179993f, -3.95300007f, 21.7080002f), Quaternion.Euler(-90f, 0f, 0f));
+                    break;
                 case "AdamanceLevel":
                     SetUpFancyEntranceDoors(new Vector3(-122.031998f, 1.84300005f, -3.6170001f), Quaternion.Euler(-90f, 0f, 0f), true);
                     break;
