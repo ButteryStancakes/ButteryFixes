@@ -56,7 +56,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void PostSpawnMapObjects(RoundManager __instance)
         {
-            if (StartOfRound.Instance.currentLevel.name == "RendLevel" || StartOfRound.Instance.currentLevel.name == "DineLevel" || StartOfRound.Instance.currentLevel.name == "TitanLevel")
+            if (StartOfRound.Instance.currentLevel.levelIncludesSnowFootprints/*StartOfRound.Instance.currentLevel.name == "RendLevel" || StartOfRound.Instance.currentLevel.name == "DineLevel" || StartOfRound.Instance.currentLevel.name == "TitanLevel"*/)
             {
                 if (__instance.mapPropsContainer != null)
                 {

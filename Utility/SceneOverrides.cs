@@ -302,10 +302,13 @@ namespace ButteryFixes.Utility
                         steelDoorFake.SetActive(false);
                         steelDoorFake2.SetActive(false);
 
-                        Transform wideDoorFrameClone = Object.Instantiate(wideDoorFrame, pos, rot).transform;
+                        if (GlobalReferences.wideDoorFrameClone != null)
+                            Object.Destroy(GlobalReferences.wideDoorFrameClone.gameObject);
+
+                        GlobalReferences.wideDoorFrameClone = Object.Instantiate(wideDoorFrame, pos, rot, RoundManager.Instance?.mapPropsContainer?.transform).transform;
 
                         if (noFrame)
-                            wideDoorFrameClone.localScale = new Vector3(wideDoorFrameClone.localScale.x, wideDoorFrameClone.localScale.y * 1.07f, wideDoorFrameClone.localScale.z);
+                            GlobalReferences.wideDoorFrameClone.localScale = new Vector3(GlobalReferences.wideDoorFrameClone.localScale.x, GlobalReferences.wideDoorFrameClone.localScale.y * 1.07f, GlobalReferences.wideDoorFrameClone.localScale.z);
                         else
                         {
                             doorFrame.localScale = new Vector3(doorFrame.localScale.x, doorFrame.localScale.y + 0.05f, doorFrame.localScale.z);

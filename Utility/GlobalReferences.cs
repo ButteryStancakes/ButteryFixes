@@ -36,5 +36,8 @@ namespace ButteryFixes.Utility
 
         // for cozy lights
         internal static Animator shipAnimator;
+
+        // fancy entrances
+        internal static Transform wideDoorFrameClone;
     }
 }

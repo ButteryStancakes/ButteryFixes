@@ -249,6 +249,9 @@ namespace ButteryFixes.Patches.General
                     }
                 }
             }
+
+            if (GlobalReferences.wideDoorFrameClone != null)
+                Object.Destroy(GlobalReferences.wideDoorFrameClone.gameObject);
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetShip))]
