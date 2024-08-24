@@ -182,11 +182,12 @@ namespace ButteryFixes.Patches.Player
         {
             if (/*!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS &&*/ __instance.grabBodyObject != null && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(newPosition))
             {
-                if (!__instance.grabBodyObject.isInElevator && !__instance.grabBodyObject.isInShipRoom)
+                GameNetworkManager.Instance.localPlayerController.SetItemInElevator(true, true, __instance.grabBodyObject);
+                /*if (!__instance.grabBodyObject.isInElevator && !__instance.grabBodyObject.isInShipRoom)
                     StartOfRound.Instance.currentShipItemCount++;
                 __instance.grabBodyObject.isInElevator = true;
                 __instance.grabBodyObject.isInShipRoom = true;
-                RoundManager.Instance.CollectNewScrapForThisRound(__instance.grabBodyObject);
+                RoundManager.Instance.CollectNewScrapForThisRound(__instance.grabBodyObject);*/
             }
         }
     }

@@ -131,5 +131,22 @@ namespace ButteryFixes.Patches.General
         {
             SceneOverrides.SwapEntranceDoors();
         }
+
+        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.DespawnPropsAtEndOfRound))]
+        [HarmonyPrefix]
+        static void PreDespawnPropsAtEndOfRound(bool despawnAllItems)
+        {
+            if (despawnAllItems || !StartOfRound.Instance.isObjectAttachedToMagnet || StartOfRound.Instance.attachedVehicle == null)
+                return;
+
+            foreach (GrabbableObject grabObj in Object.FindObjectsOfType<GrabbableObject>())
+            {
+                if (!grabObj.isInShipRoom && !grabObj.isHeld && grabObj.transform.parent == StartOfRound.Instance.attachedVehicle.transform)
+                {
+                    Plugin.Logger.LogWarning($"Item \"{grabObj.itemProperties.itemName}\" #{grabObj.GetInstanceID()} is inside the Cruiser, but somehow not marked as collected; will be preserved");
+                    GameNetworkManager.Instance.localPlayerController.SetItemInElevator(true, true, grabObj);
+                }
+            }
+        }
     }
 }

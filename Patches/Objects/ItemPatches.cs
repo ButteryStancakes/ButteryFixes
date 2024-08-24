@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using UnityEngine;
 
 namespace ButteryFixes.Patches.Objects
 {
@@ -9,15 +10,44 @@ namespace ButteryFixes.Patches.Objects
         [HarmonyPostfix]
         static void PostChargeBatteries(GrabbableObject __instance)
         {
-            if (__instance is BoomboxItem)
+            BoomboxItem boomboxItem = __instance as BoomboxItem;
+            if (boomboxItem != null)
             {
-                BoomboxItem boomboxItem = __instance as BoomboxItem;
                 // needs to verify charge is > 0 because there's a special pitch effect on battery death we don't want to interrupt
                 if (boomboxItem.isPlayingMusic && boomboxItem.boomboxAudio.pitch < 1f && boomboxItem.insertedBattery.charge > 0f)
                 {
                     boomboxItem.boomboxAudio.pitch = 1f;
                     Plugin.Logger.LogInfo("Boombox was recharged, correcting pitch");
                 }
+            }
+        }
+
+        // for soccer ball (and also whoopee cushion)
+        [HarmonyPatch(typeof(GrabbableObjectPhysicsTrigger), "OnTriggerEnter")]
+        [HarmonyPrefix]
+        static bool GrabbableObjectPhysicsTriggerPreOnTriggerEnter(Collider other)
+        {
+            return !other.CompareTag("Enemy") || !other.TryGetComponent(out EnemyAICollisionDetect enemyAICollisionDetect) || enemyAICollisionDetect.mainScript == null || !enemyAICollisionDetect.mainScript.isEnemyDead;
+        }
+
+        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.PocketItem))]
+        [HarmonyPostfix]
+        static void GrabbableObjectPostPocketItem(GrabbableObject __instance)
+        {
+            if (__instance.playerHeldBy != null)
+            {
+                /*if (__instance.playerHeldBy.IsOwner && !string.IsNullOrEmpty(__instance.itemProperties.grabAnim))
+                {
+                    try
+                    {
+                        __instance.playerHeldBy.playerBodyAnimator.SetBool(__instance.itemProperties.grabAnim, false);
+                    }
+                    catch
+                    {
+                        Plugin.Logger.LogWarning($"Pocketing item {__instance.itemProperties.itemName}, bool \"{__instance.itemProperties.grabAnim}\" does not exist on player animator");
+                    }
+                }*/
+                __instance.playerHeldBy.playerBodyAnimator.SetTrigger("SwitchHoldAnimation");
             }
         }
     }

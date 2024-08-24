@@ -32,7 +32,7 @@ namespace ButteryFixes.Utility
         internal static bool patchScanNodes;
 
         // for end-of-round scrap counter
-        internal static int scrapNotCollected;
+        internal static int scrapNotCollected = -1, scrapEaten;
 
         // for cozy lights
         internal static Animator shipAnimator;

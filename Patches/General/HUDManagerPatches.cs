@@ -4,9 +4,7 @@ using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 
 namespace ButteryFixes.Patches.General
 {
@@ -90,10 +88,15 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void PostFillEndGameStats(HUDManager __instance, int scrapCollected = 0)
         {
-            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || StartOfRound.Instance.allPlayersDead)
+            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || StartOfRound.Instance.allPlayersDead || GlobalReferences.scrapNotCollected < 0)
+            {
+                GlobalReferences.scrapEaten = 0;
                 return;
+            }
 
-            int trueTotal = scrapCollected + GlobalReferences.scrapNotCollected;
+            int trueTotal = scrapCollected + GlobalReferences.scrapNotCollected + GlobalReferences.scrapEaten;
+            GlobalReferences.scrapNotCollected = -1;
+            GlobalReferences.scrapEaten = 0;
 
             __instance.statsUIElements.quotaDenominator.SetText(trueTotal.ToString());
 

@@ -16,7 +16,7 @@ namespace ButteryFixes.Patches.Enemies
         {
             List<CodeInstruction> codes = instructions.ToList();
 
-            for (int i = 0; i < codes.Count; i++)
+            for (int i = 0; i < codes.Count - 3; i++)
             {
                 if (codes[i].opcode == OpCodes.Ldloc_1 && codes[i + 1].opcode == OpCodes.Ldarg_S && codes[i + 2].opcode == OpCodes.Bge_Un)
                 {

@@ -75,6 +75,8 @@ namespace ButteryFixes.Utility
                         "Cube.001",
                         "Cube.004",
                         "Cube.006",
+                        "Cube.007/HangarRoomBeams.001",
+                        "Cube.007/SiloWithLadder.001",
                         "Girder1",
                         "GridPlate",
                         "LadderFrame",
@@ -212,7 +214,7 @@ namespace ButteryFixes.Utility
                 foreach (Transform modelIntroScene in modelsIntroSceneParent)
                 {
                     if (modelsIntroScene.Remove(modelIntroScene.name))
-                        modelIntroScene.gameObject.SetActive(false);
+                        modelIntroScene.gameObject.SetActive(!modelIntroScene.gameObject.activeSelf);
                 }
                 Plugin.Logger.LogInfo("Hide out-of-bounds objects (Experimentation and leftovers)");
                 if (modelsIntroScene.Count > 0)

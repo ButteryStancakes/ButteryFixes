@@ -76,19 +76,5 @@ namespace ButteryFixes.Patches.Enemies
             // snare fleas and tulip snakes don't open door when latching to player
             return !(other.CompareTag("Enemy") && other.TryGetComponent(out EnemyAICollisionDetect enemyAICollisionDetect) && (enemyAICollisionDetect.mainScript is CentipedeAI { clingingToPlayer: not null } || enemyAICollisionDetect.mainScript is FlowerSnakeEnemy { clingingToPlayer: not null }));
         }
-
-        // prevents maneater "death" as a baby which has undefined behavior
-        [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.KillEnemyOnOwnerClient))]
-        [HarmonyPrefix]
-        static bool PreKillEnemyOnOwnerClient(EnemyAI __instance, bool overrideDestroy)
-        {
-            if (__instance.IsOwner && __instance is CaveDwellerAI && __instance.currentBehaviourStateIndex == 0 && !overrideDestroy)
-            {
-                Plugin.Logger.LogInfo("Maneater was \"killed\" as a baby, but not destroyed. Kill will be cancelled");
-                return false;
-            }
-
-            return true;
-        }
     }
 }

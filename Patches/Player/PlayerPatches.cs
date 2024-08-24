@@ -12,6 +12,7 @@ namespace ButteryFixes.Patches.Player
     internal class PlayerPatches
     {
         static List<PlayerControllerB> bunnyhoppingPlayers = new(50);
+        //static GrabbableObject previousItem = null;
 
         [HarmonyPatch(typeof(PlayerControllerB), "Update")]
         [HarmonyPostfix]
@@ -202,8 +203,51 @@ namespace ButteryFixes.Patches.Player
             if (__instance.equippedUsableItemQE && __instance.currentlyHeldObjectServer != null && (__instance.currentlyHeldObjectServer is FlashlightItem || __instance.currentlyHeldObjectServer is JetpackItem || __instance.currentlyHeldObjectServer is BoomboxItem || __instance.currentlyHeldObjectServer.itemProperties.name == "Hairdryer"))
             {
                 __instance.equippedUsableItemQE = false;
-                Plugin.Logger.LogInfo("Tried to use Q/E controls on an item with no secondary/tertiary use. This shouldn't happen");
+                Plugin.Logger.LogWarning("Tried to use Q/E controls on an item with no secondary/tertiary use. This shouldn't happen");
             }
         }
+
+        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.PlaceGrabbableObject))]
+        [HarmonyPostfix]
+        static void PostPlaceGrabbableObject(GrabbableObject placeObject)
+        {
+            if (StartOfRound.Instance.isObjectAttachedToMagnet && StartOfRound.Instance.attachedVehicle != null && placeObject.transform.parent == StartOfRound.Instance.attachedVehicle.transform)
+            {
+                GameNetworkManager.Instance.localPlayerController.SetItemInElevator(true, true, placeObject);
+                Plugin.Logger.LogInfo($"Item \"{placeObject.itemProperties.itemName}\" #{placeObject.GetInstanceID()} was placed inside a magnetized Cruiser and auto-collected");
+            }
+        }
+
+        /*[HarmonyPatch(typeof(PlayerControllerB), "SwitchToItemSlot")]
+        [HarmonyPrefix]
+        static void PreSwitchToItemSlot(PlayerControllerB __instance)
+        {
+            previousItem = __instance.currentlyHeldObjectServer;
+            if (__instance.IsOwner && previousItem != null && !string.IsNullOrEmpty(previousItem.itemProperties.grabAnim))
+                __instance.playerBodyAnimator.SetBool(previousItem.itemProperties.grabAnim, false);
+        }
+
+        [HarmonyPatch(typeof(PlayerControllerB), "SwitchToItemSlot")]
+        [HarmonyPostfix]
+        static void PostSwitchToItemSlot(PlayerControllerB __instance)
+        {
+            if (previousItem != null)
+                Plugin.Logger.LogDebug($"Previous equipped item: {previousItem.itemProperties.itemName} #{previousItem.GetInstanceID()}");
+            else
+                Plugin.Logger.LogDebug("Previous equipped item: None");
+            if (previousItem == null && __instance.currentlyHeldObjectServer != null)
+            {
+                if (__instance.currentlyHeldObjectServer.itemProperties.twoHandedAnimation)
+                {
+                    __instance.playerBodyAnimator.ResetTrigger("SwitchHoldAnimationTwoHanded");
+                    __instance.playerBodyAnimator.SetTrigger("SwitchHoldAnimationTwoHanded");
+                }
+                __instance.playerBodyAnimator.ResetTrigger("SwitchHoldAnimation");
+                __instance.playerBodyAnimator.SetTrigger("SwitchHoldAnimation");
+                Plugin.Logger.LogDebug($"Equipped item: {__instance.currentlyHeldObjectServer.itemProperties.itemName} #{__instance.currentlyHeldObjectServer.GetInstanceID()}");
+            }
+            else
+                Plugin.Logger.LogDebug("Equipped item: None");
+        }*/
     }
 }

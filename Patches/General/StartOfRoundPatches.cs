@@ -90,9 +90,9 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void PostResetShipFurniture(StartOfRound __instance)
         {
+            Terminal terminal = Object.FindObjectOfType<Terminal>();
             if (__instance.IsServer)
             {
-                Terminal terminal = Object.FindObjectOfType<Terminal>();
                 // empty the dropship on game over
                 if (terminal != null)
                 {
@@ -102,11 +102,30 @@ namespace ButteryFixes.Patches.General
                         terminal.SyncGroupCreditsServerRpc(terminal.groupCredits, 0);
                     }
                     terminal.orderedVehicleFromTerminal = -1;
-                    terminal.hasWarrantyTicket = false;
                     terminal.vehicleInDropship = false;
                     Plugin.Logger.LogInfo("Dropship inventory was emptied (game over)");
                 }
+                if (__instance.magnetOn)
+                {
+                    if (__instance.isObjectAttachedToMagnet && __instance.attachedVehicle != null && __instance.attachedVehicle.TryGetComponent(out NetworkObject netObj) && netObj.IsSpawned)
+                    {
+                        __instance.isObjectAttachedToMagnet = false;
+                        foreach (GrabbableObject grabObj in Object.FindObjectsOfType<GrabbableObject>())
+                        {
+                            if (grabObj.transform.parent == __instance.attachedVehicle.transform && grabObj.TryGetComponent(out NetworkObject netObj2) && netObj2.IsSpawned)
+                            {
+                                netObj2.Despawn();
+                                Plugin.Logger.LogDebug($"Deleted \"{grabObj.itemProperties.itemName}\" #{grabObj.GetInstanceID()} (inside Cruiser marked for deletion)");
+                            }
+                        }
+                        netObj.Despawn();
+                        Plugin.Logger.LogInfo("Deleted Cruiser (game over)");
+                    }
+                    __instance.magnetLever.TriggerAnimation(GameNetworkManager.Instance.localPlayerController);
+                }
             }
+            if (terminal != null)
+                terminal.hasWarrantyTicket = false;
             // reset TZP between challenge moon attempts
             if (__instance.isChallengeFile)
             {

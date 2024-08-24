@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ButteryFixes.Utility
 {
-    static class NonPatchFunctions
+    public static class NonPatchFunctions
     {
         internal static bool[] playerWasLastSprinting = new bool[/*4*/50];
 
@@ -212,6 +212,12 @@ namespace ButteryFixes.Utility
             ParticleSystem.ShapeModule shape = smokeParticle.GetComponent<ParticleSystem>().shape;
             shape.skinnedMeshRenderer = mesh;
             Plugin.Logger.LogInfo("Smoke from freshly burnt corpse");
+        }
+
+        public static void BabyEatsScrap(GrabbableObject grabObj)
+        {
+            if (grabObj.itemProperties.isScrap)
+                GlobalReferences.scrapEaten += grabObj.scrapValue;
         }
     }
 }

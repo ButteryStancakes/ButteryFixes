@@ -17,7 +17,7 @@ namespace ButteryFixes.Patches.Enemies
             List<CodeInstruction> codes = instructions.ToList();
 
             FieldInfo localPlayerController = AccessTools.Field(typeof(GameNetworkManager), nameof(GameNetworkManager.localPlayerController));
-            for (int i = 4; i < codes.Count; i++)
+            for (int i = 4; i < codes.Count - 1; i++)
             {
                 if (codes[i].opcode == OpCodes.Brfalse && codes[i - 2].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 2].operand == localPlayerController)
                 {
