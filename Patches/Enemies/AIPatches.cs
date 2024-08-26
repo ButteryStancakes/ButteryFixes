@@ -54,7 +54,7 @@ namespace ButteryFixes.Patches.Enemies
                     // I've only had mimickingPlayer desync on client
                     if (maskedPlayerEnemy.mimickingPlayer != null)
                     {
-                        Plugin.Logger.LogInfo("\"Masked\" was mimicking a player; will not subtract from power level");
+                        Plugin.Logger.LogDebug("\"Masked\" was mimicking a player; will not subtract from power level");
                         ___removedPowerLevel = true;
                     }
                 }
@@ -62,7 +62,7 @@ namespace ButteryFixes.Patches.Enemies
                 {
                     if (Configuration.maskHornetsPower.Value)
                     {
-                        Plugin.Logger.LogInfo("Butler died, but mask hornets don't decrease power level");
+                        Plugin.Logger.LogDebug("Butler died, but mask hornets don't decrease power level");
                         ___removedPowerLevel = true;
                     }
                 }

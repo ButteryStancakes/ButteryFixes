@@ -74,7 +74,7 @@ namespace ButteryFixes.Patches.General
                         }
                     }
                     if (retex)
-                        Plugin.Logger.LogInfo($"Skinned boulders for snowy moon \"{StartOfRound.Instance.currentLevel.name}\"");
+                        Plugin.Logger.LogDebug($"Skinned boulders for snowy moon \"{StartOfRound.Instance.currentLevel.name}\"");
                 }
             }
         }

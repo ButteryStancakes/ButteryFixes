@@ -19,7 +19,7 @@ namespace ButteryFixes.Patches.General
                 AudioSource musicFar = music.Find("Music (1)")?.GetComponent<AudioSource>();
                 if (musicFar != null)
                     musicFar.dopplerLevel = 0.6f * GlobalReferences.dopplerLevelMult;
-                Plugin.Logger.LogInfo("Doppler level: Dropship");
+                Plugin.Logger.LogDebug("Doppler level: Dropship");
             }
             // honestly just leave the vehicle version as-is, it's funny
         }

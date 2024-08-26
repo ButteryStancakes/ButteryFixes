@@ -17,7 +17,7 @@ namespace ButteryFixes.Patches.Objects
                 if (boomboxItem.isPlayingMusic && boomboxItem.boomboxAudio.pitch < 1f && boomboxItem.insertedBattery.charge > 0f)
                 {
                     boomboxItem.boomboxAudio.pitch = 1f;
-                    Plugin.Logger.LogInfo("Boombox was recharged, correcting pitch");
+                    Plugin.Logger.LogDebug("Boombox was recharged, correcting pitch");
                 }
             }
         }
@@ -25,9 +25,18 @@ namespace ButteryFixes.Patches.Objects
         // for soccer ball (and also whoopee cushion)
         [HarmonyPatch(typeof(GrabbableObjectPhysicsTrigger), "OnTriggerEnter")]
         [HarmonyPrefix]
-        static bool GrabbableObjectPhysicsTriggerPreOnTriggerEnter(Collider other)
+        static bool GrabbableObjectPhysicsTriggerPreOnTriggerEnter(GrabbableObjectPhysicsTrigger __instance, Collider other)
         {
-            return !other.CompareTag("Enemy") || !other.TryGetComponent(out EnemyAICollisionDetect enemyAICollisionDetect) || enemyAICollisionDetect.mainScript == null || !enemyAICollisionDetect.mainScript.isEnemyDead;
+            if (other.CompareTag("Enemy"))
+            {
+                if (other.TryGetComponent(out EnemyAICollisionDetect enemyAICollisionDetect) && enemyAICollisionDetect.mainScript != null && enemyAICollisionDetect.mainScript.isEnemyDead)
+                    return false;
+
+                if (__instance.itemScript.isInShipRoom && StartOfRound.Instance.shipIsLeaving)
+                    return false;
+            }
+
+            return true;
         }
 
         [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.PocketItem))]
@@ -47,7 +56,7 @@ namespace ButteryFixes.Patches.Objects
                         Plugin.Logger.LogWarning($"Pocketing item {__instance.itemProperties.itemName}, bool \"{__instance.itemProperties.grabAnim}\" does not exist on player animator");
                     }
                 }*/
-                __instance.playerHeldBy.playerBodyAnimator.SetTrigger("SwitchHoldAnimation");
+                __instance.playerHeldBy.playerBodyAnimator.SetTrigger(__instance.itemProperties.twoHandedAnimation ? "SwitchHoldAnimationTwoHanded" : "SwitchHoldAnimation");
             }
         }
     }

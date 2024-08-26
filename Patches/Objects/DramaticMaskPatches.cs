@@ -12,7 +12,7 @@ namespace ButteryFixes.Patches.Objects
         {
             if (__instance.maskTypeId == 5)
             {
-                Plugin.Logger.LogInfo("Player is being converted by a Tragedy mask; about to replace mask prefab appearance");
+                Plugin.Logger.LogDebug("Player is being converted by a Tragedy mask; about to replace mask prefab appearance");
                 NonPatchFunctions.ConvertMaskToTragedy(__instance.currentHeadMask.transform);
             }
         }

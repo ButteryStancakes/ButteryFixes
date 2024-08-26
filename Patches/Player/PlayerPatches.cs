@@ -63,14 +63,14 @@ namespace ButteryFixes.Patches.Player
                 if (scavengerHelmet != null)
                 {
                     scavengerHelmet.shadowCastingMode = ShadowCastingMode.Off;
-                    Plugin.Logger.LogInfo("\"Fake helmet\" no longer casts a shadow");
+                    Plugin.Logger.LogDebug("\"Fake helmet\" no longer casts a shadow");
                 }
             }
             try
             {
                 __instance.playerBadgeMesh.GetComponent<Renderer>().forceRenderingOff = true;
                 __instance.playerBetaBadgeMesh.forceRenderingOff = true;
-                Plugin.Logger.LogInfo("Hide badges on local player");
+                Plugin.Logger.LogDebug("Hide badges on local player");
             }
             catch (System.Exception e)
             {
@@ -81,7 +81,7 @@ namespace ButteryFixes.Patches.Player
             if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && __instance.playersManager.mapScreenPlayerName.text == "MONITORING: Player")
             {
                 __instance.playersManager.mapScreenPlayerName.SetText($"MONITORING: {__instance.playersManager.mapScreen.radarTargets[__instance.playersManager.mapScreen.targetTransformIndex].name}");
-                Plugin.Logger.LogInfo("Fix \"MONITORING: Player\"");
+                Plugin.Logger.LogDebug("Fix \"MONITORING: Player\"");
             }
 
             GlobalReferences.crashedJetpackAsLocalPlayer = false;
@@ -102,7 +102,7 @@ namespace ButteryFixes.Patches.Player
                 if (shipIcon != null)
                 {
                     shipIcon.localPosition = new Vector3(shipIcon.localPosition.x, shipIcon.localPosition.y, 0f);
-                    Plugin.Logger.LogInfo("Fix ship icon on radar");
+                    Plugin.Logger.LogDebug("Fix ship icon on radar");
                 }
             }
         }
@@ -115,7 +115,7 @@ namespace ButteryFixes.Patches.Player
             if (!Compatibility.INSTALLED_LETHAL_FIXES && !__instance.IsOwner && !HUDManager.Instance.itemSlotIcons[itemSlot].enabled && GameNetworkManager.Instance.localPlayerController.ItemSlots[itemSlot] != null)
             {
                 HUDManager.Instance.itemSlotIcons[itemSlot].enabled = true;
-                Plugin.Logger.LogInfo("Re-enabled inventory icon (likely that another player has just reloaded a shotgun, and it was erroneously disabled)");
+                Plugin.Logger.LogDebug("Re-enabled inventory icon (likely that another player has just reloaded a shotgun, and it was erroneously disabled)");
             }
         }
 
@@ -152,7 +152,7 @@ namespace ButteryFixes.Patches.Player
 
             if (moving)
             {
-                Plugin.Logger.LogInfo($"Player \"{__instance.playerUsername}\" is bunnyhopping with dogs outside; creating noise");
+                Plugin.Logger.LogDebug($"Player \"{__instance.playerUsername}\" is bunnyhopping with dogs outside; creating noise");
                 NonPatchFunctions.FakeFootstepAlert(__instance);
 
                 if (!bunnyhoppingPlayers.Contains(__instance))
@@ -167,7 +167,7 @@ namespace ButteryFixes.Patches.Player
             if (!bunnyhoppingPlayers.Contains(__instance))
                 return;
 
-            Plugin.Logger.LogInfo($"Player \"{__instance.playerUsername}\" landed from bunnyhop");
+            Plugin.Logger.LogDebug($"Player \"{__instance.playerUsername}\" landed from bunnyhop");
 
             if (Configuration.fixJumpCheese.Value && __instance.IsServer)
             {
@@ -214,40 +214,8 @@ namespace ButteryFixes.Patches.Player
             if (StartOfRound.Instance.isObjectAttachedToMagnet && StartOfRound.Instance.attachedVehicle != null && placeObject.transform.parent == StartOfRound.Instance.attachedVehicle.transform)
             {
                 GameNetworkManager.Instance.localPlayerController.SetItemInElevator(true, true, placeObject);
-                Plugin.Logger.LogInfo($"Item \"{placeObject.itemProperties.itemName}\" #{placeObject.GetInstanceID()} was placed inside a magnetized Cruiser and auto-collected");
+                Plugin.Logger.LogDebug($"Item \"{placeObject.itemProperties.itemName}\" #{placeObject.GetInstanceID()} was placed inside a magnetized Cruiser and auto-collected");
             }
         }
-
-        /*[HarmonyPatch(typeof(PlayerControllerB), "SwitchToItemSlot")]
-        [HarmonyPrefix]
-        static void PreSwitchToItemSlot(PlayerControllerB __instance)
-        {
-            previousItem = __instance.currentlyHeldObjectServer;
-            if (__instance.IsOwner && previousItem != null && !string.IsNullOrEmpty(previousItem.itemProperties.grabAnim))
-                __instance.playerBodyAnimator.SetBool(previousItem.itemProperties.grabAnim, false);
-        }
-
-        [HarmonyPatch(typeof(PlayerControllerB), "SwitchToItemSlot")]
-        [HarmonyPostfix]
-        static void PostSwitchToItemSlot(PlayerControllerB __instance)
-        {
-            if (previousItem != null)
-                Plugin.Logger.LogDebug($"Previous equipped item: {previousItem.itemProperties.itemName} #{previousItem.GetInstanceID()}");
-            else
-                Plugin.Logger.LogDebug("Previous equipped item: None");
-            if (previousItem == null && __instance.currentlyHeldObjectServer != null)
-            {
-                if (__instance.currentlyHeldObjectServer.itemProperties.twoHandedAnimation)
-                {
-                    __instance.playerBodyAnimator.ResetTrigger("SwitchHoldAnimationTwoHanded");
-                    __instance.playerBodyAnimator.SetTrigger("SwitchHoldAnimationTwoHanded");
-                }
-                __instance.playerBodyAnimator.ResetTrigger("SwitchHoldAnimation");
-                __instance.playerBodyAnimator.SetTrigger("SwitchHoldAnimation");
-                Plugin.Logger.LogDebug($"Equipped item: {__instance.currentlyHeldObjectServer.itemProperties.itemName} #{__instance.currentlyHeldObjectServer.GetInstanceID()}");
-            }
-            else
-                Plugin.Logger.LogDebug("Equipped item: None");
-        }*/
     }
 }

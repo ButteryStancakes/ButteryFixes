@@ -24,7 +24,7 @@ namespace ButteryFixes.Patches.General
                 _ => 1f,
             };
             __instance.speakerAudioSource.dopplerLevel = GlobalReferences.dopplerLevelMult;
-            Plugin.Logger.LogInfo("Doppler level: Ship speaker");
+            Plugin.Logger.LogDebug("Doppler level: Ship speaker");
 
             GameObject tragedyRagdoll = StartOfRound.Instance.playerRagdolls.FirstOrDefault(playerRagdoll => playerRagdoll.name == "PlayerRagdollWithTragedyMask Variant");
             if (tragedyRagdoll != null)
@@ -58,14 +58,14 @@ namespace ButteryFixes.Patches.General
             {
                 stickyNote.rolloffMode = AudioRolloffMode.Linear;
                 stickyNote.GetComponent<PhysicsProp>().scrapValue = 0;
-                Plugin.Logger.LogInfo($"Audio rolloff: Sticky note");
+                Plugin.Logger.LogDebug($"Audio rolloff: Sticky note");
             }
             AudioSource clipboard = __instance.elevatorTransform.Find("ClipboardManual")?.GetComponent<AudioSource>();
             if (clipboard != null)
             {
                 clipboard.rolloffMode = AudioRolloffMode.Linear;
                 clipboard.GetComponent<ClipboardItem>().scrapValue = 0;
-                Plugin.Logger.LogInfo($"Audio rolloff: Clipboard");
+                Plugin.Logger.LogDebug($"Audio rolloff: Clipboard");
             }
 
             ScriptableObjectOverrides.OverrideUnlockables();
@@ -73,7 +73,7 @@ namespace ButteryFixes.Patches.General
             GlobalReferences.shipAnimator = __instance.shipAnimatorObject.GetComponent<Animator>();
 
             __instance.VehiclesList.FirstOrDefault(vehicle => vehicle.name == "CompanyCruiser").GetComponent<VehicleController>().radioAudio.dopplerLevel = Configuration.musicDopplerLevel.Value == MusicDopplerLevel.Reduced ? 0.37f : GlobalReferences.dopplerLevelMult;
-            Plugin.Logger.LogInfo("Doppler level: Cruiser");
+            Plugin.Logger.LogDebug("Doppler level: Cruiser");
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetStats))]
@@ -83,7 +83,7 @@ namespace ButteryFixes.Patches.General
             // stop tracking "most profitable" between days
             for (int i = 0; i < __instance.gameStats.allPlayerStats.Length; i++)
                 __instance.gameStats.allPlayerStats[i].profitable = 0;
-            Plugin.Logger.LogInfo("Cleared \"profitable\" stat for all employees");
+            Plugin.Logger.LogDebug("Cleared \"profitable\" stat for all employees");
         }
 
         [HarmonyPatch(typeof(StartOfRound), "ResetShipFurniture")]
@@ -206,12 +206,12 @@ namespace ButteryFixes.Patches.General
                     LungProp lungProp = grabbableObject as LungProp;
                     if (lungProp != null && lungProp.isLungDocked)
                     {
-                        Plugin.Logger.LogInfo("Player late-joined a lobby with a powered apparatus");
+                        Plugin.Logger.LogDebug("Player late-joined a lobby with a powered apparatus");
                         lungProp.isLungDocked = false;
                         lungProp.GetComponent<AudioSource>().Stop();
                     }
                 }
-                Plugin.Logger.LogInfo("Mark all scrap already in the ship as collected");
+                Plugin.Logger.LogDebug("Mark all scrap already in the ship as collected");
             }
         }
 

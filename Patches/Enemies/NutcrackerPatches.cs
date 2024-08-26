@@ -25,7 +25,7 @@ namespace ButteryFixes.Patches.Enemies
                 __instance.gun.shotgunShellLeft.enabled = false;
                 __instance.gun.shotgunShellRight.enabled = false;
                 __instance.gun.StartCoroutine(NonPatchFunctions.ShellsAppearAfterDelay(__instance.gun));
-                Plugin.Logger.LogInfo("Shotgun was reloaded by nutcracker; animating shells");
+                Plugin.Logger.LogDebug("Shotgun was reloaded by nutcracker; animating shells");
             }
         }
 

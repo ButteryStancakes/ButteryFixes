@@ -23,16 +23,16 @@ namespace ButteryFixes.Patches.General
                         if (enemyFile.displayText.EndsWith("house."))
                         {
                             enemyFile.displayText += "\n\nThey watch with one tireless eye, which only senses movement; It remembers the last creature it noticed whether they are moving or not.";
-                            Plugin.Logger.LogInfo("Bestiary: Nutcracker");
+                            Plugin.Logger.LogDebug("Bestiary: Nutcracker");
                         }
                         break;
                     case "RadMechFile":
                         enemyFile.displayText = enemyFile.displayText.Replace("OLD BIRDS", "OLD BIRDS\n\nSigurd's danger level: 95%").Replace("\n The subject of who developed the Old Birds has been an intense debate since their first recorded appearance on December 18 of 2143, when a large number of Old Birds invaded the", "\n The subject of who developed the Old Birds has been an intense debate since their first recorded appearance on December 18 of 2143, when over fifty Old Birds invaded the Anglen Capital. This is considered one of the first major causes for the downfall of the Anglen Empire. The most commonly upheld theory takes into account the tension between the Anglen and Buemoch military throughout the 2100's, however nothing has been proven in the centuries since.") + " DON'T MESS AROUND OR THEYLL GIVE YOU A RIDE.tHEY LOSE TRACK QUICK AND THEY CANT TURN VERY FAST, THEYRE DUMB AND THEY WONT SHUT UP sorry caps";
-                        Plugin.Logger.LogInfo("Bestiary: Old Birds");
+                        Plugin.Logger.LogDebug("Bestiary: Old Birds");
                         break;
                     case "MaskHornetsFile":
                         enemyFile.creatureName = enemyFile.creatureName[0].ToString().ToUpper() + enemyFile.creatureName[1..];
-                        Plugin.Logger.LogInfo("Bestiary: Mask hornets");
+                        Plugin.Logger.LogDebug("Bestiary: Mask hornets");
                         break;
                 }
             }
@@ -49,7 +49,7 @@ namespace ButteryFixes.Patches.General
                     {
                         // fix cruiser price shown as $400 after price buff
                         cruiser.creditsWorth = buyCruiser.itemCost;
-                        Plugin.Logger.LogInfo("Price: Cruiser");
+                        Plugin.Logger.LogDebug("Price: Cruiser");
                     }
                 }
 
@@ -57,7 +57,7 @@ namespace ButteryFixes.Patches.General
                 if (clipboardCruiser != null)
                 {
                     clipboardCruiser.rolloffMode = AudioRolloffMode.Linear;
-                    Plugin.Logger.LogInfo("Audio rolloff: Clipboard (Cruiser)");
+                    Plugin.Logger.LogDebug("Audio rolloff: Clipboard (Cruiser)");
                 }
             }
 
@@ -67,7 +67,7 @@ namespace ButteryFixes.Patches.General
                 if (buyWelcomeMat != null)
                 {
                     buyWelcomeMat.itemCost = 40;
-                    Plugin.Logger.LogInfo("Price: Welcome mat");
+                    Plugin.Logger.LogDebug("Price: Welcome mat");
                 }
             }
         }

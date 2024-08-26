@@ -47,7 +47,7 @@ namespace ButteryFixes.Patches.Enemies
                 __instance.angerCheckInterval = 1f;
             }
             else
-                Plugin.Logger.LogInfo("Bracken was damaged by an enemy; don't max aggro");
+                Plugin.Logger.LogDebug("Bracken was damaged by an enemy; don't max aggro");
             __instance.AddToAngerMeter(0.1f);
         }
     }

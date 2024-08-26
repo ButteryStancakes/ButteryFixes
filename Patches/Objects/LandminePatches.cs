@@ -14,7 +14,7 @@ namespace ButteryFixes.Patches.Objects
             if (scanSphere != null)
             {
                 scanSphere.forceRenderingOff = true;
-                Plugin.Logger.LogInfo("Landmine: Hide radar dot after detonation");
+                Plugin.Logger.LogDebug("Landmine: Hide radar dot after detonation");
             }
             if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
             {
@@ -22,12 +22,12 @@ namespace ButteryFixes.Patches.Objects
                 if (scanNodeProperties != null)
                 {
                     scanNodeProperties.GetComponent<Collider>().enabled = false;
-                    Plugin.Logger.LogInfo("Landmine: Hide scan node after detonation");
+                    Plugin.Logger.LogDebug("Landmine: Hide scan node after detonation");
                 }
                 if (__instance.TryGetComponent(out TerminalAccessibleObject terminalAccessibleObject))
                 {
                     Object.Destroy(terminalAccessibleObject);
-                    Plugin.Logger.LogInfo("Landmine: Hide terminal code after detonation");
+                    Plugin.Logger.LogDebug("Landmine: Hide terminal code after detonation");
                 }
             }
         }

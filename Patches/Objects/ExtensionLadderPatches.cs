@@ -12,7 +12,7 @@ namespace ButteryFixes.Patches.Objects
             if (___ladderBlinkWarning)
             {
                 ___ladderBlinkWarning = false;
-                Plugin.Logger.LogInfo("Fixed broken extension ladder warning");
+                Plugin.Logger.LogDebug("Fixed broken extension ladder warning");
             }
         }
 
@@ -25,7 +25,7 @@ namespace ButteryFixes.Patches.Objects
                 __instance.itemUsedUp = true;
                 for (int i = 0; i < __instance.propColliders.Length; i++)
                     __instance.propColliders[i].excludeLayers = -1;
-                Plugin.Logger.LogInfo("Suck players through ladder");
+                Plugin.Logger.LogDebug("Suck players through ladder");
             }
         }
     }

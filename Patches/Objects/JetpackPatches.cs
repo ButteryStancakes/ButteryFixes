@@ -38,7 +38,7 @@ namespace ButteryFixes.Patches.Objects
                         rend.sharedMaterial = GlobalReferences.scavengerSuitBurnt;
                 }
                 NonPatchFunctions.SmokingHotCorpse(playerBody.transform);
-                Plugin.Logger.LogInfo("Jetpack exploded and burned player corpse");
+                Plugin.Logger.LogDebug("Jetpack exploded and burned player corpse");
             }
             else
             {

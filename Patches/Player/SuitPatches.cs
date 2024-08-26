@@ -40,7 +40,7 @@ namespace ButteryFixes.Patches.Player
                 localCostumeChanged = false;
                 foreach (Renderer rend in costumeContainer.GetComponentsInChildren<Renderer>())
                     rend.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
-                Plugin.Logger.LogInfo($"Local costume part only draws shadow - {costumeContainer.name}");
+                Plugin.Logger.LogDebug($"Local costume part only draws shadow - {costumeContainer.name}");
             }
         }
 

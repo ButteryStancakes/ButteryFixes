@@ -11,7 +11,7 @@ namespace ButteryFixes.Patches.Enemies
         [HarmonyPrefix]
         static bool MouthDogAIPreOnCollideWithPlayer(MouthDogAI __instance, Collider other)
         {
-            if (__instance.isEnemyDead || (other.TryGetComponent(out PlayerControllerB player) && player.isInHangarShipRoom && StartOfRound.Instance.hangarDoorsClosed && !StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(__instance.transform.position)))
+            if (__instance.isEnemyDead || (other.TryGetComponent(out PlayerControllerB player) && player.isInHangarShipRoom && (!__instance.isInsidePlayerShip || (StartOfRound.Instance.hangarDoorsClosed && !StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(__instance.transform.position)))))
                 return false;
 
             return true;

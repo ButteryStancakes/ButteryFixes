@@ -22,11 +22,11 @@ namespace ButteryFixes.Utility
             switch (scene.name)
             {
                 case "Level1Experimentation":
-                    Plugin.Logger.LogInfo("Detected landing on Experimentation");
+                    Plugin.Logger.LogDebug("Detected landing on Experimentation");
                     if (bigMachine != null)
                     {
                         bigMachine.localPosition = new Vector3(-112.04f, bigMachine.localPosition.y, bigMachine.localPosition.z);
-                        Plugin.Logger.LogInfo("Fixed factory ambience");
+                        Plugin.Logger.LogDebug("Experimentation - Fixed factory ambience");
                     }
                     // fix fog triggers from the water tower
                     Transform cube7 = GameObject.Find("/Environment/ReverbTriggers (1)/Cube (7)")?.transform;
@@ -44,7 +44,7 @@ namespace ButteryFixes.Utility
                             {
                                 cube8.localPosition = new Vector3(-117.39f, cube8.localPosition.y, -87.23f);
                                 cube8.localScale = new Vector3(10.4316f, cube8.localScale.y, 15.95104f);
-                                Plugin.Logger.LogInfo("Adjusted water tower fog triggers");
+                                Plugin.Logger.LogDebug("Experimentation - Adjusted water tower fog triggers");
                             }
                         }
                     }
@@ -52,14 +52,14 @@ namespace ButteryFixes.Utility
                     if (steelDoor != null)
                     {
                         steelDoor.localPosition = new Vector3(-194.668f, 19.788f, steelDoor.localPosition.z);
-                        Plugin.Logger.LogInfo("Fixed old back entrance");
+                        Plugin.Logger.LogDebug("Experimentation - Fixed old back entrance");
                     }
                     // hide weird untextured geometry
                     Renderer cube = GameObject.Find("/Environment/Map/Cube (1)")?.GetComponent<Renderer>();
                     if (cube != null)
                     {
                         cube.enabled = false;
-                        Plugin.Logger.LogInfo("Hide untextured geometry");
+                        Plugin.Logger.LogDebug("Experimentation - Hide untextured geometry");
                     }
                     modelsIntroScene.AddRange([
                         "BendingPipe",
@@ -105,7 +105,7 @@ namespace ButteryFixes.Utility
                     ]);
                     break;
                 case "Level2Assurance":
-                    Plugin.Logger.LogInfo("Detected landing on Assurance");
+                    Plugin.Logger.LogDebug("Detected landing on Assurance");
                     modelsIntroScene.AddRange([
                         "ChainlinkFenceCut",
                         "NurbsPath",
@@ -116,32 +116,32 @@ namespace ButteryFixes.Utility
                     ]);
                     break;
                 case "Level3Vow":
-                    Plugin.Logger.LogInfo("Detected landing on Vow");
+                    Plugin.Logger.LogDebug("Detected landing on Vow");
                     rotateFireExit = false;
                     break;
                 case "Level4March":
-                    Plugin.Logger.LogInfo("Detected landing on March");
+                    Plugin.Logger.LogDebug("Detected landing on March");
                     break;
                 case "Level5Rend":
-                    Plugin.Logger.LogInfo("Detected landing on Rend");
+                    Plugin.Logger.LogDebug("Detected landing on Rend");
                     break;
                 case "Level6Dine":
-                    Plugin.Logger.LogInfo("Detected landing on Dine");
+                    Plugin.Logger.LogDebug("Detected landing on Dine");
                     // fix death pit in front of fire exit
                     Transform killTrigger4 = GameObject.Find("/Environment/Map/KillTrigger (4)")?.transform;
                     if (killTrigger4 != null)
                     {
                         killTrigger4.localPosition = new Vector3(148.11f, killTrigger4.localPosition.y, 83.61f);
                         killTrigger4.localScale = new Vector3(35.3778f, killTrigger4.localScale.y, killTrigger4.localScale.z);
-                        Plugin.Logger.LogInfo("Fixed fire exit death pit");
+                        Plugin.Logger.LogDebug("Dine - Fixed death pit");
                     }
                     break;
                 case "Level7Offense":
-                    Plugin.Logger.LogInfo("Detected landing on Offense");
+                    Plugin.Logger.LogDebug("Detected landing on Offense");
                     if (bigMachine != null)
                     {
                         bigMachine.localPosition = new Vector3(27.6018715f, 24.056633f, -67.7034225f);
-                        Plugin.Logger.LogInfo("Fixed factory ambience");
+                        Plugin.Logger.LogDebug("Offense - Fixed factory ambience");
                     }
                     modelsIntroScene.AddRange([
                         "ChainlinkFenceCut",
@@ -158,35 +158,35 @@ namespace ButteryFixes.Utility
                     ]);
                     break;
                 case "Level8Titan":
-                    Plugin.Logger.LogInfo("Detected landing on Titan");
+                    Plugin.Logger.LogDebug("Detected landing on Titan");
                     if (bigMachine != null)
                     {
                         bigMachine.localPosition = new Vector3(-36.0699997f, 55.1199989f, 26.1499996f);
-                        Plugin.Logger.LogInfo("Fixed factory ambience");
+                        Plugin.Logger.LogDebug("Titan - Fixed factory ambience");
                     }
                     break;
                 case "Level9Artifice":
-                    Plugin.Logger.LogInfo("Detected landing on Artifice");
+                    Plugin.Logger.LogDebug("Detected landing on Artifice");
                     break;
                 case "Level10Adamance":
-                    Plugin.Logger.LogInfo("Detected landing on Adamance");
+                    Plugin.Logger.LogDebug("Detected landing on Adamance");
                     if (bigMachine != null)
                     {
                         bigMachine.localPosition = new Vector3(-108.444908f, -3.29539537f, 8.0433712f);
-                        Plugin.Logger.LogInfo("Fixed factory ambience");
+                        Plugin.Logger.LogDebug("Adamance - Fixed factory ambience");
                     }
                     rotateFireExit = false;
                     break;
                 case "Level11Embrion":
-                    Plugin.Logger.LogInfo("Detected landing on Embrion");
+                    Plugin.Logger.LogDebug("Detected landing on Embrion");
                     if (bigMachine != null)
                     {
                         bigMachine.localPosition = new Vector3(202.604599f, 14.0158f, 3.28045521f);
-                        Plugin.Logger.LogInfo("Fixed factory ambience");
+                        Plugin.Logger.LogDebug("Embrion - Fixed factory ambience");
                     }
                     break;
                 case "CompanyBuilding":
-                    Plugin.Logger.LogInfo("Detected landing on Gordion");
+                    Plugin.Logger.LogDebug("Detected landing on Gordion");
                     break;
                 default:
                     Plugin.Logger.LogInfo("Landed on unknown moon");
@@ -202,7 +202,7 @@ namespace ButteryFixes.Utility
                     if (entranceTeleport.isEntranceToBuilding && entranceTeleport.entranceId > 0)
                     {
                         entranceTeleport.entrancePoint.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                        Plugin.Logger.LogInfo($"Fixed rotation of external fire exit #{entranceTeleport.entranceId}");
+                        Plugin.Logger.LogDebug($"Fixed rotation of external fire exit #{entranceTeleport.entranceId}");
                     }
                 }
             }
@@ -216,7 +216,7 @@ namespace ButteryFixes.Utility
                     if (modelsIntroScene.Remove(modelIntroScene.name))
                         modelIntroScene.gameObject.SetActive(!modelIntroScene.gameObject.activeSelf);
                 }
-                Plugin.Logger.LogInfo("Hide out-of-bounds objects (Experimentation and leftovers)");
+                Plugin.Logger.LogDebug("Hide out-of-bounds objects (Experimentation and leftovers)");
                 if (modelsIntroScene.Count > 0)
                 {
                     Plugin.Logger.LogWarning($"Failed to hide {modelsIntroScene.Count} objects:");
@@ -320,7 +320,7 @@ namespace ButteryFixes.Utility
                             plane.localScale = new Vector3(plane.localScale.x + 0.047f, plane.localScale.y, plane.localScale.z + 0.237f);
                         }
 
-                        Plugin.Logger.LogInfo($"{StartOfRound.Instance.currentLevel.PlanetName} generated manor; use fancy doors at main entrance");
+                        Plugin.Logger.LogDebug($"{StartOfRound.Instance.currentLevel.PlanetName} generated manor; use fancy doors at main entrance");
                     }
                     else
                         Plugin.Logger.LogWarning("The \"FancyEntranceDoors\" setting is enabled, but will be skipped because there was an error loading the manor door assets.");

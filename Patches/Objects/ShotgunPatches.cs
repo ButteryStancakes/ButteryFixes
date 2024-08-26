@@ -20,7 +20,7 @@ namespace ButteryFixes.Patches.Objects
                 __instance.shotgunShellLeft.enabled = __instance.shellsLoaded > 0;
                 __instance.shotgunShellRight.enabled = false;
                 __instance.StartCoroutine(NonPatchFunctions.ShellsAppearAfterDelay(__instance));
-                Plugin.Logger.LogInfo("Shotgun was reloaded by another client; animating shells");
+                Plugin.Logger.LogDebug("Shotgun was reloaded by another client; animating shells");
             }
         }
 

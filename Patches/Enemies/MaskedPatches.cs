@@ -24,7 +24,7 @@ namespace ButteryFixes.Patches.Enemies
                 if (__instance.inSpecialAnimationWithPlayer == GameNetworkManager.Instance.localPlayerController && !HUDManager.Instance.HUDAnimator.GetBool("biohazardDamage"))
                 {
                     HUDManager.Instance.HUDAnimator.SetBool("biohazardDamage", true);
-                    Plugin.Logger.LogInfo("Enable screen blood for mask vomit animation");
+                    Plugin.Logger.LogDebug("Enable screen blood for mask vomit animation");
                 }
                 // bonus effect: cover the player's face with blood
                 __instance.inSpecialAnimationWithPlayer.bodyBloodDecals[3].SetActive(true);
@@ -46,7 +46,7 @@ namespace ButteryFixes.Patches.Enemies
                     __instance.maskFloodParticle.Stop();
                 HUDManager.Instance.HUDAnimator.SetBool("biohazardDamage", false);
                 HUDManager.Instance.HUDAnimator.SetTrigger("HealFromCritical");
-                Plugin.Logger.LogInfo("Vomit animation was interrupted while blood was on screen");
+                Plugin.Logger.LogDebug("Vomit animation was interrupted while blood was on screen");
             }
         }
 
@@ -61,7 +61,7 @@ namespace ButteryFixes.Patches.Enemies
             if (mapDot != null)
             {
                 mapDot.enabled = false;
-                Plugin.Logger.LogInfo("Stop animating masked radar dot");
+                Plugin.Logger.LogDebug("Stop animating masked radar dot");
             }
         }
 
@@ -85,13 +85,13 @@ namespace ButteryFixes.Patches.Enemies
                         if (spine004 != null && spine004.Find(suit.headCostumeObject.name + "(Clone)") == null)
                         {
                             Object.Instantiate(suit.headCostumeObject, spine004.position, spine004.rotation, spine004);
-                            Plugin.Logger.LogInfo($"Mimic #{__instance.GetInstanceID()} equipped {suit.unlockableName} head");
+                            Plugin.Logger.LogDebug($"Mimic #{__instance.GetInstanceID()} equipped {suit.unlockableName} head");
                         }
                     }
                     if (suit.lowerTorsoCostumeObject != null && spine.Find(suit.lowerTorsoCostumeObject.name + "(Clone)") == null)
                     {
                         Object.Instantiate(suit.lowerTorsoCostumeObject, spine.position, spine.rotation, spine);
-                        Plugin.Logger.LogInfo($"Mimic #{__instance.GetInstanceID()} equipped {suit.unlockableName} torso");
+                        Plugin.Logger.LogDebug($"Mimic #{__instance.GetInstanceID()} equipped {suit.unlockableName} torso");
                     }
                 }
             }
@@ -115,13 +115,13 @@ namespace ButteryFixes.Patches.Enemies
             if (betaBadgeMesh != null)
             {
                 betaBadgeMesh.enabled = __instance.mimickingPlayer.playerBetaBadgeMesh.enabled;
-                Plugin.Logger.LogInfo($"Mimic #{__instance.GetInstanceID()} VIP: {betaBadgeMesh.enabled}");
+                Plugin.Logger.LogDebug($"Mimic #{__instance.GetInstanceID()} VIP: {betaBadgeMesh.enabled}");
             }
             MeshFilter badgeMesh = spine003.Find("LevelSticker")?.GetComponent<MeshFilter>();
             if (badgeMesh != null)
             {
                 badgeMesh.mesh = __instance.mimickingPlayer.playerBadgeMesh.mesh;
-                Plugin.Logger.LogInfo($"Mimic #{__instance.GetInstanceID()} updated level sticker");
+                Plugin.Logger.LogDebug($"Mimic #{__instance.GetInstanceID()} updated level sticker");
             }
 
             // toggling GameObjects under a NetworkObject maybe also a bad idea?
@@ -134,7 +134,7 @@ namespace ButteryFixes.Patches.Enemies
                         if (bloodDecal.name == bodyBloodDecal.name)
                         {
                             bloodDecal.gameObject.SetActive(bodyBloodDecal.activeSelf);
-                            Plugin.Logger.LogInfo($"Mimic #{__instance.GetInstanceID()} blood: \"{bloodDecal.name}\"");
+                            Plugin.Logger.LogDebug($"Mimic #{__instance.GetInstanceID()} blood: \"{bloodDecal.name}\"");
                         }
                     }
                 }
@@ -153,7 +153,7 @@ namespace ButteryFixes.Patches.Enemies
             if (maskType == 5 && __instance.maskTypeIndex != 1)
             {
                 __instance.maskTypeIndex = 1;
-                Plugin.Logger.LogInfo("Mimic spawned that should be Tragedy");
+                Plugin.Logger.LogDebug("Mimic spawned that should be Tragedy");
 
                 // replace the comedy mask's models with the tragedy models
                 NonPatchFunctions.ConvertMaskToTragedy(__instance.maskTypes[0].transform);
@@ -163,7 +163,7 @@ namespace ButteryFixes.Patches.Enemies
                 if (randomPeriodicAudioPlayer != null)
                 {
                     randomPeriodicAudioPlayer.randomClips = GlobalReferences.tragedyMaskRandomClips;
-                    Plugin.Logger.LogInfo("Tragedy mimic cries");
+                    Plugin.Logger.LogDebug("Tragedy mimic cries");
                 }
             }
 

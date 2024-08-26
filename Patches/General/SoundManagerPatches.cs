@@ -9,9 +9,13 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void SoundManagerPostStart(SoundManager __instance)
         {
-            // fixes the TZP effects persisting when you disconnect and re-enter the game
+            // fix persistent effects when you disconnect and re-enter the game
+            // TZP
             __instance.currentMixerSnapshotID = 4;
             __instance.SetDiageticMixerSnapshot(0, 0.2f);
+            // mineshaft echo
+            __instance.echoEnabled = true;
+            __instance.SetEchoFilter(false);
         }
     }
 }

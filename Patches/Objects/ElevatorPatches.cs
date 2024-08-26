@@ -11,7 +11,7 @@ namespace ButteryFixes.Patches.Objects
         static void MineshaftElevatorControllerPostOnEnable(MineshaftElevatorController __instance)
         {
             __instance.elevatorJingleMusic.dopplerLevel = 0.58f * GlobalReferences.dopplerLevelMult;
-            Plugin.Logger.LogInfo("Doppler level: Mineshaft elevator");
+            Plugin.Logger.LogDebug("Doppler level: Mineshaft elevator");
         }
     }
 }

@@ -25,7 +25,7 @@ namespace ButteryFixes.Patches.Objects
                     scanNodeProperties.scrapValue = __instance.scrapValue;
                     scanNodeProperties.subText = $"Value: ${scanNodeProperties.scrapValue}";
                 }
-                Plugin.Logger.LogInfo("Scan node: Apparatus");
+                Plugin.Logger.LogDebug("Scan node: Apparatus");
             }
         }
 

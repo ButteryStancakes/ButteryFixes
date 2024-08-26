@@ -75,7 +75,7 @@ namespace ButteryFixes.Patches.Player
                             headRend.materials = materials;
                         }
 
-                        Plugin.Logger.LogInfo("Fixed helmet material on player corpse");
+                        Plugin.Logger.LogDebug("Fixed helmet material on player corpse");
                     }
 
                     if (suit.headCostumeObject == null && suit.lowerTorsoCostumeObject == null)
@@ -97,7 +97,7 @@ namespace ButteryFixes.Patches.Player
                             // special offset for snipping
                             if (snipped)
                                 tail.transform.SetPositionAndRotation(new Vector3(-0.0400025733f, -0.0654963329f, -0.0346327312f), Quaternion.Euler(19.4403114f, 0.0116598327f, 0.0529587828f));
-                            Plugin.Logger.LogInfo("Torso attachment complete for player corpse");
+                            Plugin.Logger.LogDebug("Torso attachment complete for player corpse");
                         }
                     }
 
@@ -123,7 +123,7 @@ namespace ButteryFixes.Patches.Player
                                 foreach (Renderer hatRend in hat.GetComponentsInChildren<Renderer>())
                                     hatRend.sharedMaterial = suitMaterial;
                             }
-                            Plugin.Logger.LogInfo("Head attachment complete for player corpse");
+                            Plugin.Logger.LogDebug("Head attachment complete for player corpse");
                         }
                     }
 
@@ -137,7 +137,7 @@ namespace ButteryFixes.Patches.Player
                             badge.GetComponent<Renderer>().forceRenderingOff = false;
                             betaBadge.GetComponent<Renderer>().forceRenderingOff = false;
                         }
-                        Plugin.Logger.LogInfo("Badges added to player corpse");
+                        Plugin.Logger.LogDebug("Badges added to player corpse");
                     }
                 }
                 catch (System.Exception e)
@@ -163,7 +163,7 @@ namespace ButteryFixes.Patches.Player
                 if (rend.gameObject.layer == 0 && (rend.name.StartsWith("BetaBadge") || rend.name.StartsWith("LevelSticker")))
                 {
                     rend.forceRenderingOff = true;
-                    Plugin.Logger.LogInfo($"Player corpse transformed; hide badge \"{rend.name}\"");
+                    Plugin.Logger.LogDebug($"Player corpse transformed; hide badge \"{rend.name}\"");
                 }
             }
         }

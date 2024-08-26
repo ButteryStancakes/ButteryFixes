@@ -25,7 +25,7 @@ namespace ButteryFixes.Utility
                             else
                             {
                                 enemy.Value.requireNestObjectsToSpawn = true;
-                                Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Require \"nest\" to spawn");
+                                Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Require \"nest\" to spawn");
                             }
                         }
                         else
@@ -33,23 +33,23 @@ namespace ButteryFixes.Utility
                         break;
                     case "MaskedPlayerEnemy":
                         enemy.Value.isOutsideEnemy = false;
-                        Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Subtract from indoor power, not outdoor power");
+                        Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Subtract from indoor power, not outdoor power");
                         break;
                     case "Blob":
                         enemy.Value.canDie = false;
-                        Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Don't \"die\" when crushed by spike trap");
+                        Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Don't \"die\" when crushed by spike trap");
                         break;
                     case "ForestGiant":
                         ScanNodeProperties scanNodeProperties = enemy.Value.enemyPrefab.GetComponentInChildren<ScanNodeProperties>();
                         if (scanNodeProperties != null)
                         {
                             scanNodeProperties.headerText = "Forest Keeper";
-                            Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Rename scan node");
+                            Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Rename scan node");
                         }
                         break;
                     case "ClaySurgeon":
                         enemy.Value.enemyPrefab.GetComponent<NavMeshAgent>().speed = 0f;
-                        Plugin.Logger.LogInfo($"{enemy.Value.enemyName}: Don't slide around on fresh spawn");
+                        Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Don't slide around on fresh spawn");
                         foreach (Renderer rend in enemy.Value.enemyPrefab.GetComponentsInChildren<Renderer>())
                         {
                             if (rend.gameObject.layer == 19)
@@ -58,7 +58,7 @@ namespace ButteryFixes.Utility
                         break;
                     case "CaveDweller":
                         enemy.Value.enemyPrefab.GetComponent<CaveDwellerPhysicsProp>().itemProperties.isConductiveMetal = false;
-                        Plugin.Logger.LogInfo($"Conductive: {enemy.Value.enemyName} (False)");
+                        Plugin.Logger.LogDebug($"Conductive: {enemy.Value.enemyName} (False)");
                         break;
                 }
                 // fix residue in ScriptableObject
@@ -80,7 +80,7 @@ namespace ButteryFixes.Utility
                         if (spikeRoofTrapHazard != null)
                         {
                             spikeRoofTrapHazard.requireDistanceBetweenSpawns = true;
-                            Plugin.Logger.LogInfo("Rend now properly spaces spike traps");
+                            Plugin.Logger.LogDebug("Rend now properly spaces spike traps");
                         }
                         break;
                 }
@@ -135,11 +135,11 @@ namespace ButteryFixes.Utility
                 {
                     case "Boombox":
                         item.spawnPrefab.GetComponent<BoomboxItem>().boomboxAudio.dopplerLevel = 0.3f * GlobalReferences.dopplerLevelMult;
-                        Plugin.Logger.LogInfo("Doppler level: Boombox");
+                        Plugin.Logger.LogDebug("Doppler level: Boombox");
                         break;
                     case "ClownHorn":
                         item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 0.4f;
-                        Plugin.Logger.LogInfo("Cooldown: Clown horn");
+                        Plugin.Logger.LogDebug("Cooldown: Clown horn");
                         break;
                     case "Cog1":
                     case "EasterEgg":
@@ -151,7 +151,7 @@ namespace ButteryFixes.Utility
                     case "ExtensionLadder":
                     case "RadarBooster":
                         item.canBeInspected = false;
-                        Plugin.Logger.LogInfo($"Inspectable: {item.itemName} (False)");
+                        Plugin.Logger.LogDebug($"Inspectable: {item.itemName} (False)");
                         break;
                     case "Flashlight":
                     case "ProFlashlight":
@@ -159,17 +159,17 @@ namespace ButteryFixes.Utility
                         Material[] sharedMaterials = flashlightItem.flashlightMesh.sharedMaterials;
                         sharedMaterials[1] = flashlightItem.bulbDark;
                         flashlightItem.flashlightMesh.sharedMaterials = sharedMaterials;
-                        Plugin.Logger.LogInfo($"Bulb off: {item.itemName}");
+                        Plugin.Logger.LogDebug($"Bulb off: {item.itemName}");
                         break;
                     case "Hairdryer":
                         item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 2f;
-                        Plugin.Logger.LogInfo("Cooldown: Hairdryer");
+                        Plugin.Logger.LogDebug("Cooldown: Hairdryer");
                         break;
                     case "Key":
                         if (Configuration.keysAreScrap.Value)
                         {
                             item.isScrap = true;
-                            Plugin.Logger.LogInfo("Scrap: Key");
+                            Plugin.Logger.LogDebug("Scrap: Key");
                         }
                         else
                         {
@@ -179,7 +179,7 @@ namespace ButteryFixes.Utility
                             {
                                 scanNodeProperties.subText = string.Empty;
                                 scanNodeProperties.scrapValue = 0;
-                                Plugin.Logger.LogInfo("Scan node: Key");
+                                Plugin.Logger.LogDebug("Scan node: Key");
                             }
                         }
                         break;
@@ -191,7 +191,7 @@ namespace ButteryFixes.Utility
                         {
                             scanNodeProperties.scrapValue = knifeItem.scrapValue;
                             scanNodeProperties.subText = $"Value: ${scanNodeProperties.scrapValue}";
-                            Plugin.Logger.LogInfo("Scan node: Kitchen knife");
+                            Plugin.Logger.LogDebug("Scan node: Kitchen knife");
                         }
                         if (item.minValue == 70 && item.maxValue == 210)
                         {
@@ -203,7 +203,7 @@ namespace ButteryFixes.Utility
                     case "PillBottle":
                     case "SprayPaint":
                         item.canBeInspected = true;
-                        Plugin.Logger.LogInfo($"Inspectable: {item.itemName} (True)");
+                        Plugin.Logger.LogDebug($"Inspectable: {item.itemName} (True)");
                         break;
                     case "MetalSheet":
                         tatteredMetalSheet = item;
@@ -211,7 +211,7 @@ namespace ButteryFixes.Utility
                     case "RedLocustHive":
                         linearRolloff = true;
                         item.spawnPrefab.GetComponent<PhysicsProp>().isInFactory = false;
-                        Plugin.Logger.LogInfo("Factory: Hive");
+                        Plugin.Logger.LogDebug("Factory: Hive");
                         if (item.minValue == 90 && item.maxValue == 140)
                         {
                             item.minValue = 100; // 40
@@ -241,27 +241,27 @@ namespace ButteryFixes.Utility
                                 if (maskLOD != null && GlobalReferences.tragedyMaskLOD != null)
                                 {
                                     maskLOD.mesh = GlobalReferences.tragedyMaskLOD;
-                                    Plugin.Logger.LogInfo("Meshes: Tragedy");
+                                    Plugin.Logger.LogDebug("Meshes: Tragedy");
                                 }
                             }
                         }
                         break;
                     case "WeedKillerBottle":
                         item.canBeInspected = true;
-                        Plugin.Logger.LogInfo("Inspectable: Weed killer (True)");
+                        Plugin.Logger.LogDebug("Inspectable: Weed killer (True)");
                         item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
-                        Plugin.Logger.LogInfo("Audio rolloff: Weed killer");
+                        Plugin.Logger.LogDebug("Audio rolloff: Weed killer");
                         break;
                     case "Zeddog":
                         item.dropSFX = item.grabSFX;
-                        Plugin.Logger.LogInfo($"Audio: {item.itemName}");
+                        Plugin.Logger.LogDebug($"Audio: {item.itemName}");
                         break;
                 }
 
                 if (linearRolloff)
                 {
                     item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Linear;
-                    Plugin.Logger.LogInfo($"Audio rolloff: {item.itemName}");
+                    Plugin.Logger.LogDebug($"Audio rolloff: {item.itemName}");
                 }
 
                 // affects whoopie cushion primarily
@@ -277,7 +277,7 @@ namespace ButteryFixes.Utility
                         }
                     }
                     if (triggerHidden)
-                        Plugin.Logger.LogInfo($"Invisible trigger: {item.itemName}");
+                        Plugin.Logger.LogDebug($"Invisible trigger: {item.itemName}");
                 }
 
                 if (item.canBeInspected)
@@ -299,7 +299,7 @@ namespace ButteryFixes.Utility
                         if (!hasInspectTip)
                         {
                             item.toolTips = item.toolTips.AddToArray("Inspect: [Z]");
-                            Plugin.Logger.LogInfo($"Inspect tooltip: {item.itemName}");
+                            Plugin.Logger.LogDebug($"Inspect tooltip: {item.itemName}");
                         }
                     }
                 }
@@ -307,20 +307,20 @@ namespace ButteryFixes.Utility
                 if (conductiveItems.ContainsKey(item.name))
                 {
                     item.isConductiveMetal = conductiveItems[item.name] && Configuration.makeConductive.Value;
-                    Plugin.Logger.LogInfo($"Conductive: {item.itemName} ({item.isConductiveMetal})");
+                    Plugin.Logger.LogDebug($"Conductive: {item.itemName} ({item.isConductiveMetal})");
                 }
 
                 if (grabbableBeforeStart.ContainsKey(item.name))
                 {
                     item.canBeGrabbedBeforeGameStart = grabbableBeforeStart[item.name];
-                    Plugin.Logger.LogInfo($"Hold before ship has landed: {item.itemName} ({item.canBeGrabbedBeforeGameStart})");
+                    Plugin.Logger.LogDebug($"Hold before ship has landed: {item.itemName} ({item.canBeGrabbedBeforeGameStart})");
                 }
             }
 
             if (tatteredMetalSheet != null && shovel != null)
             {
                 tatteredMetalSheet.grabSFX = shovel.grabSFX;
-                Plugin.Logger.LogInfo("Audio: Metal sheet");
+                Plugin.Logger.LogDebug("Audio: Metal sheet");
             }
         }
 
@@ -332,30 +332,30 @@ namespace ButteryFixes.Utility
                 {
                     /*case "Television":
                         unlockableItem.prefabObject.GetComponentInChildren<TVScript>().tvSFX.dopplerLevel = 0f * MUSIC_DOPPLER_LEVEL;
-                        Plugin.Logger.LogInfo("Doppler level: Television");
+                        Plugin.Logger.LogDebug("Doppler level: Television");
                         break;*/
                     case "Record player":
                         unlockableItem.prefabObject.GetComponentInChildren<AnimatedObjectTrigger>().thisAudioSource.dopplerLevel = GlobalReferences.dopplerLevelMult;
-                        Plugin.Logger.LogInfo("Doppler level: Record player");
+                        Plugin.Logger.LogDebug("Doppler level: Record player");
                         break;
                     case "Disco Ball":
                         unlockableItem.prefabObject.GetComponentInChildren<CozyLights>().turnOnAudio.dopplerLevel = 0.92f * GlobalReferences.dopplerLevelMult;
-                        Plugin.Logger.LogInfo("Doppler level: Disco ball");
+                        Plugin.Logger.LogDebug("Doppler level: Disco ball");
                         break;
                     case "JackOLantern":
                         unlockableItem.prefabObject.GetComponentInChildren<InteractTrigger>().cooldownTime = 0.5f;
-                        Plugin.Logger.LogInfo("Cooldown: Jack o' Lantern");
+                        Plugin.Logger.LogDebug("Cooldown: Jack o' Lantern");
                         break;
                     case "Plushie pajama man":
                         unlockableItem.prefabObject.GetComponentInChildren<InteractTrigger>().cooldownTime = 0.54f;
-                        Plugin.Logger.LogInfo("Cooldown: Plushie pajama man");
+                        Plugin.Logger.LogDebug("Cooldown: Plushie pajama man");
                         break;
                     case "Inverse Teleporter":
                         if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
                         {
                             InteractTrigger buttonTrigger = unlockableItem.prefabObject.GetComponentInChildren<ShipTeleporter>().buttonTrigger;
                             buttonTrigger.hoverTip = buttonTrigger.hoverTip.Replace("Beam up", "Beam out");
-                            Plugin.Logger.LogInfo("Text: Inverse teleporter");
+                            Plugin.Logger.LogDebug("Text: Inverse teleporter");
                         }
                         break;
                 }

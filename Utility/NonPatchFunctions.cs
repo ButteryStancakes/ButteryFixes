@@ -38,7 +38,7 @@ namespace ButteryFixes.Utility
             // disables shells rendering when the gun is closed, to prevent bleedthrough with LOD1 model
             shotgun.shotgunShellLeft.forceRenderingOff = true;
             shotgun.shotgunShellRight.forceRenderingOff = true;
-            Plugin.Logger.LogInfo($"Finished animating shotgun shells (held by enemy: {shotgun.isHeldByEnemy})");
+            Plugin.Logger.LogDebug($"Finished animating shotgun shells (held by enemy: {shotgun.isHeldByEnemy})");
         }
 
         public static void ShotgunPreProcess(Vector3 shotgunPosition, ref int num, ref RaycastHit[] results)
@@ -124,7 +124,7 @@ namespace ButteryFixes.Utility
                         tragedyMaskLOD.mesh = GlobalReferences.tragedyMaskLOD;
                         tragedyMaskLOD.GetComponent<MeshRenderer>().sharedMaterial = GlobalReferences.tragedyMaskMat;
 
-                        Plugin.Logger.LogInfo("All mask meshes replaced successfully");
+                        Plugin.Logger.LogDebug("All mask meshes replaced successfully");
                     }
                     else
                         Plugin.Logger.LogWarning("Failed to replace mask eyes");
@@ -159,7 +159,7 @@ namespace ButteryFixes.Utility
                 if (player.allHelmetLights[i].enabled != enable)
                 {
                     player.allHelmetLights[i].enabled = enable;
-                    Plugin.Logger.LogInfo($"Fixed erroneous active state of {player.playerUsername}'s helmet light \"{player.allHelmetLights[i].name}\" (now {enable})");
+                    Plugin.Logger.LogDebug($"Fixed erroneous active state of {player.playerUsername}'s helmet light \"{player.allHelmetLights[i].name}\" (now {enable})");
                 }
             }
         }
@@ -193,7 +193,7 @@ namespace ButteryFixes.Utility
             {
                 oldBird.numberSpawned++;
                 RoundManager.Instance.currentOutsideEnemyPower += oldBird.PowerLevel;
-                Plugin.Logger.LogInfo("Old Bird spawned from apparatus");
+                Plugin.Logger.LogDebug("Old Bird spawned from apparatus");
             }
         }
 
@@ -211,7 +211,7 @@ namespace ButteryFixes.Utility
             smokeParticle.transform.localScale = Vector3.one;
             ParticleSystem.ShapeModule shape = smokeParticle.GetComponent<ParticleSystem>().shape;
             shape.skinnedMeshRenderer = mesh;
-            Plugin.Logger.LogInfo("Smoke from freshly burnt corpse");
+            Plugin.Logger.LogDebug("Smoke from freshly burnt corpse");
         }
 
         public static void BabyEatsScrap(GrabbableObject grabObj)
