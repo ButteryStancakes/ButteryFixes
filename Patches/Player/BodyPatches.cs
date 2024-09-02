@@ -13,6 +13,9 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPostfix]
         static void DeadBodyInfoPostStart(DeadBodyInfo __instance)
         {
+            if (__instance.grabBodyObject != null && __instance.playerScript.isInHangarShipRoom)
+                __instance.playerScript.SetItemInElevator(true, true, __instance.grabBodyObject);
+
             if (Compatibility.DISABLE_PLAYERMODEL_PATCHES)
                 return;
 
@@ -180,7 +183,7 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPostfix]
         static void PostSetRagdollPositionSafely(DeadBodyInfo __instance, Vector3 newPosition)
         {
-            if (/*!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS &&*/ __instance.grabBodyObject != null && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(newPosition))
+            if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && __instance.grabBodyObject != null && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(newPosition))
             {
                 GameNetworkManager.Instance.localPlayerController.SetItemInElevator(true, true, __instance.grabBodyObject);
                 /*if (!__instance.grabBodyObject.isInElevator && !__instance.grabBodyObject.isInShipRoom)

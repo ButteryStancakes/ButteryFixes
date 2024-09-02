@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ButteryFixes.Utility
 {
-    internal class GlobalReferences
+    internal static class GlobalReferences
     {
         // Experimentation, Assurance, Vow, Gordion, March, Adamance, Rend, Dine, Offense, Titan, Artifice, Liquidation, Embrion
         internal const int NUM_LEVELS = 13;
@@ -36,8 +36,5 @@ namespace ButteryFixes.Utility
 
         // for cozy lights
         internal static Animator shipAnimator;
-
-        // fancy entrances
-        internal static Transform wideDoorFrameClone;
     }
 }

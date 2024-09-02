@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using UnityEngine;
 
 namespace ButteryFixes.Patches.Enemies
 {
@@ -33,6 +34,14 @@ namespace ButteryFixes.Patches.Enemies
 
             Plugin.Logger.LogError("Forest giant death transpiler failed");
             return codes;
+        }
+
+        [HarmonyPatch(typeof(ForestGiantAI), "LookForPlayers")]
+        [HarmonyPostfix]
+        static void PostLookForPlayers(ForestGiantAI __instance)
+        {
+            for (int i = 0; i < __instance.playerStealthMeters.Length; i++)
+                __instance.playerStealthMeters[i] = Mathf.Clamp01(__instance.playerStealthMeters[i]);
         }
     }
 }

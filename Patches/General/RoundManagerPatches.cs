@@ -52,33 +52,6 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnMapObjects))]
-        [HarmonyPostfix]
-        static void PostSpawnMapObjects(RoundManager __instance)
-        {
-            if (StartOfRound.Instance.currentLevel.levelIncludesSnowFootprints/*StartOfRound.Instance.currentLevel.name == "RendLevel" || StartOfRound.Instance.currentLevel.name == "DineLevel" || StartOfRound.Instance.currentLevel.name == "TitanLevel"*/)
-            {
-                if (__instance.mapPropsContainer != null)
-                {
-                    bool retex = false;
-                    foreach (Transform mapProp in __instance.mapPropsContainer.transform)
-                    {
-                        if (mapProp.name.StartsWith("LargeRock"))
-                        {
-                            foreach (Renderer rend in mapProp.GetComponentsInChildren<Renderer>())
-                            {
-                                rend.material.SetTexture("_MainTex", null);
-                                rend.material.SetTexture("_BaseColorMap", null);
-                                retex = true;
-                            }
-                        }
-                    }
-                    if (retex)
-                        Plugin.Logger.LogDebug($"Skinned boulders for snowy moon \"{StartOfRound.Instance.currentLevel.name}\"");
-                }
-            }
-        }
-
         static IEnumerable<CodeInstruction> TransSpawnRandomEnemy(List<CodeInstruction> codes, string firstTime, string enemies, string id)
         {
             FieldInfo firstTimeSpawning = AccessTools.Field(typeof(RoundManager), firstTime);
@@ -125,13 +98,6 @@ namespace ButteryFixes.Patches.General
             return TransSpawnRandomEnemy(instructions.ToList(), "firstTimeSpawningDaytimeEnemies", nameof(SelectableLevel.DaytimeEnemies), "Daytime spawner");
         }
 
-        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.GenerateNewFloor))]
-        [HarmonyPostfix]
-        static void PostGenerateNewFloor()
-        {
-            SceneOverrides.SwapEntranceDoors();
-        }
-
         [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.DespawnPropsAtEndOfRound))]
         [HarmonyPrefix]
         static void PreDespawnPropsAtEndOfRound(bool despawnAllItems)
@@ -147,6 +113,24 @@ namespace ButteryFixes.Patches.General
                     GameNetworkManager.Instance.localPlayerController.SetItemInElevator(true, true, grabObj);
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.GenerateNewFloor))]
+        [HarmonyPrefix]
+        static void PreGenerateNewFloor(RoundManager __instance)
+        {
+            if (__instance.currentLevel.dungeonFlowTypes == null || __instance.currentLevel.dungeonFlowTypes.Length < 1)
+            {
+                __instance.currentDungeonType = -1;
+                SoundManager.Instance.currentLevelAmbience = __instance.currentLevel.levelAmbienceClips;
+            }
+        }
+
+        [HarmonyPatch(typeof(RoundManager), "Awake")]
+        [HarmonyPostfix]
+        static void RoundManagerPostAwake(RoundManager __instance)
+        {
+            TileOverrides.OverrideTiles(__instance.dungeonFlowTypes);
         }
     }
 }

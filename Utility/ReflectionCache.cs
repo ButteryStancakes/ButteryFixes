@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace ButteryFixes.Utility
 {
-    internal class ReflectionCache
+    internal static class ReflectionCache
     {
         internal static readonly FieldInfo IS_IN_HANGAR_SHIP_ROOM = AccessTools.Field(typeof(PlayerControllerB), nameof(PlayerControllerB.isInHangarShipRoom));
 

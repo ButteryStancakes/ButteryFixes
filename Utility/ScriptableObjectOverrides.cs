@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 namespace ButteryFixes.Utility
 {
-    internal class ScriptableObjectOverrides
+    internal static class ScriptableObjectOverrides
     {
         internal static void OverrideEnemyTypes()
         {
@@ -120,7 +120,7 @@ namespace ButteryFixes.Utility
             };
             ScanNodeProperties scanNodeProperties;
 
-            Item shovel = null, tatteredMetalSheet = null;
+            Item teaKettle = null, tatteredMetalSheet = null;
             foreach (Item item in StartOfRound.Instance.allItemsList.itemsList)
             {
                 if (item == null)
@@ -152,6 +152,9 @@ namespace ButteryFixes.Utility
                     case "RadarBooster":
                         item.canBeInspected = false;
                         Plugin.Logger.LogDebug($"Inspectable: {item.itemName} (False)");
+                        break;
+                    case "FancyLamp":
+                        item.verticalOffset = 0f;
                         break;
                     case "Flashlight":
                     case "ProFlashlight":
@@ -225,8 +228,8 @@ namespace ButteryFixes.Utility
                             item.maxValue = 225; // 89 + 1
                         }
                         break;
-                    case "Shovel":
-                        shovel = item;
+                    case "TeaKettle":
+                        teaKettle = item;
                         break;
                     case "TragedyMask":
                         GlobalReferences.tragedyMaskRandomClips = item.spawnPrefab.GetComponent<RandomPeriodicAudioPlayer>()?.randomClips;
@@ -253,7 +256,7 @@ namespace ButteryFixes.Utility
                         Plugin.Logger.LogDebug("Audio rolloff: Weed killer");
                         break;
                     case "Zeddog":
-                        item.dropSFX = item.grabSFX;
+                        item.dropSFX = item.grabSFX; //null
                         Plugin.Logger.LogDebug($"Audio: {item.itemName}");
                         break;
                 }
@@ -317,9 +320,9 @@ namespace ButteryFixes.Utility
                 }
             }
 
-            if (tatteredMetalSheet != null && shovel != null)
+            if (tatteredMetalSheet != null && teaKettle != null)
             {
-                tatteredMetalSheet.grabSFX = shovel.grabSFX;
+                tatteredMetalSheet.grabSFX = teaKettle.grabSFX;
                 Plugin.Logger.LogDebug("Audio: Metal sheet");
             }
         }

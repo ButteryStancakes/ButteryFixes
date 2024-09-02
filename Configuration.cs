@@ -22,7 +22,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, fancyEntranceDoors, unlimitedOldBirds, restoreShipIcon, limitSpawnChance;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, unlimitedOldBirds, restoreShipIcon, limitSpawnChance;
 
         internal static void Init(ConfigFile cfg)
         {
@@ -32,6 +32,7 @@ namespace ButteryFixes
             VisualConfig();
             AudioConfig();
             ExtraConfig();
+            MigrateLegacyConfigs();
         }
 
         static void GameplayConfig()
@@ -70,7 +71,7 @@ namespace ButteryFixes
                 "Gameplay",
                 "UnlimitedOldBirds",
                 false,
-                "(Host only) Allows Old Birds to continue spawning even once all the ones presently on the map have \"woken up\", like in vanilla. This will cause them to appear out of nowhere, since they don't have a proper spawning animation.");
+                "(Host only) Allows Old Birds to continue spawning even once all the ones presently on the map have \"woken up\", like in vanilla. This will cause them to appear out of nowhere, since they don't have a proper spawning animation\nThis will also allow outdoor spawns to \"overflow\" when you unplug the apparatus, since that doesn't add Old Birds to the power count in vanilla.");
 
             maskHornetsPower = configFile.Bind(
                 "Gameplay",
@@ -94,12 +95,6 @@ namespace ButteryFixes
                 "The internal resolution rendered by the game. There are unused resolution presets in the game data that you can enable using this option.\n" +
                 "\"DontChange\" makes no changes - vanilla is 860x520, but this setting is also compatible with other resolution mods.\n" +
                 "\"Low\" is 620x350. \"High\" is 970x580.");
-
-            fancyEntranceDoors = configFile.Bind(
-                "Visual",
-                "FancyEntranceDoors",
-                false,
-                "Changes the front doors to match how they look on the inside when a manor interior generates. (Works for ONLY vanilla levels!)");
 
             restoreShipIcon = configFile.Bind(
                 "Visual",
@@ -131,6 +126,16 @@ namespace ButteryFixes
                 "ScanOnShip",
                 false,
                 "Allows the \"scan\" command on the terminal to count the number and value of the items on your ship, when in orbit or parked at Gordion.");
+        }
+
+        static void MigrateLegacyConfigs()
+        {
+            // removed when fixed in v60
+            configFile.Bind("Gameplay", "KillOldBirds", true, "Legacy setting, doesn't work");
+            configFile.Remove(configFile["Gameplay", "KillOldBirds"].Definition);
+            // moved to Interior Designer
+            configFile.Bind("Visual", "FancyEntranceDoors", false, "Legacy setting, use \"Interior Designer\" instead");
+            configFile.Remove(configFile["Visual", "FancyEntranceDoors"].Definition);
         }
     }
 }
