@@ -73,8 +73,8 @@ namespace ButteryFixes.Patches.Enemies
         [HarmonyPrefix]
         public static bool DoorLockPreOnTriggerStay(Collider other)
         {
-            // snare fleas and tulip snakes don't open door when latching to player
-            return !(other.CompareTag("Enemy") && other.TryGetComponent(out EnemyAICollisionDetect enemyAICollisionDetect) && (enemyAICollisionDetect.mainScript is CentipedeAI { clingingToPlayer: not null } || enemyAICollisionDetect.mainScript is FlowerSnakeEnemy { clingingToPlayer: not null }));
+            // snare fleas, tulip snakes, and maneater don't open door when latching to player
+            return !(other.CompareTag("Enemy") && other.TryGetComponent(out EnemyAICollisionDetect enemyAICollisionDetect) && (enemyAICollisionDetect.mainScript is CentipedeAI { clingingToPlayer: not null } || enemyAICollisionDetect.mainScript is FlowerSnakeEnemy { clingingToPlayer: not null } || enemyAICollisionDetect.mainScript is CaveDwellerAI { propScript.playerHeldBy: not null }));
         }
     }
 }
