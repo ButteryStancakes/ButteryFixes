@@ -92,21 +92,21 @@ namespace ButteryFixes.Utility
             Dictionary<string, bool> conductiveItems = new()
             {
                 //{ "Airhorn", true },
-                { "Clock", false },
+                //{ "Clock", false },
                 //{ "DustPan", true },
                 { "FancyCup", true },
-                { "Flask", false },
+                //{ "Flask", false },
                 //{ "Hairdryer", true },
                 { "LockPicker", true },
                 { "MoldPan", true },
                 //{ "Phone", true },
-                { "PlasticCup", false },
+                //{ "PlasticCup", false },
                 { "Shotgun", true },
                 { "SoccerBall", false },
                 { "SprayPaint", true },
                 //{ "SteeringWheel", true },
                 { "ToiletPaperRolls", false },
-                { "ToyTrain", false },
+                //{ "ToyTrain", false },
                 { "Zeddog", false }
             };
             Dictionary<string, bool> grabbableBeforeStart = new()
