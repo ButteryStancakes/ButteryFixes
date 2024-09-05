@@ -6,13 +6,13 @@ namespace ButteryFixes
     {
         internal const string FAST_CLIMBING_GUID = "inoyu.FastClimbing", BETTER_LADDERS_GUID = "e3s1.BetterLadders";
         internal const string GENERAL_IMPROVEMENTS_GUID = "ShaosilGaming.GeneralImprovements";
-        internal const string LETHAL_FIXES_GUID = "Dev1A3.LethalFixes";
+        //internal const string LETHAL_FIXES_GUID = "Dev1A3.LethalFixes";
         internal const string MODEL_REPLACEMENT_API_GUID = "meow.ModelReplacementAPI";
         internal const string STARLANCER_AI_FIX_GUID = "AudioKnight.StarlancerAIFix";
         internal const string BETTER_SPRAY_PAINT_GUID = "taffyko.BetterSprayPaint";
         internal const string LETHAL_QUANTITIES_GUID = "LethalQuantities";
 
-        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_LETHAL_FIXES, INSTALLED_LETHAL_QUANTITIES;
+        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, /*INSTALLED_LETHAL_FIXES,*/ INSTALLED_LETHAL_QUANTITIES;
         internal static bool DISABLE_LADDER_PATCH, DISABLE_PLAYERMODEL_PATCHES, DISABLE_ENEMY_MESH_PATCH, DISABLE_SPRAY_PAINT_PATCHES;
 
         internal static void Init()
@@ -23,11 +23,11 @@ namespace ButteryFixes
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - GeneralImprovements detected");
             }
 
-            if (Chainloader.PluginInfos.ContainsKey(LETHAL_FIXES_GUID))
+            /*if (Chainloader.PluginInfos.ContainsKey(LETHAL_FIXES_GUID))
             {
                 INSTALLED_LETHAL_FIXES = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - LethalFixes detected");
-            }
+            }*/
 
             if (Chainloader.PluginInfos.ContainsKey(FAST_CLIMBING_GUID) || Chainloader.PluginInfos.ContainsKey(BETTER_LADDERS_GUID))
             {

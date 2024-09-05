@@ -50,7 +50,6 @@ namespace ButteryFixes.Utility
                         break;
 
                     // --- MINESHAFT ---
-                    // - fix navmesh blocker on fork stair tile
                 }
 
                 if (tile.name.StartsWith("Cave") || tile.name.Contains("Tunnel"))

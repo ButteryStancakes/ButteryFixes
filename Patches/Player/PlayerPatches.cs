@@ -107,18 +107,6 @@ namespace ButteryFixes.Patches.Player
             }
         }
 
-        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.DestroyItemInSlot))]
-        [HarmonyPostfix]
-        static void PostDestroyItemInSlot(PlayerControllerB __instance, int itemSlot)
-        {
-            // this fix is redundant with LethalFixes, but here just in case the user doesn't have it installed...
-            if (!Compatibility.INSTALLED_LETHAL_FIXES && !__instance.IsOwner && !HUDManager.Instance.itemSlotIcons[itemSlot].enabled && GameNetworkManager.Instance.localPlayerController.ItemSlots[itemSlot] != null)
-            {
-                HUDManager.Instance.itemSlotIcons[itemSlot].enabled = true;
-                Plugin.Logger.LogDebug("Re-enabled inventory icon (likely that another player has just reloaded a shotgun, and it was erroneously disabled)");
-            }
-        }
-
         [HarmonyPatch(typeof(PlayerControllerB), "PlayJumpAudio")]
         [HarmonyPostfix]
         static void PostPlayJumpAudio(PlayerControllerB __instance, bool ___isWalking)

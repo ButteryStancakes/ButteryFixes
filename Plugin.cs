@@ -10,13 +10,13 @@ namespace ButteryFixes
     [BepInDependency(Compatibility.FAST_CLIMBING_GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.BETTER_LADDERS_GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GENERAL_IMPROVEMENTS_GUID, BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency(Compatibility.LETHAL_FIXES_GUID, BepInDependency.DependencyFlags.SoftDependency)]
+    //[BepInDependency(Compatibility.LETHAL_FIXES_GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.MODEL_REPLACEMENT_API_GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.STARLANCER_AI_FIX_GUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.LETHAL_QUANTITIES_GUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.9.0";
+        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.9.1";
         internal static new ManualLogSource Logger;
 
         void Awake()
