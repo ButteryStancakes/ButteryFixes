@@ -115,17 +115,6 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.GenerateNewFloor))]
-        [HarmonyPrefix]
-        static void PreGenerateNewFloor(RoundManager __instance)
-        {
-            if (__instance.currentLevel.dungeonFlowTypes == null || __instance.currentLevel.dungeonFlowTypes.Length < 1)
-            {
-                __instance.currentDungeonType = -1;
-                SoundManager.Instance.currentLevelAmbience = __instance.currentLevel.levelAmbienceClips;
-            }
-        }
-
         [HarmonyPatch(typeof(RoundManager), "Awake")]
         [HarmonyPostfix]
         static void RoundManagerPostAwake(RoundManager __instance)
