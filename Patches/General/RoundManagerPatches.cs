@@ -98,28 +98,26 @@ namespace ButteryFixes.Patches.General
             return TransSpawnRandomEnemy(instructions.ToList(), "firstTimeSpawningDaytimeEnemies", nameof(SelectableLevel.DaytimeEnemies), "Daytime spawner");
         }
 
-        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.DespawnPropsAtEndOfRound))]
-        [HarmonyPrefix]
-        static void PreDespawnPropsAtEndOfRound(bool despawnAllItems)
-        {
-            if (despawnAllItems || !StartOfRound.Instance.isObjectAttachedToMagnet || StartOfRound.Instance.attachedVehicle == null)
-                return;
-
-            foreach (GrabbableObject grabObj in Object.FindObjectsOfType<GrabbableObject>())
-            {
-                if (!grabObj.isInShipRoom && !grabObj.isHeld && grabObj.transform.parent == StartOfRound.Instance.attachedVehicle.transform)
-                {
-                    Plugin.Logger.LogWarning($"Item \"{grabObj.itemProperties.itemName}\" #{grabObj.GetInstanceID()} is inside the Cruiser, but somehow not marked as collected; will be preserved");
-                    GameNetworkManager.Instance.localPlayerController.SetItemInElevator(true, true, grabObj);
-                }
-            }
-        }
-
         [HarmonyPatch(typeof(RoundManager), "Awake")]
         [HarmonyPostfix]
         static void RoundManagerPostAwake(RoundManager __instance)
         {
             TileOverrides.OverrideTiles(__instance.dungeonFlowTypes);
+        }
+
+        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.RefreshLightsList))]
+        [HarmonyPrefix]
+        static void PreRefreshLightsList()
+        {
+            if (StartOfRound.Instance.currentLevel.name == "DineLevel" || StartOfRound.Instance.currentLevel.name == "ArtificeLevel")
+            {
+                foreach (GameObject poweredLight in GameObject.FindGameObjectsWithTag("PoweredLight"))
+                    if (poweredLight.name.StartsWith("NeonLights") && poweredLight.transform.position.y > -100f)
+                    {
+                        poweredLight.tag = "Untagged";
+                        Plugin.Logger.LogDebug($"{StartOfRound.Instance.currentLevel.PlanetName}: Exterior lights disconnected from interior power");
+                    }
+            }
         }
     }
 }

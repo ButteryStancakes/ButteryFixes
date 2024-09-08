@@ -78,7 +78,7 @@ namespace ButteryFixes.Patches.General
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetStats))]
         [HarmonyPostfix]
-        static void StartOfRoundPostResetStats(StartOfRound __instance)
+        static void PostResetStats(StartOfRound __instance)
         {
             // stop tracking "most profitable" between days
             for (int i = 0; i < __instance.gameStats.allPlayerStats.Length; i++)
@@ -277,6 +277,22 @@ namespace ButteryFixes.Patches.General
             // fix Experimentation weather on screen after being fired
             if (!__instance.isChallengeFile)
                 __instance.SetMapScreenInfoToCurrentLevel();
+        }
+
+        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ReviveDeadPlayers))]
+        [HarmonyPostfix]
+        static void PostReviveDeadPlayers(StartOfRound __instance)
+        {
+            // stop bleeding if you're healed at the end of the round
+            for (int i = 0; i < __instance.allPlayerScripts.Length; i++)
+            {
+                if (__instance.allPlayerScripts[i].criticallyInjured || __instance.allPlayerScripts[i].bleedingHeavily)
+                {
+                    __instance.allPlayerScripts[i].criticallyInjured = false;
+                    __instance.allPlayerScripts[i].bleedingHeavily = false;
+                    Plugin.Logger.LogDebug($"Fixed player #{i} ({__instance.allPlayerScripts[i].playerUsername}) still bleeding after recovering full HP");
+                }
+            }
         }
     }
 }

@@ -35,18 +35,6 @@ namespace ButteryFixes.Patches.Objects
                 buttonDown = false;
         }
 
-        [HarmonyPatch(typeof(SprayPaintItem), nameof(SprayPaintItem.DiscardItem))]
-        [HarmonyPrefix]
-        static void SprayPaintItemPreDiscardItem(SprayPaintItem __instance)
-        {
-            // vanilla calls this after base.DiscardItem() which means this reference will always be null
-            if (__instance.playerHeldBy != null)
-            {
-                __instance.playerHeldBy.activatingItem = false;
-                __instance.playerHeldBy.equippedUsableItemQE = false;
-            }
-        }
-
         [HarmonyPatch(typeof(SprayPaintItem), nameof(SprayPaintItem.EquipItem))]
         [HarmonyPostfix]
         static void SprayPaintItemPostEquipItem(SprayPaintItem __instance)
@@ -58,13 +46,23 @@ namespace ButteryFixes.Patches.Objects
 
         [HarmonyPatch(typeof(SprayPaintItem), nameof(SprayPaintItem.Start))]
         [HarmonyPostfix]
-        static void SprayPaintItemPostStart(SprayPaintItem __instance)
+        static void SprayPaintItemPostStart(SprayPaintItem __instance, ref int ___sprayCanMatsIndex)
         {
-            if (!Compatibility.DISABLE_SPRAY_PAINT_PATCHES && !__instance.isWeedKillerSprayBottle)
+            if (!__instance.isWeedKillerSprayBottle)
             {
-                __instance.sprayIntervalSpeed = 0.037f; // 0.05
-                // 600 * (0.08 / 0.037) * (0.175 / 0.1) = 2270, rounded to multiple of 200
-                __instance.maxSprayPaintDecals = 2200;
+                if (!Compatibility.DISABLE_SPRAY_PAINT_PATCHES)
+                {
+                    __instance.sprayIntervalSpeed = 0.037f; // 0.05
+                    // 600 * (0.08 / 0.037) * (0.175 / 0.1) = 2270, rounded to multiple of 200
+                    __instance.maxSprayPaintDecals = 2200;
+                }
+                if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
+                {
+                    ___sprayCanMatsIndex = new System.Random((int)__instance.NetworkObjectId).Next(__instance.particleMats.Length);
+                    __instance.sprayParticle.GetComponent<ParticleSystemRenderer>().material = __instance.particleMats[___sprayCanMatsIndex];
+                    __instance.sprayCanNeedsShakingParticle.GetComponent<ParticleSystemRenderer>().material = __instance.particleMats[___sprayCanMatsIndex];
+                    Plugin.Logger.LogDebug($"Rerolled spray can #{__instance.NetworkObjectId} color");
+                }
             }
         }
 

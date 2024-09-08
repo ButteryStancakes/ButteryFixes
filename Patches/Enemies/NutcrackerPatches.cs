@@ -1,6 +1,11 @@
 ﻿using ButteryFixes.Utility;
 using GameNetcodeStuff;
 using HarmonyLib;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using UnityEngine;
 
 namespace ButteryFixes.Patches.Enemies
 {
@@ -42,25 +47,26 @@ namespace ButteryFixes.Patches.Enemies
             }
         }
 
-        // probably unnecessary?
-        /*[HarmonyPatch(typeof(NutcrackerEnemyAI), "AimGun", MethodType.Enumerator)]
+        [HarmonyPatch(typeof(NutcrackerEnemyAI), nameof(NutcrackerEnemyAI.CheckLineOfSightForLocalPlayer))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> NutcrackerEnemyAITransAimGun(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> TransCheckLineOfSightForLocalPlayer(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
-            FieldInfo updatePositionThreshold = AccessTools.Field(typeof(EnemyAI), nameof(EnemyAI.updatePositionThreshold));
-            for (int i = 2; i < codes.Count - 1; i++)
+            FieldInfo collidersAndRoomMaskAndDefault = AccessTools.Field(typeof(StartOfRound), nameof(StartOfRound.collidersAndRoomMaskAndDefault));
+            for (int i = 1; i < codes.Count; i++)
             {
-                if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == updatePositionThreshold && codes[i - 1].opcode == OpCodes.Ldc_R4 && (float)codes[i - 1].operand == 0.45f)
+                if (codes[i].opcode == OpCodes.Call && ((MethodInfo)codes[i].operand).Name.Equals(nameof(Physics.Linecast)) && codes[i - 1].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 1].operand == collidersAndRoomMaskAndDefault)
                 {
-                    // change updatePositionThreshold to a smaller value
-                    codes[i - 1].operand = 0.3f;
-                    Plugin.Logger.LogDebug("Transpiler (Nutcracker aim): Improve positionaal accuracy during \"tiptoe\"");
+                    codes[i].operand = AccessTools.Method(typeof(Physics), nameof(Physics.Linecast), [typeof(Vector3), typeof(Vector3), typeof(int), typeof(QueryTriggerInteraction)]);
+                    codes.Insert(i, new CodeInstruction(OpCodes.Ldc_I4_1));
+                    Plugin.Logger.LogDebug("Transpiler (Nutcracker sight): Ignore triggers when spotting player");
+                    return codes; // i++;
                 }
             }
 
+            Plugin.Logger.LogError("Nutcracker sight transpiler failed");
             return codes;
-        }*/
+        }
     }
 }

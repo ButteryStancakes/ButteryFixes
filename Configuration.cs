@@ -65,7 +65,7 @@ namespace ButteryFixes
                 "Gameplay",
                 "LimitSpawnChance",
                 true,
-                "(Host only) Prevents enemy spawn weight from exceeding 100 (likely the intended maximum) if its spawn curves would normally allow it to do so.\nThis will prevent some enemies from spawning out of control on certain maps.");
+                "(Host only) Prevents enemy spawn weight from exceeding 100 (likely the intended maximum) if its spawn curves would normally allow it to do so.\nThis will prevent some enemy types from spawning out of control on certain maps.");
 
             unlimitedOldBirds = configFile.Bind(
                 "Gameplay",
@@ -133,8 +133,8 @@ namespace ButteryFixes
             // removed when fixed in v60
             configFile.Bind("Gameplay", "KillOldBirds", true, "Legacy setting, doesn't work");
             configFile.Remove(configFile["Gameplay", "KillOldBirds"].Definition);
-            // moved to Interior Designer
-            configFile.Bind("Visual", "FancyEntranceDoors", false, "Legacy setting, use \"Interior Designer\" instead");
+            // moved to Chameleon
+            configFile.Bind("Visual", "FancyEntranceDoors", false, "Legacy setting, use \"Chameleon\" instead");
             configFile.Remove(configFile["Visual", "FancyEntranceDoors"].Definition);
         }
     }

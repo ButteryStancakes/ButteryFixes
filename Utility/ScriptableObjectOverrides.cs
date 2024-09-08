@@ -60,6 +60,10 @@ namespace ButteryFixes.Utility
                         enemy.Value.enemyPrefab.GetComponent<CaveDwellerPhysicsProp>().itemProperties.isConductiveMetal = false;
                         Plugin.Logger.LogDebug($"Conductive: {enemy.Value.enemyName} (False)");
                         break;
+                    case "SandWorm":
+                        enemy.Value.canBeDestroyed = false;
+                        Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Don't get eaten by other worms");
+                        break;
                 }
                 // fix residue in ScriptableObject
                 enemy.Value.numberSpawned = 0;
@@ -130,6 +134,7 @@ namespace ButteryFixes.Utility
                 }
 
                 bool linearRolloff = false;
+                scanNodeProperties = item.spawnPrefab?.GetComponentInChildren<ScanNodeProperties>();
 
                 switch (item.name)
                 {
@@ -177,7 +182,6 @@ namespace ButteryFixes.Utility
                         else
                         {
                             item.spawnPrefab.GetComponent<KeyItem>().scrapValue = 0;
-                            scanNodeProperties = item.spawnPrefab.GetComponentInChildren<ScanNodeProperties>();
                             if (scanNodeProperties != null)
                             {
                                 scanNodeProperties.subText = string.Empty;
@@ -189,7 +193,6 @@ namespace ButteryFixes.Utility
                     case "Knife":
                         KnifeItem knifeItem = item.spawnPrefab.GetComponent<KnifeItem>();
                         //knifeItem.SetScrapValue(knifeItem.scrapValue);
-                        scanNodeProperties = knifeItem.GetComponentInChildren<ScanNodeProperties>();
                         if (scanNodeProperties != null)
                         {
                             scanNodeProperties.scrapValue = knifeItem.scrapValue;
@@ -267,9 +270,9 @@ namespace ButteryFixes.Utility
                     Plugin.Logger.LogDebug($"Audio rolloff: {item.itemName}");
                 }
 
-                // affects whoopie cushion primarily
                 if (item.spawnPrefab != null)
                 {
+                    // affects whoopie cushion primarily
                     bool triggerHidden = false;
                     foreach (Renderer rend in item.spawnPrefab.GetComponentsInChildren<Renderer>())
                     {
@@ -281,6 +284,18 @@ namespace ButteryFixes.Utility
                     }
                     if (triggerHidden)
                         Plugin.Logger.LogDebug($"Invisible trigger: {item.itemName}");
+
+                    // affects soccer ball primarily
+                    if (item.spawnPrefab.GetComponent<Rigidbody>() != null && scanNodeProperties != null)
+                    {
+                        Rigidbody rb = scanNodeProperties.GetComponent<Rigidbody>();
+                        if (rb == null)
+                        {
+                            rb = scanNodeProperties.gameObject.AddComponent<Rigidbody>();
+                            rb.isKinematic = true;
+                            Plugin.Logger.LogDebug($"Scan node rigidbody: {item.itemName}");
+                        }
+                    }
                 }
 
                 if (item.canBeInspected)
