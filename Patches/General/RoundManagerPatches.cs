@@ -119,5 +119,18 @@ namespace ButteryFixes.Patches.General
                     }
             }
         }
+
+        [HarmonyPatch(typeof(RoundManager), "SetToCurrentLevelWeather")]
+        [HarmonyPostfix]
+        static void PostSetToCurrentLevelWeather(RoundManager __instance)
+        {
+            if (TimeOfDay.Instance.currentLevelWeather == LevelWeatherType.Rainy && Configuration.restoreQuicksand.Value)
+            {
+                System.Random rand = new System.Random(StartOfRound.Instance.randomMapSeed + 2);
+                for (int i = 0; i < rand.Next(5, rand.Next(0, 100) < 7 ? 30 : 15); i++)
+                    Object.Instantiate(__instance.quicksandPrefab, __instance.GetRandomNavMeshPositionInBoxPredictable(__instance.outsideAINodes[rand.Next(0, __instance.outsideAINodes.Length)].transform.position, 30f, default, rand, -1) + Vector3.up, Quaternion.identity, __instance.mapPropsContainer.transform);
+                Plugin.Logger.LogInfo("Generated quicksand. Note that this *might* cause problems if other players in your lobby aren't using this setting!!");
+            }
+        }
     }
 }

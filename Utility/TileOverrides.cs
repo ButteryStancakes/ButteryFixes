@@ -1,6 +1,7 @@
 ﻿using DunGen;
 using DunGen.Graph;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace ButteryFixes.Utility
@@ -29,6 +30,24 @@ namespace ButteryFixes.Utility
 
                     // --- MANOR ---
 
+                    // entrance
+                    case "ManorStartRoom":
+                        // cache wooden door sounds
+                        if (GlobalReferences.woodenDoorOpen == null || GlobalReferences.woodenDoorOpen.Length < 1 || GlobalReferences.woodenDoorClose == null || GlobalReferences.woodenDoorClose.Length < 1)
+                        {
+                            // fun!
+                            AnimatedObjectTrigger manorDoor = tile.transform.Find("Doorways")?.GetComponentInChildren<Doorway>()?.ConnectorPrefabWeights?.FirstOrDefault(prefab => prefab.GameObject.name == "FancyDoorMapSpawn")?.GameObject.GetComponent<SpawnSyncedObject>()?.spawnPrefab?.GetComponentInChildren<AnimatedObjectTrigger>();
+
+                            if (manorDoor != null)
+                            {
+                                GlobalReferences.woodenDoorClose = manorDoor.boolFalseAudios;
+                                GlobalReferences.woodenDoorOpen = manorDoor.boolTrueAudios;
+                                Plugin.Logger.LogDebug("Cached wooden door SFX");
+                            }
+                            else
+                                Plugin.Logger.LogWarning("Could not find fancy door prefab");
+                        }
+                        break;
                     // kitchen
                     case "KitchenTile":
                         string[] coffeeTablePaths =

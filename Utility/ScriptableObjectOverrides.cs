@@ -124,7 +124,7 @@ namespace ButteryFixes.Utility
             };
             ScanNodeProperties scanNodeProperties;
 
-            Item teaKettle = null, tatteredMetalSheet = null;
+            Item brush = null, tatteredMetalSheet = null;
             foreach (Item item in StartOfRound.Instance.allItemsList.itemsList)
             {
                 if (item == null)
@@ -141,6 +141,9 @@ namespace ButteryFixes.Utility
                     case "Boombox":
                         item.spawnPrefab.GetComponent<BoomboxItem>().boomboxAudio.dopplerLevel = 0.3f * GlobalReferences.dopplerLevelMult;
                         Plugin.Logger.LogDebug("Doppler level: Boombox");
+                        break;
+                    case "Brush":
+                        brush = item;
                         break;
                     case "ClownHorn":
                         item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 0.4f;
@@ -231,9 +234,6 @@ namespace ButteryFixes.Utility
                             item.maxValue = 225; // 89 + 1
                         }
                         break;
-                    case "TeaKettle":
-                        teaKettle = item;
-                        break;
                     case "TragedyMask":
                         GlobalReferences.tragedyMaskRandomClips = item.spawnPrefab.GetComponent<RandomPeriodicAudioPlayer>()?.randomClips;
                         MeshFilter maskMesh = item.spawnPrefab.transform.Find("MaskMesh")?.GetComponent<MeshFilter>();
@@ -258,10 +258,10 @@ namespace ButteryFixes.Utility
                         item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
                         Plugin.Logger.LogDebug("Audio rolloff: Weed killer");
                         break;
-                    case "Zeddog":
+                    /*case "Zeddog":
                         item.dropSFX = item.grabSFX; //null
                         Plugin.Logger.LogDebug($"Audio: {item.itemName}");
-                        break;
+                        break;*/
                 }
 
                 if (linearRolloff)
@@ -335,10 +335,12 @@ namespace ButteryFixes.Utility
                 }
             }
 
-            if (tatteredMetalSheet != null && teaKettle != null)
+            if (tatteredMetalSheet != null && brush != null)
             {
-                tatteredMetalSheet.grabSFX = teaKettle.grabSFX;
+                tatteredMetalSheet.grabSFX = brush.grabSFX;
                 Plugin.Logger.LogDebug("Audio: Metal sheet");
+                brush.grabSFX = null;
+                Plugin.Logger.LogDebug("Audio: Brush");
             }
         }
 
