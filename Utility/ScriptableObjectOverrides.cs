@@ -103,7 +103,7 @@ namespace ButteryFixes.Utility
                 //{ "Hairdryer", true },
                 { "LockPicker", true },
                 { "MoldPan", true },
-                //{ "Phone", true },
+                { "Phone", true },
                 //{ "PlasticCup", false },
                 { "Shotgun", true },
                 { "SoccerBall", false },
@@ -122,9 +122,19 @@ namespace ButteryFixes.Utility
                 { "ComedyMask", false },
                 { "TragedyMask", false }
             };
+            Dictionary<string, bool> inspectable = new()
+            {
+                { "ExtensionLadder", false },
+                { "MagnifyingGlass", true },
+                { "PillBottle", true },
+                { "RadarBooster", false },
+                { "SprayPaint", true },
+                { "WeedKillerBottle", true }
+            };
             ScanNodeProperties scanNodeProperties;
 
-            Item brush = null, tatteredMetalSheet = null;
+            AudioClip shovelPickUp = null, pickUpPlasticBin = null;
+            List<Item> metalSFXItems = [], plasticSFXItems = [];
             foreach (Item item in StartOfRound.Instance.allItemsList.itemsList)
             {
                 if (item == null)
@@ -142,8 +152,24 @@ namespace ButteryFixes.Utility
                         item.spawnPrefab.GetComponent<BoomboxItem>().boomboxAudio.dopplerLevel = 0.3f * GlobalReferences.dopplerLevelMult;
                         Plugin.Logger.LogDebug("Doppler level: Boombox");
                         break;
+                    case "BottleBin":
+                        pickUpPlasticBin = item.grabSFX;
+                        break;
                     case "Brush":
-                        brush = item;
+                    //case "PerfumeBottle":
+                    //case "Phone":
+                    //case "PickleJar":
+                    //case "PillBottle":
+                    //case "PlasticCup":
+                    case "Remote":
+                    case "SteeringWheel":
+                    case "Toothpaste":
+                    case "ToyCube":
+                        plasticSFXItems.Add(item);
+                        break;
+                    case "Candy":
+                        item.grabSFX = null;
+                        Plugin.Logger.LogDebug($"Audio: {item.itemName}");
                         break;
                     case "ClownHorn":
                         item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 0.4f;
@@ -151,18 +177,16 @@ namespace ButteryFixes.Utility
                         break;
                     case "Cog1":
                     case "EasterEgg":
-                    case "FishTestProp":
                     case "MapDevice":
                     case "ZapGun":
                         linearRolloff = true;
                         break;
-                    case "ExtensionLadder":
-                    case "RadarBooster":
-                        item.canBeInspected = false;
-                        Plugin.Logger.LogDebug($"Inspectable: {item.itemName} (False)");
-                        break;
                     case "FancyLamp":
                         item.verticalOffset = 0f;
+                        break;
+                    case "FishTestProp":
+                        linearRolloff = true;
+                        //plasticSFXItems.Add(item);
                         break;
                     case "Flashlight":
                     case "ProFlashlight":
@@ -171,6 +195,10 @@ namespace ButteryFixes.Utility
                         sharedMaterials[1] = flashlightItem.bulbDark;
                         flashlightItem.flashlightMesh.sharedMaterials = sharedMaterials;
                         Plugin.Logger.LogDebug($"Bulb off: {item.itemName}");
+                        break;
+                    case "GarbageLid":
+                    case "MetalSheet":
+                        metalSFXItems.Add(item);
                         break;
                     case "Hairdryer":
                         item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 2f;
@@ -208,15 +236,6 @@ namespace ButteryFixes.Utility
                             item.maxValue = 105; // 42 + 1
                         }
                         break;
-                    case "MagnifyingGlass":
-                    case "PillBottle":
-                    case "SprayPaint":
-                        item.canBeInspected = true;
-                        Plugin.Logger.LogDebug($"Inspectable: {item.itemName} (True)");
-                        break;
-                    case "MetalSheet":
-                        tatteredMetalSheet = item;
-                        break;
                     case "RedLocustHive":
                         linearRolloff = true;
                         item.spawnPrefab.GetComponent<PhysicsProp>().isInFactory = false;
@@ -233,6 +252,9 @@ namespace ButteryFixes.Utility
                             item.minValue = 63; // 25
                             item.maxValue = 225; // 89 + 1
                         }
+                        break;
+                    case "TeaKettle":
+                        shovelPickUp = item.grabSFX;
                         break;
                     case "TragedyMask":
                         GlobalReferences.tragedyMaskRandomClips = item.spawnPrefab.GetComponent<RandomPeriodicAudioPlayer>()?.randomClips;
@@ -253,8 +275,6 @@ namespace ButteryFixes.Utility
                         }
                         break;
                     case "WeedKillerBottle":
-                        item.canBeInspected = true;
-                        Plugin.Logger.LogDebug("Inspectable: Weed killer (True)");
                         item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
                         Plugin.Logger.LogDebug("Audio rolloff: Weed killer");
                         break;
@@ -298,6 +318,12 @@ namespace ButteryFixes.Utility
                     }
                 }
 
+                if (inspectable.ContainsKey(item.name))
+                {
+                    item.canBeInspected = inspectable[item.name];
+                    Plugin.Logger.LogDebug($"Inspectable: {item.itemName} ({item.canBeInspected})");
+                }
+
                 if (item.canBeInspected)
                 {
                     if (item.toolTips == null)
@@ -335,12 +361,21 @@ namespace ButteryFixes.Utility
                 }
             }
 
-            if (tatteredMetalSheet != null && brush != null)
+            if (shovelPickUp != null)
             {
-                tatteredMetalSheet.grabSFX = brush.grabSFX;
-                Plugin.Logger.LogDebug("Audio: Metal sheet");
-                brush.grabSFX = null;
-                Plugin.Logger.LogDebug("Audio: Brush");
+                foreach (Item metalSFXItem in metalSFXItems)
+                {
+                    metalSFXItem.grabSFX = shovelPickUp;
+                    Plugin.Logger.LogDebug($"Audio: {metalSFXItem.itemName}");
+                }
+            }
+            if (pickUpPlasticBin != null)
+            {
+                foreach (Item plasticSFXItem in plasticSFXItems)
+                {
+                    plasticSFXItem.grabSFX = pickUpPlasticBin;
+                    Plugin.Logger.LogDebug($"Audio: {plasticSFXItem.itemName}");
+                }
             }
         }
 
