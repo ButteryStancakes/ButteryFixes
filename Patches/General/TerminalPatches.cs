@@ -96,7 +96,7 @@ namespace ButteryFixes.Patches.General
             }
 
             Plugin.Logger.LogError("Terminal text transpiler failed");
-            return codes;
+            return instructions;
         }
 
         [HarmonyPatch(typeof(Terminal), "TextPostProcess")]
@@ -161,7 +161,7 @@ namespace ButteryFixes.Patches.General
             }
 
             Plugin.Logger.LogError("Order capacity transpiler failed");
-            return codes;
+            return instructions;
         }
 
         [HarmonyPatch(typeof(Terminal), "LoadNewNodeIfAffordable")]
@@ -210,7 +210,7 @@ namespace ButteryFixes.Patches.General
             }
 
             Plugin.Logger.LogError("Survival kit transpiler failed");
-            return codes;
+            return instructions;
         }
     }
 }

@@ -36,8 +36,11 @@ namespace ButteryFixes.Utility
                         Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Subtract from indoor power, not outdoor power");
                         break;
                     case "Blob":
-                        enemy.Value.canDie = false;
-                        Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Don't \"die\" when crushed by spike trap");
+                        if (!Compatibility.INSTALLED_EVERYTHING_CAN_DIE)
+                        {
+                            enemy.Value.canDie = false;
+                            Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Don't \"die\" when crushed by spike trap");
+                        }
                         break;
                     case "ForestGiant":
                         ScanNodeProperties scanNodeProperties = enemy.Value.enemyPrefab.GetComponentInChildren<ScanNodeProperties>();
@@ -111,7 +114,7 @@ namespace ButteryFixes.Utility
                 //{ "SteeringWheel", true },
                 { "ToiletPaperRolls", false },
                 //{ "ToyTrain", false },
-                { "Zeddog", false }
+                //{ "Zeddog", false }
             };
             Dictionary<string, bool> grabbableBeforeStart = new()
             {
@@ -133,7 +136,7 @@ namespace ButteryFixes.Utility
             };
             ScanNodeProperties scanNodeProperties;
 
-            AudioClip shovelPickUp = null, pickUpPlasticBin = null;
+            AudioClip shovelPickUp = null, pickUpPlasticBin = null, dropCan = null;
             List<Item> metalSFXItems = [], plasticSFXItems = [];
             foreach (Item item in StartOfRound.Instance.allItemsList.itemsList)
             {
@@ -159,7 +162,7 @@ namespace ButteryFixes.Utility
                     //case "PerfumeBottle":
                     //case "Phone":
                     //case "PickleJar":
-                    //case "PillBottle":
+                    case "PillBottle":
                     //case "PlasticCup":
                     case "Remote":
                     case "SteeringWheel":
@@ -181,6 +184,11 @@ namespace ButteryFixes.Utility
                     case "ZapGun":
                         linearRolloff = true;
                         break;
+                    case "FancyCup":
+                    case "GarbageLid":
+                    case "MetalSheet":
+                        metalSFXItems.Add(item);
+                        break;
                     case "FancyLamp":
                         item.verticalOffset = 0f;
                         break;
@@ -195,10 +203,6 @@ namespace ButteryFixes.Utility
                         sharedMaterials[1] = flashlightItem.bulbDark;
                         flashlightItem.flashlightMesh.sharedMaterials = sharedMaterials;
                         Plugin.Logger.LogDebug($"Bulb off: {item.itemName}");
-                        break;
-                    case "GarbageLid":
-                    case "MetalSheet":
-                        metalSFXItems.Add(item);
                         break;
                     case "Hairdryer":
                         item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 2f;
@@ -252,6 +256,9 @@ namespace ButteryFixes.Utility
                             item.minValue = 63; // 25
                             item.maxValue = 225; // 89 + 1
                         }
+                        break;
+                    case "SprayPaint":
+                        dropCan = item.dropSFX;
                         break;
                     case "TeaKettle":
                         shovelPickUp = item.grabSFX;
@@ -375,6 +382,8 @@ namespace ButteryFixes.Utility
                 {
                     plasticSFXItem.grabSFX = pickUpPlasticBin;
                     Plugin.Logger.LogDebug($"Audio: {plasticSFXItem.itemName}");
+                    if (plasticSFXItem.name == "PillBottle" && dropCan != null)
+                        plasticSFXItem.dropSFX = dropCan;
                 }
             }
         }

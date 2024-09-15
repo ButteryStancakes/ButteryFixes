@@ -34,7 +34,7 @@ namespace ButteryFixes.Patches.Enemies
             }
 
             Plugin.Logger.LogError("Bracken damage transpiler failed");
-            return codes;
+            return instructions;
         }
 
         [HarmonyPatch(typeof(FlowermanAI), nameof(FlowermanAI.HitEnemy))]

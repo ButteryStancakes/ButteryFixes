@@ -48,7 +48,7 @@ namespace ButteryFixes.Patches.Objects
             }
 
             Plugin.Logger.LogError("Radiation warning transpiler failed");
-            return codes;
+            return instructions;
         }
     }
 }

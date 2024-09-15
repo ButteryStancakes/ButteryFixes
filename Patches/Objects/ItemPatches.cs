@@ -29,10 +29,13 @@ namespace ButteryFixes.Patches.Objects
         {
             if (other.CompareTag("Enemy"))
             {
-                if (other.TryGetComponent(out EnemyAICollisionDetect enemyAICollisionDetect) && enemyAICollisionDetect.mainScript != null && enemyAICollisionDetect.mainScript.isEnemyDead)
+                if (!other.TryGetComponent(out EnemyAICollisionDetect enemyAICollisionDetect) || enemyAICollisionDetect.mainScript == null)
                     return false;
 
-                if (__instance.itemScript.isInShipRoom && StartOfRound.Instance.shipIsLeaving)
+                if (enemyAICollisionDetect.mainScript.isEnemyDead)
+                    return false;
+
+                if (__instance.itemScript.isInShipRoom && (StartOfRound.Instance.shipIsLeaving || !enemyAICollisionDetect.mainScript.isInsidePlayerShip || enemyAICollisionDetect.mainScript is ForestGiantAI || enemyAICollisionDetect.mainScript is RadMechAI))
                     return false;
             }
 

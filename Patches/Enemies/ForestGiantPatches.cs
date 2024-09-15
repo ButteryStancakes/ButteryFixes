@@ -33,7 +33,7 @@ namespace ButteryFixes.Patches.Enemies
             }
 
             Plugin.Logger.LogError("Forest giant death transpiler failed");
-            return codes;
+            return instructions;
         }
 
         [HarmonyPatch(typeof(ForestGiantAI), "LookForPlayers")]

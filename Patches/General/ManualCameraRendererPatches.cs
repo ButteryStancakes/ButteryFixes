@@ -45,7 +45,7 @@ namespace ButteryFixes.Patches.General
             }
 
             Plugin.Logger.LogError("Radar transpiler failed");
-            return codes;
+            return instructions;
         }
     }
 }

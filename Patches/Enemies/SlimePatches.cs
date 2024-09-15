@@ -28,7 +28,7 @@ namespace ButteryFixes.Patches.Enemies
             }
 
             Plugin.Logger.LogError("Hygrodere collision transpiler failed");
-            return codes;
+            return instructions;
         }
     }
 }

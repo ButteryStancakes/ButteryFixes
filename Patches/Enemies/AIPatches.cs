@@ -101,7 +101,7 @@ namespace ButteryFixes.Patches.Enemies
             }
 
             Plugin.Logger.LogError("Enemy kill transpiler failed");
-            return codes;
+            return instructions;
         }
     }
 }

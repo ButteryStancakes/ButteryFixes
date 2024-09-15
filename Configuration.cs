@@ -22,7 +22,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, unlimitedOldBirds, restoreShipIcon, limitSpawnChance, restoreQuicksand;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, unlimitedOldBirds, restoreShipIcon, limitSpawnChance;
 
         internal static void Init(ConfigFile cfg)
         {
@@ -54,12 +54,6 @@ namespace ButteryFixes
                 "MakeConductive",
                 true,
                 "(Host only) Makes some metallic items that are non-conductive in vanilla actually conductive. This fix applies sensibly to the existing items, but you can disable it if you are used to vanilla's properties.");
-
-            restoreQuicksand = configFile.Bind(
-                "Gameplay",
-                "RestoreQuicksand",
-                false,
-                "Spawns quicksand during Rainy weather again. (This currently does not work in vanilla v64)\nIt is recommended that ALL PLAYERS enable this setting together! Otherwise there could be minor desync");
 
             keysAreScrap = configFile.Bind(
                 "Gameplay",

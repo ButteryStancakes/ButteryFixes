@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace ButteryFixes.Patches.General
@@ -120,16 +121,81 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(RoundManager), "SetToCurrentLevelWeather")]
+        [HarmonyPatch(typeof(RoundManager), "SpawnOutsideHazards")]
         [HarmonyPostfix]
-        static void PostSetToCurrentLevelWeather(RoundManager __instance)
+        static void PostSpawnOutsideHazards(RoundManager __instance)
         {
-            if (TimeOfDay.Instance.currentLevelWeather == LevelWeatherType.Rainy && Configuration.restoreQuicksand.Value)
+            // this can't run in OnSceneLoaded because the navmesh needs to be baked first
+            if (StartOfRound.Instance.currentLevel.name == "DineLevel")
             {
-                System.Random rand = new System.Random(StartOfRound.Instance.randomMapSeed + 2);
-                for (int i = 0; i < rand.Next(5, rand.Next(0, 100) < 7 ? 30 : 15); i++)
-                    Object.Instantiate(__instance.quicksandPrefab, __instance.GetRandomNavMeshPositionInBoxPredictable(__instance.outsideAINodes[rand.Next(0, __instance.outsideAINodes.Length)].transform.position, 30f, default, rand, -1) + Vector3.up, Quaternion.identity, __instance.mapPropsContainer.transform);
-                Plugin.Logger.LogInfo("Generated quicksand. Note that this *might* cause problems if other players in your lobby aren't using this setting!!");
+                foreach (string chainlinkFenceName in new string[]{
+                    "ChainlinkFence",
+                    "ChainlinkFence (1)",
+                    "ChainlinkFence (2)",
+                    "ChainlinkFence (3)",
+                    "Collider",
+                    "Collider (1)"
+                })
+                {
+                    GameObject chainlinkFence = GameObject.Find("/Environment/Map/" + chainlinkFenceName);
+                    if (chainlinkFence != null)
+                    {
+                        if (chainlinkFence.GetComponent<Renderer>() != null)
+                        {
+                            GameObject chainlinkFake = new(chainlinkFenceName + "Collider")
+                            {
+                                layer = 28
+                            };
+                            chainlinkFake.transform.SetParent(chainlinkFence.transform.parent);
+                            chainlinkFake.transform.SetPositionAndRotation(chainlinkFence.transform.position, chainlinkFence.transform.rotation);
+                            chainlinkFake.transform.localScale = chainlinkFence.transform.localScale;
+                            foreach (BoxCollider boxCollider in chainlinkFence.GetComponents<BoxCollider>())
+                            {
+                                boxCollider.enabled = false;
+                                BoxCollider chainlinkCollider = chainlinkFake.AddComponent<BoxCollider>();
+                                chainlinkCollider.center = boxCollider.center;
+                                chainlinkCollider.size = boxCollider.size;
+                            }
+                        }
+                        else
+                            chainlinkFence.layer = 28;
+                    }
+                }
+                Plugin.Logger.LogDebug("Dine - Adjusted fences for enemy line-of-sight");
+            }
+        }
+
+        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.FinishGeneratingNewLevelClientRpc))]
+        [HarmonyPostfix]
+        static void PostFinishGeneratingNewLevelClientRpc(RoundManager __instance)
+        {
+            if (!__instance.IsServer || __instance.currentDungeonType != 4)
+                return;
+
+            MineshaftElevatorController mineshaftElevatorController = __instance.spawnedSyncedObjects.FirstOrDefault(spawnedSyncedObject => spawnedSyncedObject.name.StartsWith("MineshaftElevator"))?.GetComponent<MineshaftElevatorController>();
+            if (mineshaftElevatorController == null)
+            {
+                Plugin.Logger.LogWarning("Mineshaft interior was selected, but could not find the elevator on host");
+                return;
+            }
+
+            foreach (SpikeRoofTrap spikeRoofTrap in Object.FindObjectsOfType<SpikeRoofTrap>())
+            {
+                if (Vector3.Distance(spikeRoofTrap.transform.position, mineshaftElevatorController.elevatorBottomPoint.position) < 12f)
+                {
+                    Plugin.Logger.LogDebug($"Spike trap #{spikeRoofTrap.GetInstanceID()} is very close to the elevator");
+                    NetworkObject netObj = spikeRoofTrap.GetComponentInParent<NetworkObject>();
+                    if (netObj != null && netObj.IsSpawned)
+                    {
+                        if (Vector3.Distance(netObj.transform.position, mineshaftElevatorController.elevatorBottomPoint.position) <= 7f)
+                        {
+                            Plugin.Logger.LogDebug($"Spike trap #{spikeRoofTrap.GetInstanceID()} was too close, and has been destroyed");
+                            netObj.Despawn();
+                        }
+                    }
+                    else
+                        Plugin.Logger.LogWarning("Error occurred while despawning spike trap (could not find network object, or it was not network spawned yet)");
+                }
             }
         }
     }

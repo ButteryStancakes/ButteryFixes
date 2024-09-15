@@ -201,7 +201,7 @@ namespace ButteryFixes.Patches.Enemies
             }
 
             Plugin.Logger.LogError("Masked stun transpiler failed");
-            return codes;
+            return instructions;
         }
     }
 }

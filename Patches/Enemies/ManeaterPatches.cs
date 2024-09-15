@@ -34,7 +34,7 @@ namespace ButteryFixes.Patches.Enemies
             }
 
             Plugin.Logger.LogError("Maneater transpiler failed");
-            return codes;
+            return instructions;
         }
     }
 }

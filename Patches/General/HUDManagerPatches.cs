@@ -66,7 +66,7 @@ namespace ButteryFixes.Patches.General
             }
 
             Plugin.Logger.LogError("Health UI transpiler failed");
-            return codes;
+            return instructions;
         }
 
         [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.GetNewStoryLogClientRpc))]

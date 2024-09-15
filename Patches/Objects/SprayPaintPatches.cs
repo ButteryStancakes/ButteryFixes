@@ -108,7 +108,7 @@ namespace ButteryFixes.Patches.Objects
             }
 
             Plugin.Logger.LogError("Spray paint transpiler failed");
-            return codes;
+            return instructions;
         }
     }
 }

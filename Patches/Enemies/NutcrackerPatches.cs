@@ -66,7 +66,7 @@ namespace ButteryFixes.Patches.Enemies
             }
 
             Plugin.Logger.LogError("Nutcracker sight transpiler failed");
-            return codes;
+            return instructions;
         }
     }
 }

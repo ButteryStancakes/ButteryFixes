@@ -45,7 +45,7 @@ namespace ButteryFixes.Patches.Objects
             }
 
             Plugin.Logger.LogError("Cruiser noise alert transpiler failed");
-            return codes;
+            return instructions;
         }
 
         [HarmonyPatch(typeof(VehicleController), nameof(VehicleController.SetRadioValues))]
@@ -57,6 +57,27 @@ namespace ButteryFixes.Patches.Objects
                 radioPingTimestamp = Time.realtimeSinceStartup + 2f;
                 RoundManager.Instance.PlayAudibleNoise(__instance.radioAudio.transform.position, 16f, Mathf.Min((__instance.radioAudio.volume + __instance.radioInterference.volume) * 0.5f, 0.9f), 0, false, 2692);
             }
+        }
+
+        [HarmonyPatch(typeof(VehicleController), nameof(VehicleController.CollectItemsInTruck))]
+        [HarmonyTranspiler]
+        private static IEnumerable<CodeInstruction> TransCollectItemsInTruck(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            MethodInfo overlapSphere = AccessTools.Method(typeof(Physics), nameof(Physics.OverlapSphere), [typeof(Vector3), typeof(float), typeof(int), typeof(QueryTriggerInteraction)]);
+            for (int i = 1; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Call && (MethodInfo)codes[i].operand == overlapSphere && codes[i - 1].opcode == OpCodes.Ldc_I4_1)
+                {
+                    codes[i - 1].opcode = OpCodes.Ldc_I4_2;
+                    Plugin.Logger.LogDebug("Transpiler (Cruiser collect): Auto-collect trigger colliders, for Teeth");
+                    return codes;
+                }
+            }
+
+            Plugin.Logger.LogError("Cruiser collect transpiler failed");
+            return instructions;
         }
     }
 }

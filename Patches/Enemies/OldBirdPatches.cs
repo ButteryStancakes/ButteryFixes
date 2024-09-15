@@ -39,7 +39,7 @@ namespace ButteryFixes.Patches.Enemies
             }
 
             Plugin.Logger.LogError("Old Bird stomp transpiler failed");
-            return codes;
+            return instructions;
         }
     }
 }
