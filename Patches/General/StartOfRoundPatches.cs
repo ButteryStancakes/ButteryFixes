@@ -202,6 +202,7 @@ namespace ButteryFixes.Patches.General
                     grabbableObject.scrapPersistedThroughRounds = true;
                     grabbableObject.isInElevator = true;
                     grabbableObject.isInShipRoom = true;
+                    grabbableObject.hasBeenHeld = true;
 
                     LungProp lungProp = grabbableObject as LungProp;
                     if (lungProp != null && lungProp.isLungDocked)

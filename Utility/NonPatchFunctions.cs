@@ -166,7 +166,10 @@ namespace ButteryFixes.Utility
 
         public static void SpawnProbabilitiesPostProcess(ref List<int> spawnProbabilities, List<SpawnableEnemyWithRarity> enemies)
         {
-            for (int i = 0; i < spawnProbabilities.Count; i++)
+            if (spawnProbabilities.Count != enemies.Count)
+                Plugin.Logger.LogWarning("SpawnProbabilities is a different size from the current enemies list. This should never happen outside of mod conflicts!");
+
+            for (int i = 0; i < spawnProbabilities.Count && i < enemies.Count; i++)
             {
                 EnemyType enemyType = enemies[i].enemyType;
                 // prevent old birds from eating up spawns when there are no dormant nests left

@@ -181,17 +181,13 @@ namespace ButteryFixes.Patches.General
 
             foreach (SpikeRoofTrap spikeRoofTrap in Object.FindObjectsOfType<SpikeRoofTrap>())
             {
-                if (Vector3.Distance(spikeRoofTrap.transform.position, mineshaftElevatorController.elevatorBottomPoint.position) < 12f)
+                if (Vector3.Distance(spikeRoofTrap.spikeTrapAudio.transform.position, mineshaftElevatorController.elevatorBottomPoint.position) < 7f)
                 {
-                    Plugin.Logger.LogDebug($"Spike trap #{spikeRoofTrap.GetInstanceID()} is very close to the elevator");
                     NetworkObject netObj = spikeRoofTrap.GetComponentInParent<NetworkObject>();
                     if (netObj != null && netObj.IsSpawned)
                     {
-                        if (Vector3.Distance(netObj.transform.position, mineshaftElevatorController.elevatorBottomPoint.position) <= 7f)
-                        {
-                            Plugin.Logger.LogDebug($"Spike trap #{spikeRoofTrap.GetInstanceID()} was too close, and has been destroyed");
-                            netObj.Despawn();
-                        }
+                        Plugin.Logger.LogDebug($"Spike trap #{spikeRoofTrap.GetInstanceID()} was destroyed (too close to the elevator)");
+                        netObj.Despawn();
                     }
                     else
                         Plugin.Logger.LogWarning("Error occurred while despawning spike trap (could not find network object, or it was not network spawned yet)");

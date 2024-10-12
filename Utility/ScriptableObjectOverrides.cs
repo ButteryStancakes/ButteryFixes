@@ -361,7 +361,7 @@ namespace ButteryFixes.Utility
                     Plugin.Logger.LogDebug($"Conductive: {item.itemName} ({item.isConductiveMetal})");
                 }
 
-                if (grabbableBeforeStart.ContainsKey(item.name))
+                if (grabbableBeforeStart.ContainsKey(item.name) && !Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
                 {
                     item.canBeGrabbedBeforeGameStart = grabbableBeforeStart[item.name];
                     Plugin.Logger.LogDebug($"Hold before ship has landed: {item.itemName} ({item.canBeGrabbedBeforeGameStart})");
