@@ -105,6 +105,13 @@ namespace ButteryFixes.Patches.Player
                     Plugin.Logger.LogDebug("Fix ship icon on radar");
                 }
             }
+
+            // in case the default suit has an attached costume object
+            if (__instance.currentSuitID >= 0 && __instance.currentSuitID < __instance.playersManager.unlockablesList.unlockables.Count)
+            {
+                if (__instance.playersManager.unlockablesList.unlockables[__instance.currentSuitID].headCostumeObject != null || __instance.playersManager.unlockablesList.unlockables[__instance.currentSuitID].lowerTorsoCostumeObject != null)
+                    UnlockableSuit.SwitchSuitForPlayer(__instance, __instance.currentSuitID, false);
+            }
         }
 
         [HarmonyPatch(typeof(PlayerControllerB), "PlayJumpAudio")]

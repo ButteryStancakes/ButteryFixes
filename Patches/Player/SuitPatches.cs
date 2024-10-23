@@ -18,11 +18,19 @@ namespace ButteryFixes.Patches.Player
                 return;
 
             // MoreCompany changes player suits before the local player is initialized which would cause this function to throw an exception
-            if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.localPlayerController == null)
+            if (GameNetworkManager.Instance?.localPlayerController == null)
                 return;
 
             if (costumeContainer == GameNetworkManager.Instance.localPlayerController.headCostumeContainerLocal)
             {
+                // because of the return statement above, MoreCompany users might require additional cleanup
+                if (Compatibility.INSTALLED_MORE_COMPANY && costumeContainer.childCount > 0)
+                {
+                    foreach (Transform oldCostume in costumeContainer)
+                        if (!oldCostume.CompareTag("DoNotSet"))
+                            Object.Destroy(oldCostume.gameObject);
+                }
+
                 costumeContainer = GameNetworkManager.Instance.localPlayerController.headCostumeContainer;
                 if (newCostume != null)
                     localCostumeChanged = true;

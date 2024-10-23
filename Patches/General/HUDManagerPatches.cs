@@ -139,5 +139,13 @@ namespace ButteryFixes.Patches.General
             if (XPGain < -8)
                 XPGain = -8;
         }
+
+        [HarmonyPatch(typeof(HUDManager), "HelmetCondensationDrops")]
+        [HarmonyPostfix]
+        static void PostHelmetCondensationDrops(HUDManager __instance)
+        {
+            if (!__instance.increaseHelmetCondensation && !TimeOfDay.Instance.insideLighting && TimeOfDay.Instance.effects[(int)LevelWeatherType.Flooded].effectEnabled && Vector3.Angle(GameNetworkManager.Instance.localPlayerController.gameplayCamera.transform.forward, Vector3.up) < 45f)
+                __instance.increaseHelmetCondensation = true;
+        }
     }
 }

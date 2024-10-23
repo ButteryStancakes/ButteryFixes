@@ -76,7 +76,8 @@ namespace ButteryFixes.Patches.Objects
                 }
             }
 
-            Plugin.Logger.LogError("Cruiser collect transpiler failed");
+            // reduce to a warning, because HighQuotaFixes includes a different solution for this issue, and Cruiser Additions patches it the exact same way as I do
+            Plugin.Logger.LogWarning("Cruiser collect transpiler failed");
             return instructions;
         }
     }

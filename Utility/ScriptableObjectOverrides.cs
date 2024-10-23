@@ -423,6 +423,19 @@ namespace ButteryFixes.Utility
                         }
                         break;
                 }
+
+                if (unlockableItem.unlockableType == 0 && unlockableItem.headCostumeObject != null)
+                {
+                    if (unlockableItem.headCostumeObject.name.StartsWith("PartyHatContainer"))
+                    {
+                        Transform birthdayHat = unlockableItem.headCostumeObject.transform.Find("BirthdayHat");
+                        if (birthdayHat != null)
+                        {
+                            birthdayHat.SetLocalPositionAndRotation(new Vector3(-0.0309999995f, 0.286000013f, -0.00700000022f), Quaternion.Euler(255.292f, 0f, 180f));
+                            Plugin.Logger.LogDebug($"Offset: Birthday hat ({unlockableItem.unlockableName})");
+                        }
+                    }
+                }
             }
         }
     }
