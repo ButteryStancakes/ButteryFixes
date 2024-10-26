@@ -424,7 +424,7 @@ namespace ButteryFixes.Utility
                         break;
                 }
 
-                if (unlockableItem.unlockableType == 0 && unlockableItem.headCostumeObject != null)
+                /*if (unlockableItem.unlockableType == 0 && unlockableItem.headCostumeObject != null)
                 {
                     if (unlockableItem.headCostumeObject.name.StartsWith("PartyHatContainer"))
                     {
@@ -435,7 +435,7 @@ namespace ButteryFixes.Utility
                             Plugin.Logger.LogDebug($"Offset: Birthday hat ({unlockableItem.unlockableName})");
                         }
                     }
-                }
+                }*/
             }
         }
     }

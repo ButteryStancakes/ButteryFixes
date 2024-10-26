@@ -131,8 +131,7 @@ namespace ButteryFixes.Patches.Player
             if (__instance.isInsideFactory || __instance.isInElevator || __instance.isInHangarShipRoom)
                 return;
 
-            EnemyType mouthDog = GlobalReferences.allEnemiesList["MouthDog"];
-            if (mouthDog == null || mouthDog.numberSpawned < 1)
+            if (!GlobalReferences.allEnemiesList.TryGetValue("MouthDog", out EnemyType mouthDog) || mouthDog.numberSpawned < 1)
                 return;
 
             bool moving = false;
@@ -166,8 +165,7 @@ namespace ButteryFixes.Patches.Player
 
             if (Configuration.fixJumpCheese.Value && __instance.IsServer)
             {
-                EnemyType mouthDog = GlobalReferences.allEnemiesList["MouthDog"];
-                if (mouthDog != null && mouthDog.numberSpawned >= 1)
+                if (GlobalReferences.allEnemiesList.TryGetValue("MouthDog", out EnemyType mouthDog) && mouthDog.numberSpawned > 0)
                     NonPatchFunctions.FakeFootstepAlert(__instance);
             }
 

@@ -107,7 +107,7 @@ namespace ButteryFixes.Patches.Player
                     Transform chest = lowerTorso?.Find("spine.002/spine.003");
 
                     // hat costume piece
-                    if (suit.headCostumeObject != null)
+                    if (suit.headCostumeObject != null && !suit.headCostumeObject.name.StartsWith("PartyHatContainer"))
                     {
                         Transform head = __instance.detachedHeadObject;
                         if ((head == null || snipped) && chest != null)

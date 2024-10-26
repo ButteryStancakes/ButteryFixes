@@ -12,9 +12,9 @@ namespace ButteryFixes
         internal const string BETTER_SPRAY_PAINT_GUID = "taffyko.BetterSprayPaint";
         internal const string EVERYTHING_CAN_DIE_GUID = "nwnt.EverythingCanDie";
         internal const string LETHAL_QUANTITIES_GUID = "LethalQuantities";
-        internal const string MORE_COMPANY_GUID = "me.swipez.melonloader.morecompany";
+        //internal const string MORE_COMPANY_GUID = "me.swipez.melonloader.morecompany";
 
-        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, /*INSTALLED_LETHAL_FIXES,*/ INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES, INSTALLED_MORE_COMPANY;
+        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, /*INSTALLED_LETHAL_FIXES,*/ INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES/*, INSTALLED_MORE_COMPANY*/;
         internal static bool DISABLE_LADDER_PATCH, DISABLE_PLAYERMODEL_PATCHES, DISABLE_ENEMY_MESH_PATCH, DISABLE_SPRAY_PAINT_PATCHES;
 
         internal static void Init()
@@ -67,11 +67,11 @@ namespace ButteryFixes
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Lethal Quantities detected");
             }
 
-            if (Chainloader.PluginInfos.ContainsKey(MORE_COMPANY_GUID))
+            /*if (Chainloader.PluginInfos.ContainsKey(MORE_COMPANY_GUID))
             {
                 INSTALLED_MORE_COMPANY = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - More Company detected");
-            }
+            }*/
         }
     }
 }
