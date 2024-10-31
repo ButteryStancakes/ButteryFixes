@@ -1,4 +1,5 @@
 ﻿using BepInEx.Bootstrap;
+using System.Runtime.InteropServices;
 
 namespace ButteryFixes
 {
@@ -13,8 +14,9 @@ namespace ButteryFixes
         internal const string EVERYTHING_CAN_DIE_GUID = "nwnt.EverythingCanDie";
         internal const string LETHAL_QUANTITIES_GUID = "LethalQuantities";
         //internal const string MORE_COMPANY_GUID = "me.swipez.melonloader.morecompany";
+        internal const string ARTIFICE_BLIZZARD_GUID = "butterystancakes.lethalcompany.artificeblizzard";
 
-        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, /*INSTALLED_LETHAL_FIXES,*/ INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES/*, INSTALLED_MORE_COMPANY*/;
+        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, /*INSTALLED_LETHAL_FIXES,*/ INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES, /*INSTALLED_MORE_COMPANY,*/ INSTALLED_ARTIFICE_BLIZZARD;
         internal static bool DISABLE_LADDER_PATCH, DISABLE_PLAYERMODEL_PATCHES, DISABLE_ENEMY_MESH_PATCH, DISABLE_SPRAY_PAINT_PATCHES;
 
         internal static void Init()
@@ -72,6 +74,12 @@ namespace ButteryFixes
                 INSTALLED_MORE_COMPANY = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - More Company detected");
             }*/
+
+            if (Chainloader.PluginInfos.ContainsKey(ARTIFICE_BLIZZARD_GUID))
+            {
+                INSTALLED_ARTIFICE_BLIZZARD = true;
+                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Artifice Blizzard detected");
+            }
         }
     }
 }

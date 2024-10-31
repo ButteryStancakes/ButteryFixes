@@ -74,6 +74,25 @@ namespace ButteryFixes.Patches.General
 
             __instance.VehiclesList.FirstOrDefault(vehicle => vehicle.name == "CompanyCruiser").GetComponent<VehicleController>().radioAudio.dopplerLevel = Configuration.musicDopplerLevel.Value == MusicDopplerLevel.Reduced ? 0.37f : GlobalReferences.dopplerLevelMult;
             Plugin.Logger.LogDebug("Doppler level: Cruiser");
+
+            if (__instance.outerSpaceSunAnimator != null)
+            {
+                Light sunlight = __instance.outerSpaceSunAnimator.GetComponent<Light>();
+                if (sunlight != null)
+                {
+                    __instance.outerSpaceSunAnimator.enabled = false;
+                    __instance.outerSpaceSunAnimator.transform.rotation = Quaternion.Euler(10.560008f, 188.704987f, 173.568024f);
+                    sunlight.enabled = true;
+                    Plugin.Logger.LogDebug("Orbit visuals: Sun");
+                }
+            }
+            ParticleSystem windParticle = __instance.elevatorTransform.GetComponent<PlayAudioAnimationEvent>()?.particle;
+            if (windParticle)
+            {
+                ParticleSystem.MainModule main = windParticle.main;
+                main.stopAction = ParticleSystemStopAction.None;
+                Plugin.Logger.LogDebug("Orbit visuals: Particles");
+            }
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetStats))]
@@ -292,6 +311,21 @@ namespace ButteryFixes.Patches.General
                     __instance.allPlayerScripts[i].criticallyInjured = false;
                     __instance.allPlayerScripts[i].bleedingHeavily = false;
                     Plugin.Logger.LogDebug($"Fixed player #{i} ({__instance.allPlayerScripts[i].playerUsername}) still bleeding after recovering full HP");
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ChangePlanet))]
+        [HarmonyPostfix]
+        static void PostChangePlanet(StartOfRound __instance)
+        {
+            // don't show company in orbit
+            if (__instance.currentLevel.name == "CompanyBuildingLevel" && __instance.currentPlanetPrefab != null)
+            {
+                foreach (Renderer rend in __instance.currentPlanetPrefab.GetComponentsInChildren<Renderer>())
+                {
+                    rend.enabled = false;
+                    rend.forceRenderingOff = true;
                 }
             }
         }

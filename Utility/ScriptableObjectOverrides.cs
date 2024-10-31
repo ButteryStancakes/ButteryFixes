@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BepInEx.Bootstrap;
+using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -75,22 +76,37 @@ namespace ButteryFixes.Utility
 
         internal static void OverrideSelectableLevels()
         {
+            GameObject moon2 = null;
+            SelectableLevel artifice = null;
             foreach (SelectableLevel selectableLevel in StartOfRound.Instance.levels)
             {
                 switch (selectableLevel.name)
                 {
                     case "OffenseLevel":
                         selectableLevel.videoReel = null;
+                        Plugin.Logger.LogDebug("Offense: Video reel");
                         break;
                     case "RendLevel":
                         SpawnableMapObject spikeRoofTrapHazard = selectableLevel.spawnableMapObjects.FirstOrDefault(spawnableMapObject => spawnableMapObject.prefabToSpawn?.name == "SpikeRoofTrapHazard");
                         if (spikeRoofTrapHazard != null)
                         {
                             spikeRoofTrapHazard.requireDistanceBetweenSpawns = true;
-                            Plugin.Logger.LogDebug("Rend now properly spaces spike traps");
+                            Plugin.Logger.LogDebug("Rend: Space spike traps");
                         }
                         break;
+                    case "ArtificeLevel":
+                        artifice = selectableLevel;
+                        break;
                 }
+
+                if (moon2 == null && selectableLevel.planetPrefab.name.StartsWith("Moon2"))
+                    moon2 = selectableLevel.planetPrefab;
+            }
+
+            if (!Compatibility.INSTALLED_ARTIFICE_BLIZZARD && moon2 != null && artifice != null)
+            {
+                artifice.planetPrefab = moon2;
+                Plugin.Logger.LogDebug("Artifice: Planet/moon");
             }
         }
 
