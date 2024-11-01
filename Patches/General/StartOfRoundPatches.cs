@@ -11,7 +11,7 @@ namespace ButteryFixes.Patches.General
     internal class StartOfRoundPatches
     {
         [HarmonyPatch(typeof(StartOfRound), "Awake")]
-        [HarmonyBefore(Compatibility.GENERAL_IMPROVEMENTS_GUID)]
+        [HarmonyBefore(Compatibility.GUID_GENERAL_IMPROVEMENTS)]
         [HarmonyPostfix]
         static void StartOfRoundPostAwake(StartOfRound __instance)
         {
@@ -75,7 +75,7 @@ namespace ButteryFixes.Patches.General
             __instance.VehiclesList.FirstOrDefault(vehicle => vehicle.name == "CompanyCruiser").GetComponent<VehicleController>().radioAudio.dopplerLevel = Configuration.musicDopplerLevel.Value == MusicDopplerLevel.Reduced ? 0.37f : GlobalReferences.dopplerLevelMult;
             Plugin.Logger.LogDebug("Doppler level: Cruiser");
 
-            if (__instance.outerSpaceSunAnimator != null)
+            if (!Compatibility.DISABLE_SUN && __instance.outerSpaceSunAnimator != null)
             {
                 Light sunlight = __instance.outerSpaceSunAnimator.GetComponent<Light>();
                 if (sunlight != null)
@@ -320,7 +320,7 @@ namespace ButteryFixes.Patches.General
         static void PostChangePlanet(StartOfRound __instance)
         {
             // don't show company in orbit
-            if (__instance.currentLevel.name == "CompanyBuildingLevel" && __instance.currentPlanetPrefab != null)
+            if (!Compatibility.DISABLE_SUN && __instance.currentLevel.name == "CompanyBuildingLevel" && __instance.currentPlanetPrefab != null)
             {
                 foreach (Renderer rend in __instance.currentPlanetPrefab.GetComponentsInChildren<Renderer>())
                 {

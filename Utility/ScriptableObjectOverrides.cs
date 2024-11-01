@@ -99,7 +99,8 @@ namespace ButteryFixes.Utility
                         break;
                 }
 
-                if (moon2 == null && selectableLevel.planetPrefab.name.StartsWith("Moon2"))
+                // celestial tint changes this prefab
+                if (!Compatibility.DISABLE_SUN && moon2 == null && selectableLevel.planetPrefab.name.StartsWith("Moon2"))
                     moon2 = selectableLevel.planetPrefab;
             }
 
