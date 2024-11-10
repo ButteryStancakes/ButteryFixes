@@ -36,7 +36,8 @@ namespace ButteryFixes.Patches.Objects
         [HarmonyPrefix]
         static bool PreSetOffMineAnimation(Landmine __instance)
         {
-            return !__instance.hasExploded || __instance.GetComponent<Renderer>().enabled;
+            Renderer rend = __instance.GetComponent<Renderer>();
+            return !__instance.hasExploded || rend == null || rend.enabled;
         }
     }
 }

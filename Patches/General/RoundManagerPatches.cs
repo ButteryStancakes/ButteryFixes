@@ -194,13 +194,5 @@ namespace ButteryFixes.Patches.General
                 }
             }
         }
-
-        [HarmonyPatch(typeof(RoundManager), "RefreshEnemiesList")]
-        [HarmonyPrefix]
-        static void PreRefreshEnemiesList(RoundManager __instance)
-        {
-            // fix Halloween fog getting stuck between rounds
-            __instance.indoorFog.gameObject.SetActive(false);
-        }
     }
 }

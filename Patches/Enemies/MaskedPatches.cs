@@ -152,7 +152,9 @@ namespace ButteryFixes.Patches.Enemies
         {
             if (maskType == 5 && __instance.maskTypeIndex != 1)
             {
-                __instance.maskTypeIndex = 1;
+                // this breaks the eye glow for Tragedy (since we are just changing meshes, not GameObject)
+                //__instance.maskTypeIndex = 1;
+
                 Plugin.Logger.LogDebug("Mimic spawned that should be Tragedy");
 
                 // replace the comedy mask's models with the tragedy models

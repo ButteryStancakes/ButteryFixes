@@ -77,12 +77,12 @@ namespace ButteryFixes.Patches.General
 
             if (!Compatibility.DISABLE_SUN && __instance.outerSpaceSunAnimator != null)
             {
-                Light sunlight = __instance.outerSpaceSunAnimator.GetComponent<Light>();
-                if (sunlight != null)
+                GlobalReferences.sunlight = __instance.outerSpaceSunAnimator.GetComponent<Light>();
+                if (GlobalReferences.sunlight != null)
                 {
                     __instance.outerSpaceSunAnimator.enabled = false;
                     __instance.outerSpaceSunAnimator.transform.rotation = Quaternion.Euler(10.560008f, 188.704987f, 173.568024f);
-                    sunlight.enabled = true;
+                    GlobalReferences.sunlight.enabled = true;
                     Plugin.Logger.LogDebug("Orbit visuals: Sun");
                 }
             }
@@ -255,6 +255,9 @@ namespace ButteryFixes.Patches.General
         {
             if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && GlobalReferences.shipNode != null)
                 GlobalReferences.shipNode.position = StartOfRound.Instance.elevatorTransform.position + GlobalReferences.shipNodeOffset;
+
+            if (!Compatibility.DISABLE_SUN && __instance.firingPlayersCutsceneRunning && GlobalReferences.sunlight != null && GlobalReferences.shipAnimator != null && GlobalReferences.shipAnimator.GetBool("AlarmRinging"))
+                GlobalReferences.sunlight.enabled = false;
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ShipHasLeft))]
@@ -297,6 +300,9 @@ namespace ButteryFixes.Patches.General
             // fix Experimentation weather on screen after being fired
             if (!__instance.isChallengeFile)
                 __instance.SetMapScreenInfoToCurrentLevel();
+
+            if (!Compatibility.DISABLE_SUN && GlobalReferences.sunlight != null)
+                GlobalReferences.sunlight.enabled = true;
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ReviveDeadPlayers))]

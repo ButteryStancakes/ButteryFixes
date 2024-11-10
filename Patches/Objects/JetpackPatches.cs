@@ -31,7 +31,7 @@ namespace ButteryFixes.Patches.Objects
                 playerBody.setMaterialToPlayerSuit = false;
                 foreach (Renderer rend in playerBody.GetComponentsInChildren<Renderer>())
                 {
-                    if (rend.gameObject.layer == 0 && (rend.name.StartsWith("BetaBadge") || rend.name.StartsWith("LevelSticker")))
+                    if (rend.gameObject.layer == 0 && (rend.name.StartsWith("BetaBadge") || rend.name.StartsWith("LevelSticker") || rend.name.StartsWith("BirthdayHat")))
                         rend.forceRenderingOff = true;
                     // don't change ParticleSystem renderers
                     else if (rend.gameObject.layer == 20 && (rend is SkinnedMeshRenderer || rend is MeshRenderer))

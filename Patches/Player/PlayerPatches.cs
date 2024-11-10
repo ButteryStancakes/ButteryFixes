@@ -14,6 +14,8 @@ namespace ButteryFixes.Patches.Player
         static List<PlayerControllerB> bunnyhoppingPlayers = new(50);
         //static GrabbableObject previousItem = null;
 
+        static float safeTimer = 0;
+
         [HarmonyPatch(typeof(PlayerControllerB), "Update")]
         [HarmonyPostfix]
         static void PlayerControllerBPostUpdate(PlayerControllerB __instance, bool ___isWalking)
@@ -26,6 +28,18 @@ namespace ButteryFixes.Patches.Player
                 if (___isWalking)
                     __instance.playerBodyAnimator.SetFloat("animationSpeed", 1f);
             }
+
+            if (__instance.isGrabbingObjectAnimation)
+            {
+                safeTimer += Time.deltaTime;
+                if (safeTimer > __instance.grabObjectAnimationTime + 0.3f)
+                {
+                    Plugin.Logger.LogWarning("Player's interactions probably got stuck - resetting");
+                    __instance.isGrabbingObjectAnimation = false;
+                }
+            }
+            else if (safeTimer > 0f)
+                safeTimer = 0f;
         }
 
         [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.ConnectClientToPlayerObject))]

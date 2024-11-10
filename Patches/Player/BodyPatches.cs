@@ -107,7 +107,8 @@ namespace ButteryFixes.Patches.Player
                     Transform chest = lowerTorso?.Find("spine.002/spine.003");
 
                     // hat costume piece
-                    if (suit.headCostumeObject != null && !suit.headCostumeObject.name.StartsWith("PartyHatContainer"))
+                    bool party = suit.headCostumeObject.name.StartsWith("PartyHatContainer");
+                    if (suit.headCostumeObject != null && (!party || (!burnt && mesh.sharedMaterial != GlobalReferences.scavengerSuitBurnt)))
                     {
                         Transform head = __instance.detachedHeadObject;
                         if ((head == null || snipped) && chest != null)
@@ -121,7 +122,7 @@ namespace ButteryFixes.Patches.Player
                                 hat.transform.SetPositionAndRotation(new Vector3(0.0698937327f, 0.0544735007f, -0.685245395f), Quaternion.Euler(96.69699f, 0f, 0f));
                                 hat.transform.localScale = new Vector3(hat.transform.localScale.x / head.localScale.x, hat.transform.localScale.y / head.localScale.y, hat.transform.localScale.z / head.localScale.z);
                             }
-                            if (!__instance.setMaterialToPlayerSuit || burnt)
+                            if ((!__instance.setMaterialToPlayerSuit || burnt) && !party)
                             {
                                 foreach (Renderer hatRend in hat.GetComponentsInChildren<Renderer>())
                                     hatRend.sharedMaterial = suitMaterial;

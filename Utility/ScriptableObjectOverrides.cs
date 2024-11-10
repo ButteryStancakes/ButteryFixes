@@ -117,11 +117,12 @@ namespace ButteryFixes.Utility
             {
                 //{ "Airhorn", true },
                 //{ "Clock", false },
-                //{ "DustPan", true },
+                { "DustPan", true },
                 { "FancyCup", true },
                 //{ "Flask", false },
                 //{ "Hairdryer", true },
                 { "LockPicker", true },
+                //{ "MagnifyingGlass", true },
                 { "MoldPan", true },
                 { "Phone", true },
                 //{ "PlasticCup", false },
@@ -153,7 +154,7 @@ namespace ButteryFixes.Utility
             };
             ScanNodeProperties scanNodeProperties;
 
-            AudioClip shovelPickUp = null, pickUpPlasticBin = null, dropCan = null;
+            AudioClip shovelPickUp = null, pickUpPlasticBin = null, dropPlastic1 = null;
             List<Item> metalSFXItems = [], plasticSFXItems = [];
             foreach (Item item in StartOfRound.Instance.allItemsList.itemsList)
             {
@@ -257,6 +258,9 @@ namespace ButteryFixes.Utility
                             item.maxValue = 105; // 42 + 1
                         }
                         break;
+                    case "Mug":
+                        dropPlastic1 = item.dropSFX;
+                        break;
                     case "RedLocustHive":
                         linearRolloff = true;
                         item.spawnPrefab.GetComponent<PhysicsProp>().isInFactory = false;
@@ -273,9 +277,6 @@ namespace ButteryFixes.Utility
                             item.minValue = 63; // 25
                             item.maxValue = 225; // 89 + 1
                         }
-                        break;
-                    case "SprayPaint":
-                        dropCan = item.dropSFX;
                         break;
                     case "TeaKettle":
                         shovelPickUp = item.grabSFX;
@@ -399,8 +400,8 @@ namespace ButteryFixes.Utility
                 {
                     plasticSFXItem.grabSFX = pickUpPlasticBin;
                     Plugin.Logger.LogDebug($"Audio: {plasticSFXItem.itemName}");
-                    if (plasticSFXItem.name == "PillBottle" && dropCan != null)
-                        plasticSFXItem.dropSFX = dropCan;
+                    if (plasticSFXItem.name == "PillBottle" && dropPlastic1 != null)
+                        plasticSFXItem.dropSFX = dropPlastic1;
                 }
             }
         }
