@@ -38,17 +38,20 @@ namespace ButteryFixes.Patches.Player
                     __instance.playerBodyAnimator.SetFloat("animationSpeed", 1f);
             }
 
-            if (__instance.isGrabbingObjectAnimation)
+            if (!Compatibility.DISABLE_INTERACT_FIX)
             {
-                safeTimer += Time.deltaTime;
-                if (safeTimer > __instance.grabObjectAnimationTime + 0.3f)
+                if (__instance.isGrabbingObjectAnimation)
                 {
-                    Plugin.Logger.LogWarning("Player's interactions probably got stuck - resetting");
-                    __instance.isGrabbingObjectAnimation = false;
+                    safeTimer += Time.deltaTime;
+                    if (safeTimer > __instance.grabObjectAnimationTime + 0.3f)
+                    {
+                        Plugin.Logger.LogWarning("Player's interactions probably got stuck - resetting");
+                        __instance.isGrabbingObjectAnimation = false;
+                    }
                 }
+                else if (safeTimer > 0f)
+                    safeTimer = 0f;
             }
-            else if (safeTimer > 0f)
-                safeTimer = 0f;
         }
 
         [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.ConnectClientToPlayerObject))]
