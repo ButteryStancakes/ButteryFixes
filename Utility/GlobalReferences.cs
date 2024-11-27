@@ -39,8 +39,5 @@ namespace ButteryFixes.Utility
 
         // for cabin doors
         internal static AudioClip[] woodenDoorOpen, woodenDoorClose;
-
-        // for space view
-        internal static Light sunlight;
     }
 }

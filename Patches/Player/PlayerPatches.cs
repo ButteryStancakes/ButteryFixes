@@ -2,6 +2,7 @@
 using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -11,8 +12,16 @@ namespace ButteryFixes.Patches.Player
     [HarmonyPatch]
     internal class PlayerPatches
     {
+        static readonly string[] qeBugItems = [
+            "Flashlight",
+            "ProFlashlight",
+            "LaserPointer",
+            "Jetpack",
+            //"Boombox",
+            "Hairdryer"
+        ];
+
         static List<PlayerControllerB> bunnyhoppingPlayers = new(50);
-        //static GrabbableObject previousItem = null;
 
         static float safeTimer = 0;
 
@@ -186,7 +195,6 @@ namespace ButteryFixes.Patches.Player
             bunnyhoppingPlayers.Remove(__instance);
         }
 
-        // TODO: Check animator state during animsync RPC instead
         [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.PlayFootstepSound))]
         [HarmonyPostfix]
         static void PostPlayFootstepSound(PlayerControllerB __instance)
@@ -195,19 +203,13 @@ namespace ButteryFixes.Patches.Player
                 NonPatchFunctions.playerWasLastSprinting[__instance.actualClientId] = __instance.playerBodyAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Sprinting");
         }
 
-        /*[HarmonyPatch(typeof(PlayerControllerB), "UpdatePlayerAnimationClientRpc")]
-        [HarmonyPostfix]
-        static void PostUpdatePlayerAnimationClientRpc(PlayerControllerB __instance)
-        {
-        }*/
-
         [HarmonyPatch(typeof(PlayerControllerB), "QEItemInteract_performed")]
         [HarmonyPatch(typeof(PlayerControllerB), "ItemSecondaryUse_performed")]
         [HarmonyPatch(typeof(PlayerControllerB), "ItemTertiaryUse_performed")]
         [HarmonyPrefix]
         static void PreItem_performed(PlayerControllerB __instance)
         {
-            if (__instance.equippedUsableItemQE && __instance.currentlyHeldObjectServer != null && (__instance.currentlyHeldObjectServer is FlashlightItem || __instance.currentlyHeldObjectServer is JetpackItem || __instance.currentlyHeldObjectServer is BoomboxItem || __instance.currentlyHeldObjectServer.itemProperties.name == "Hairdryer"))
+            if (__instance.equippedUsableItemQE && __instance.currentlyHeldObjectServer != null && qeBugItems.Contains(__instance.currentlyHeldObjectServer.itemProperties.name))
             {
                 __instance.equippedUsableItemQE = false;
                 Plugin.Logger.LogWarning("Tried to use Q/E controls on an item with no secondary/tertiary use. This shouldn't happen");

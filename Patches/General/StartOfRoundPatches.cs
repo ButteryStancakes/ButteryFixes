@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace ButteryFixes.Patches.General
 {
@@ -75,23 +76,23 @@ namespace ButteryFixes.Patches.General
             __instance.VehiclesList.FirstOrDefault(vehicle => vehicle.name == "CompanyCruiser").GetComponent<VehicleController>().radioAudio.dopplerLevel = Configuration.musicDopplerLevel.Value == MusicDopplerLevel.Reduced ? 0.37f : GlobalReferences.dopplerLevelMult;
             Plugin.Logger.LogDebug("Doppler level: Cruiser");
 
-            if (!Compatibility.DISABLE_SUN && __instance.outerSpaceSunAnimator != null)
-            {
-                GlobalReferences.sunlight = __instance.outerSpaceSunAnimator.GetComponent<Light>();
-                if (GlobalReferences.sunlight != null)
-                {
-                    __instance.outerSpaceSunAnimator.enabled = false;
-                    __instance.outerSpaceSunAnimator.transform.rotation = Quaternion.Euler(10.560008f, 188.704987f, 173.568024f);
-                    GlobalReferences.sunlight.enabled = true;
-                    Plugin.Logger.LogDebug("Orbit visuals: Sun");
-                }
-            }
             ParticleSystem windParticle = __instance.elevatorTransform.GetComponent<PlayAudioAnimationEvent>()?.particle;
             if (windParticle)
             {
                 ParticleSystem.MainModule main = windParticle.main;
                 main.stopAction = ParticleSystemStopAction.None;
                 Plugin.Logger.LogDebug("Orbit visuals: Particles");
+            }
+
+            BeltBagInventoryUI beltBagUI = Object.FindObjectOfType<BeltBagInventoryUI>(true);
+            if (beltBagUI != null)
+            {
+                Navigation nav = new()
+                {
+                    mode = Navigation.Mode.None
+                };
+                foreach (Button button in beltBagUI.GetComponentsInChildren<Button>())
+                    button.navigation = nav;
             }
         }
 
@@ -208,6 +209,7 @@ namespace ButteryFixes.Patches.General
         static void PostReviveDeadPlayers()
         {
             GlobalReferences.crashedJetpackAsLocalPlayer = false;
+            SoundManager.Instance.SetEchoFilter(false);
         }
 
         [HarmonyPatch(typeof(StartOfRound), "Start")]
@@ -256,8 +258,8 @@ namespace ButteryFixes.Patches.General
             if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && GlobalReferences.shipNode != null)
                 GlobalReferences.shipNode.position = StartOfRound.Instance.elevatorTransform.position + GlobalReferences.shipNodeOffset;
 
-            if (!Compatibility.DISABLE_SUN && __instance.firingPlayersCutsceneRunning && GlobalReferences.sunlight != null && GlobalReferences.shipAnimator != null && GlobalReferences.shipAnimator.GetBool("AlarmRinging"))
-                GlobalReferences.sunlight.enabled = false;
+            if (SoundManager.Instance != null && SoundManager.Instance.echoEnabled && GameNetworkManager.Instance.localPlayerController != null && GameNetworkManager.Instance.localPlayerController.isPlayerDead && GameNetworkManager.Instance.localPlayerController.spectatedPlayerScript != null && !GameNetworkManager.Instance.localPlayerController.spectatedPlayerScript.isInsideFactory)
+                SoundManager.Instance.SetEchoFilter(false);
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ShipHasLeft))]
@@ -300,9 +302,6 @@ namespace ButteryFixes.Patches.General
             // fix Experimentation weather on screen after being fired
             if (!__instance.isChallengeFile)
                 __instance.SetMapScreenInfoToCurrentLevel();
-
-            if (!Compatibility.DISABLE_SUN && GlobalReferences.sunlight != null)
-                GlobalReferences.sunlight.enabled = true;
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ReviveDeadPlayers))]
@@ -317,21 +316,6 @@ namespace ButteryFixes.Patches.General
                     __instance.allPlayerScripts[i].criticallyInjured = false;
                     __instance.allPlayerScripts[i].bleedingHeavily = false;
                     Plugin.Logger.LogDebug($"Fixed player #{i} ({__instance.allPlayerScripts[i].playerUsername}) still bleeding after recovering full HP");
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ChangePlanet))]
-        [HarmonyPostfix]
-        static void PostChangePlanet(StartOfRound __instance)
-        {
-            // don't show company in orbit
-            if (!Compatibility.DISABLE_SUN && __instance.currentLevel.name == "CompanyBuildingLevel" && __instance.currentPlanetPrefab != null)
-            {
-                foreach (Renderer rend in __instance.currentPlanetPrefab.GetComponentsInChildren<Renderer>())
-                {
-                    rend.enabled = false;
-                    rend.forceRenderingOff = true;
                 }
             }
         }
