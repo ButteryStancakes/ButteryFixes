@@ -11,7 +11,7 @@ namespace ButteryFixes
         internal const string GUID_BETTER_SPRAY_PAINT = "taffyko.BetterSprayPaint";
         internal const string GUID_EVERYTHING_CAN_DIE = "nwnt.EverythingCanDie";
         internal const string GUID_LETHAL_QUANTITIES = "LethalQuantities";
-        internal const string GUID_TOUCHSCREEN = "TouchScreen";
+        internal const string GUID_TOUCHSCREEN = "me.pm.TheDeadSnake";
 
         internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES;
         internal static bool DISABLE_LADDER_PATCH, DISABLE_PLAYERMODEL_PATCHES, DISABLE_ENEMY_MESH_PATCH, DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX;
