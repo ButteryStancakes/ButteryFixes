@@ -9,6 +9,7 @@ namespace ButteryFixes.Utility
     public static class NonPatchFunctions
     {
         internal static bool[] playerWasLastSprinting = new bool[/*4*/50];
+        internal static int hives;
 
         internal static IEnumerator ShellsAppearAfterDelay(ShotgunItem shotgun)
         {
@@ -221,6 +222,23 @@ namespace ButteryFixes.Utility
         {
             if (grabObj.itemProperties.isScrap)
                 GlobalReferences.scrapEaten += grabObj.scrapValue;
+        }
+
+        public static int RerollHivePrice(int price, Vector3 pos)
+        {
+            hives++;
+
+            if (!Configuration.fixHivePrices.Value || StartOfRound.Instance.isChallengeFile)
+                return price;
+
+            System.Random random = new(StartOfRound.Instance.randomMapSeed + 1314 + hives);
+
+            int temp = random.Next(50, 150);
+            if (Vector3.Distance(pos, new(1.27146339f, 0.278438568f, -7.5f)) < 40f)
+                temp = random.Next(40, 100);
+
+            Plugin.Logger.LogDebug($"Hive price recalculated: ${price} -> ${temp}");
+            return temp;
         }
     }
 }

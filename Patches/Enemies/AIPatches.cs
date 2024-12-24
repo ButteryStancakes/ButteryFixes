@@ -92,8 +92,8 @@ namespace ButteryFixes.Patches.Enemies
                 if (codes[i].opcode == OpCodes.Stloc_0 && codes[i - 1].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 1].operand == destroyOnDeath)
                 {
                     codes.InsertRange(i, [
-                        new CodeInstruction(OpCodes.Ldarg_1),
-                        new CodeInstruction(OpCodes.Or)
+                        new(OpCodes.Ldarg_1),
+                        new(OpCodes.Or)
                     ]);
                     Plugin.Logger.LogDebug("Transpiler (Enemy kill): Allow unkillable enemies to be destroyed by Earth Leviathan");
                     return codes; // i += 2;

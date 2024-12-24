@@ -22,7 +22,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, unlimitedOldBirds, restoreShipIcon, limitSpawnChance;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, unlimitedOldBirds, restoreShipIcon, limitSpawnChance, fixHivePrices;
 
         internal static void Init(ConfigFile cfg)
         {
@@ -84,6 +84,12 @@ namespace ButteryFixes
                 "FixJumpCheese",
                 true,
                 "(Host only) Enabling this makes enemies hear players jumping and landing on the floor. This fixes the exploit where you can silently move past dogs with sprinting speed by spamming the jump button.");
+
+            fixHivePrices = configFile.Bind(
+                "Gameplay",
+                "FixHivePrices",
+                true,
+                "(Host only) Fixes some errors with the vanilla bee hive pricing logic. This will let different hives be worth different values on the same day, and also reduces the price of hives that spawn extremely close to the ship.");
         }
 
         static void VisualConfig()

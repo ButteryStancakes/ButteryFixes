@@ -65,7 +65,7 @@ namespace ButteryFixes.Patches.Objects
                             // first jump from if/else branches
                             if (insertAt >= 0 && codes[j].opcode == OpCodes.Br)
                             {
-                                codes.Insert(insertAt, new CodeInstruction(OpCodes.Br, codes[j].operand));
+                                codes.Insert(insertAt, new(OpCodes.Br, codes[j].operand));
                                 Plugin.Logger.LogDebug("Transpiler (Shotgun blast): Fix ear-ringing severity in extremely close range");
                                 fixEarsRinging = true;
                                 break;
@@ -84,11 +84,11 @@ namespace ButteryFixes.Patches.Objects
                 else if (codes[i].opcode == OpCodes.Call && codes[i].operand.ToString().Contains("SphereCastNonAlloc"))
                 {
                     codes.InsertRange(i + 2, [
-                        new CodeInstruction(OpCodes.Ldarg_1),
-                        new CodeInstruction(OpCodes.Ldloca_S, codes[i + 1].operand),
-                        new CodeInstruction(OpCodes.Ldarg_0),
-                        new CodeInstruction(OpCodes.Ldflda, ReflectionCache.ENEMY_COLLIDERS),
-                        new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(NonPatchFunctions), nameof(NonPatchFunctions.ShotgunPreProcess))),
+                        new(OpCodes.Ldarg_1),
+                        new(OpCodes.Ldloca_S, codes[i + 1].operand),
+                        new(OpCodes.Ldarg_0),
+                        new(OpCodes.Ldflda, ReflectionCache.ENEMY_COLLIDERS),
+                        new(OpCodes.Call, AccessTools.Method(typeof(NonPatchFunctions), nameof(NonPatchFunctions.ShotgunPreProcess))),
                     ]);
                     Plugin.Logger.LogDebug("Transpiler (Shotgun blast): Pre-process shotgun targets");
                 }

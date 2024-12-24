@@ -193,9 +193,9 @@ namespace ButteryFixes.Patches.Enemies
                 {
                     codes.InsertRange(i - 2,
                     [
-                        new CodeInstruction(OpCodes.Ldarg_0),
-                        new CodeInstruction(OpCodes.Call, AccessTools.DeclaredPropertyGetter(typeof(NetworkBehaviour), nameof(NetworkBehaviour.IsOwner))),
-                        new CodeInstruction(OpCodes.Brfalse, codes[i + 3].operand)
+                        new(OpCodes.Ldarg_0),
+                        new(OpCodes.Call, AccessTools.DeclaredPropertyGetter(typeof(NetworkBehaviour), nameof(NetworkBehaviour.IsOwner))),
+                        new(OpCodes.Brfalse, codes[i + 3].operand)
                     ]);
                     Plugin.Logger.LogDebug("Transpiler (Masked stun): Roll 40% chance to sprint only once");
                     return codes;

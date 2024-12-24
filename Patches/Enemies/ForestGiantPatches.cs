@@ -23,9 +23,9 @@ namespace ButteryFixes.Patches.Enemies
                 if (codes[i].opcode == OpCodes.Brfalse && codes[i - 2].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 2].operand == localPlayerController)
                 {
                     codes.InsertRange(i + 1, [
-                        new CodeInstruction(codes[i - 4].opcode), // local variable
-                        new CodeInstruction(OpCodes.Ldfld, ReflectionCache.IS_IN_HANGAR_SHIP_ROOM),
-                        new CodeInstruction(OpCodes.Brtrue, codes[i].operand),
+                        new(codes[i - 4].opcode), // local variable
+                        new(OpCodes.Ldfld, ReflectionCache.IS_IN_HANGAR_SHIP_ROOM),
+                        new(OpCodes.Brtrue, codes[i].operand),
                     ]);
                     Plugin.Logger.LogDebug("Transpiler (Forest giant death): No longer crush players in the ship");
                     return codes;

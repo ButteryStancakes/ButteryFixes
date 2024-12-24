@@ -24,9 +24,9 @@ namespace ButteryFixes.Patches.Enemies
                 if (codes[i].opcode == OpCodes.Callvirt && (MethodInfo)codes[i].operand == despawn && codes[i - 3].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 3].operand == observingScrap)
                 {
                     codes.InsertRange(i - 4, [
-                        new CodeInstruction(OpCodes.Ldarg_0),
-                        new CodeInstruction(OpCodes.Ldfld, observingScrap),
-                        new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(NonPatchFunctions), nameof(NonPatchFunctions.BabyEatsScrap)))
+                        new(OpCodes.Ldarg_0),
+                        new(OpCodes.Ldfld, observingScrap),
+                        new(OpCodes.Call, AccessTools.Method(typeof(NonPatchFunctions), nameof(NonPatchFunctions.BabyEatsScrap)))
                     ]);
                     Plugin.Logger.LogDebug("Transpiler (Maneater): Add eaten scrap to uncollected value");
                     return codes;

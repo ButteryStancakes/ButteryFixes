@@ -36,7 +36,7 @@ namespace ButteryFixes.Patches.Objects
                     {
                         if (codes[j].opcode == OpCodes.Br)
                         {
-                            codes.Insert(i + 1, new CodeInstruction(OpCodes.Br, codes[j].operand));
+                            codes.Insert(i + 1, new(OpCodes.Br, codes[j].operand));
                             Plugin.Logger.LogDebug("Transpiler (Cruiser noise alert): Fix 2 audible noises at once");
                             return codes;
                         }

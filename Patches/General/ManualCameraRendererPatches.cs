@@ -31,10 +31,10 @@ namespace ButteryFixes.Patches.General
                             for (int k = j - 1; k < i - 3; k++)
                                 clone.Add(codes[k]);
                             clone.AddRange([
-                                new CodeInstruction(OpCodes.Ldfld, z),
-                                new CodeInstruction(OpCodes.Ldc_R4, 995f), // 400
-                                new CodeInstruction(OpCodes.Clt),
-                                new CodeInstruction(OpCodes.Brfalse, codes[i].operand),
+                                new(OpCodes.Ldfld, z),
+                                new(OpCodes.Ldc_R4, 995f), // 400
+                                new(OpCodes.Clt),
+                                new(OpCodes.Brfalse, codes[i].operand),
                             ]);
                             codes.InsertRange(i + 1, clone);
                             Plugin.Logger.LogDebug("Transpiler (Radar): Hide compass icon when players are out of bounds");

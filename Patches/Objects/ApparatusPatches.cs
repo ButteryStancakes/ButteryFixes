@@ -40,7 +40,7 @@ namespace ButteryFixes.Patches.Objects
             {
                 if (codes[i].opcode == OpCodes.Callvirt && (MethodInfo)codes[i].operand == spawnEnemyGameObject)
                 {
-                    codes.Insert(i + 2, new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(NonPatchFunctions), nameof(NonPatchFunctions.OldBirdSpawnsFromApparatus))));
+                    codes.Insert(i + 2, new(OpCodes.Call, AccessTools.Method(typeof(NonPatchFunctions), nameof(NonPatchFunctions.OldBirdSpawnsFromApparatus))));
                     Plugin.Logger.LogDebug("Transpiler (Radiation warning): Add Old Bird values after spawning");
                     //i++;
                     return codes;

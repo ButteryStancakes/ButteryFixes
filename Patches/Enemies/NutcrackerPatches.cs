@@ -59,7 +59,7 @@ namespace ButteryFixes.Patches.Enemies
                 if (codes[i].opcode == OpCodes.Call && ((MethodInfo)codes[i].operand).Name.Equals(nameof(Physics.Linecast)) && codes[i - 1].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 1].operand == collidersAndRoomMaskAndDefault)
                 {
                     codes[i].operand = AccessTools.Method(typeof(Physics), nameof(Physics.Linecast), [typeof(Vector3), typeof(Vector3), typeof(int), typeof(QueryTriggerInteraction)]);
-                    codes.Insert(i, new CodeInstruction(OpCodes.Ldc_I4_1));
+                    codes.Insert(i, new(OpCodes.Ldc_I4_1));
                     Plugin.Logger.LogDebug("Transpiler (Nutcracker sight): Ignore triggers when spotting player");
                     return codes; // i++;
                 }

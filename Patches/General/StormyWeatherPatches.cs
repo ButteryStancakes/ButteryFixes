@@ -23,13 +23,13 @@ namespace ButteryFixes.Patches.General
                 if (codes[i].opcode == OpCodes.Brtrue && codes[i - 1].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 1].operand == isInFactory && codes[i - 4].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 4].operand == metalObjects && codes[i - 3].opcode.ToString().StartsWith("ldloc") && codes[i - 2].ToString().Contains("get_Item"))
                 {
                     codes.InsertRange(i - 5, [
-                        new CodeInstruction(OpCodes.Ldarg_0),
-                        new CodeInstruction(OpCodes.Ldfld, metalObjects),
-                        new CodeInstruction(codes[i - 3].opcode, codes[i - 3].operand), // should be ldloc.2
-                        new CodeInstruction(codes[i - 2].opcode, codes[i - 2].operand), // should be callvirt get_Item
-                        new CodeInstruction(OpCodes.Ldnull),
-                        new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Object), "op_Inequality", [typeof(Object), typeof(Object)])),
-                        new CodeInstruction(OpCodes.Brfalse, codes[i].operand)
+                        new(OpCodes.Ldarg_0),
+                        new(OpCodes.Ldfld, metalObjects),
+                        new(codes[i - 3].opcode, codes[i - 3].operand), // should be ldloc.2
+                        new(codes[i - 2].opcode, codes[i - 2].operand), // should be callvirt get_Item
+                        new(OpCodes.Ldnull),
+                        new(OpCodes.Call, AccessTools.Method(typeof(Object), "op_Inequality", [typeof(Object), typeof(Object)])),
+                        new(OpCodes.Brfalse, codes[i].operand)
                     ]);
                     Plugin.Logger.LogDebug("Transpiler (Stormy weather): Null check when iterating metalObjects");
                     return codes;

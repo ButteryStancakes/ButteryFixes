@@ -61,12 +61,12 @@ namespace ButteryFixes.Patches.General
                 if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == firstTimeSpawning)
                 {
                     codes.InsertRange(i - 2, [
-                        new CodeInstruction(OpCodes.Ldarg_0),
-                        new CodeInstruction(OpCodes.Ldflda, ReflectionCache.SPAWN_PROBABILITIES),
-                        new CodeInstruction(OpCodes.Ldarg_0),
-                        new CodeInstruction(OpCodes.Ldfld, ReflectionCache.CURRENT_LEVEL),
-                        new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(SelectableLevel), enemies)),
-                        new CodeInstruction(OpCodes.Call, ReflectionCache.SPAWN_PROBABILITIES_POST_PROCESS)
+                        new(OpCodes.Ldarg_0),
+                        new(OpCodes.Ldflda, ReflectionCache.SPAWN_PROBABILITIES),
+                        new(OpCodes.Ldarg_0),
+                        new(OpCodes.Ldfld, ReflectionCache.CURRENT_LEVEL),
+                        new(OpCodes.Ldfld, AccessTools.Field(typeof(SelectableLevel), enemies)),
+                        new(OpCodes.Call, ReflectionCache.SPAWN_PROBABILITIES_POST_PROCESS)
                     ]);
                     Plugin.Logger.LogDebug($"Transpiler ({id}): Post process probabilities");
                     //i += 6;
