@@ -19,7 +19,6 @@ namespace ButteryFixes.Utility
             Transform bigMachine = GameObject.Find("/Environment/Map/DiageticAmbiance/BigMachine")?.transform;
             // for unused objects underneath the map
             List<string> modelsIntroScene = [];
-            string cabinDoor = string.Empty;
             switch (scene.name)
             {
                 case "Level1Experimentation":
@@ -125,7 +124,6 @@ namespace ButteryFixes.Utility
                     break;
                 case "Level5Rend":
                     Plugin.Logger.LogDebug("Detected landing on Rend");
-                    cabinDoor = "/Environment/Map/SnowCabin/FancyDoorMapModel/SteelDoor (1)/DoorMesh/Cube";
                     break;
                 case "Level6Dine":
                     Plugin.Logger.LogDebug("Detected landing on Dine");
@@ -178,7 +176,6 @@ namespace ButteryFixes.Utility
                         Plugin.Logger.LogDebug("Adamance - Fixed factory ambience");
                     }
                     rotateFireExit = false;
-                    cabinDoor = "/Environment/SnowCabin/FancyDoorMapModel/SteelDoor (1)/DoorMesh/Cube";
                     break;
                 case "Level11Embrion":
                     Plugin.Logger.LogDebug("Detected landing on Embrion");
@@ -247,18 +244,6 @@ namespace ButteryFixes.Utility
                 GlobalReferences.shipNode = Object.FindObjectsOfType<ScanNodeProperties>().FirstOrDefault(scanNodeProperties => scanNodeProperties.headerText == "Ship")?.transform;
                 if (GlobalReferences.shipNode != null)
                     GlobalReferences.shipNodeOffset = GlobalReferences.shipNode.position - GlobalReferences.shipDefaultPos;
-            }
-
-            // override cabin door with wooden sounds
-            if (!string.IsNullOrEmpty(cabinDoor) && GlobalReferences.woodenDoorOpen != null && GlobalReferences.woodenDoorOpen.Length > 0 && GlobalReferences.woodenDoorClose != null && GlobalReferences.woodenDoorClose.Length > 0)
-            {
-                AnimatedObjectTrigger door = GameObject.Find(cabinDoor)?.GetComponent<AnimatedObjectTrigger>();
-                if (door != null)
-                {
-                    door.boolFalseAudios = GlobalReferences.woodenDoorClose;
-                    door.boolTrueAudios = GlobalReferences.woodenDoorOpen;
-                    Plugin.Logger.LogDebug("Overwritten cabin door SFX with wooden variants");
-                }
             }
         }
     }

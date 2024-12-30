@@ -36,8 +36,5 @@ namespace ButteryFixes.Utility
 
         // for cozy lights
         internal static Animator shipAnimator;
-
-        // for cabin doors
-        internal static AudioClip[] woodenDoorOpen, woodenDoorClose;
     }
 }
