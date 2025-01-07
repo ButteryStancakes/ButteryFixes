@@ -94,6 +94,9 @@ namespace ButteryFixes.Patches.General
                 foreach (Button button in beltBagUI.GetComponentsInChildren<Button>())
                     button.navigation = nav;
             }
+
+            __instance.mapScreen.mapCameraAnimator.transform.localPosition = new(0f, 0f, -0.95f);
+            Plugin.Logger.LogDebug("Orbit visuals: Camera flash");
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetStats))]
