@@ -80,10 +80,10 @@ namespace ButteryFixes.Utility
             {
                 switch (selectableLevel.name)
                 {
-                    case "OffenseLevel":
+                    /*case "OffenseLevel":
                         selectableLevel.videoReel = null;
                         Plugin.Logger.LogDebug("Offense: Video reel");
-                        break;
+                        break;*/
                     case "RendLevel":
                         SpawnableMapObject spikeRoofTrapHazard = selectableLevel.spawnableMapObjects.FirstOrDefault(spawnableMapObject => spawnableMapObject.prefabToSpawn?.name == "SpikeRoofTrapHazard");
                         if (spikeRoofTrapHazard != null)

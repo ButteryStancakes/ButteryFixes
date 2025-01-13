@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Linq;
 using UnityEngine;
+using GameNetcodeStuff;
 
 namespace ButteryFixes.Patches.General
 {
@@ -38,6 +39,19 @@ namespace ButteryFixes.Patches.General
 
             Plugin.Logger.LogError("Stormy weather transpiler failed");
             return instructions;
+        }
+
+        [HarmonyPatch(typeof(StormyWeather), "Update")]
+        [HarmonyPostfix]
+        static void StormyWeatherPostUpdate(ref GrabbableObject ___targetingMetalObject, bool ___hasShownStrikeWarning)
+        {
+            if (___targetingMetalObject != null && !___hasShownStrikeWarning && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(___targetingMetalObject.transform.position))
+            {
+                Plugin.Logger.LogDebug($"Item {___targetingMetalObject.name} #{___targetingMetalObject.GetInstanceID()} was targeted by lightning but is inside the ship");
+                PlayerControllerB player = ___targetingMetalObject.playerHeldBy ?? GameNetworkManager.Instance.localPlayerController;
+                player.SetItemInElevator(true, true, ___targetingMetalObject);
+                ___targetingMetalObject = null;
+            }
         }
     }
 }
