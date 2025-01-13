@@ -65,7 +65,7 @@ namespace ButteryFixes.Patches.General
 
             if (buy != null)
             {
-                TerminalNode buyWelcomeMat = buy.compatibleNouns.FirstOrDefault(noun => noun.noun.name == "WelcomeMat")?.result;
+                TerminalNode buyWelcomeMat = buy.compatibleNouns.FirstOrDefault(noun => noun.noun?.name == "WelcomeMat")?.result?.terminalOptions?.FirstOrDefault(option => option.noun?.name == "Confirm")?.result;
                 if (buyWelcomeMat != null)
                 {
                     buyWelcomeMat.itemCost = 40;

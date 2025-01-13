@@ -52,7 +52,7 @@ namespace ButteryFixes.Patches.General
                 player.SetItemInElevator(true, true, ___targetingMetalObject);
                 ___targetingMetalObject = null;
                 // re-target sooner
-                ___getObjectToTargetInterval = 3.8f; // every 0.2s
+                ___getObjectToTargetInterval = 3.86f; // every 0.14s
             }
         }
     }
