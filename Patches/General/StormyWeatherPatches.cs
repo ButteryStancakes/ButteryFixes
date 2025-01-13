@@ -43,14 +43,16 @@ namespace ButteryFixes.Patches.General
 
         [HarmonyPatch(typeof(StormyWeather), "Update")]
         [HarmonyPostfix]
-        static void StormyWeatherPostUpdate(ref GrabbableObject ___targetingMetalObject, bool ___hasShownStrikeWarning)
+        static void StormyWeatherPostUpdate(ref GrabbableObject ___targetingMetalObject, bool ___hasShownStrikeWarning, ref float ___getObjectToTargetInterval)
         {
-            if (___targetingMetalObject != null && !___hasShownStrikeWarning && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(___targetingMetalObject.transform.position))
+            if (RoundManager.Instance.IsOwner && ___targetingMetalObject != null && !___hasShownStrikeWarning && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(___targetingMetalObject.transform.position) && (___targetingMetalObject.playerHeldBy == null || (___targetingMetalObject.playerHeldBy.isInHangarShipRoom && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(___targetingMetalObject.playerHeldBy.transform.position))))
             {
                 Plugin.Logger.LogDebug($"Item {___targetingMetalObject.name} #{___targetingMetalObject.GetInstanceID()} was targeted by lightning but is inside the ship");
                 PlayerControllerB player = ___targetingMetalObject.playerHeldBy ?? GameNetworkManager.Instance.localPlayerController;
                 player.SetItemInElevator(true, true, ___targetingMetalObject);
                 ___targetingMetalObject = null;
+                // re-target sooner
+                ___getObjectToTargetInterval = 3.8f; // every 0.2s
             }
         }
     }
