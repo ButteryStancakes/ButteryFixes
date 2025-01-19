@@ -7,7 +7,7 @@ namespace ButteryFixes.Patches.Player
     [HarmonyPatch]
     internal class BodyPatches
     {
-        static bool dontCheckBadges = true;
+        static bool dontCheckBadges;
 
         [HarmonyPatch(typeof(DeadBodyInfo), "Start")]
         [HarmonyPostfix]

@@ -12,8 +12,9 @@ namespace ButteryFixes
         internal const string GUID_EVERYTHING_CAN_DIE = "nwnt.EverythingCanDie";
         internal const string GUID_LETHAL_QUANTITIES = "LethalQuantities";
         internal const string GUID_TOUCHSCREEN = "me.pm.TheDeadSnake";
+        internal const string GUID_REBALANCED_MOONS = "dopadream.lethalcompany.rebalancedmoons";
 
-        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES;
+        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES, INSTALLED_REBALANCED_MOONS;
         internal static bool DISABLE_LADDER_PATCH, DISABLE_PLAYERMODEL_PATCHES, DISABLE_ENEMY_MESH_PATCH, DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX;
 
         internal static void Init()
@@ -70,6 +71,12 @@ namespace ButteryFixes
             {
                 DISABLE_INTERACT_FIX = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Touchscreen detected");
+            }
+
+            if (Chainloader.PluginInfos.ContainsKey(GUID_REBALANCED_MOONS))
+            {
+                INSTALLED_REBALANCED_MOONS = true;
+                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Rebalanced Moons detected");
             }
         }
     }

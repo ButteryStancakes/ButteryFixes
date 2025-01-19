@@ -59,7 +59,7 @@ namespace ButteryFixes.Patches.General
             {
                 if (codes[i].opcode == OpCodes.Ldarg_1 && codes[i + 1].opcode == OpCodes.Ldc_I4_S && (sbyte)codes[i + 1].operand == 20 && codes[i + 2].opcode == OpCodes.Bge)
                 {
-                    codes[i + 1].operand = 10;
+                    codes[i + 1].operand = (sbyte)10;
                     Plugin.Logger.LogDebug("Transpiler (Health UI): Fix critical injury popup threshold");
                     return codes;
                 }
@@ -146,6 +146,14 @@ namespace ButteryFixes.Patches.General
         {
             if (!__instance.increaseHelmetCondensation && !TimeOfDay.Instance.insideLighting && TimeOfDay.Instance.effects[(int)LevelWeatherType.Flooded].effectEnabled && Vector3.Angle(GameNetworkManager.Instance.localPlayerController.gameplayCamera.transform.forward, Vector3.up) < 45f)
                 __instance.increaseHelmetCondensation = true;
+        }
+
+        [HarmonyPatch(typeof(HUDManager), "CanPlayerScan")]
+        [HarmonyPostfix]
+        static void Post_CanPlayerScan(ref bool __result)
+        {
+            if (!__result && GameNetworkManager.Instance.localPlayerController.inVehicleAnimation && !GameNetworkManager.Instance.localPlayerController.isPlayerDead)
+                __result = true;
         }
     }
 }

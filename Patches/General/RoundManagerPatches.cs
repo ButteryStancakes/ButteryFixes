@@ -110,14 +110,16 @@ namespace ButteryFixes.Patches.General
         [HarmonyPrefix]
         static void PreRefreshLightsList()
         {
-            if (StartOfRound.Instance.currentLevel.name == "DineLevel" || StartOfRound.Instance.currentLevel.name == "ArtificeLevel")
+            if (!Compatibility.INSTALLED_REBALANCED_MOONS && (StartOfRound.Instance.currentLevel.name == "DineLevel" || StartOfRound.Instance.currentLevel.name == "ArtificeLevel"))
             {
                 foreach (GameObject poweredLight in GameObject.FindGameObjectsWithTag("PoweredLight"))
+                {
                     if (poweredLight.name.StartsWith("NeonLights") && poweredLight.transform.position.y > -100f)
                     {
                         poweredLight.tag = "Untagged";
                         Plugin.Logger.LogDebug($"{StartOfRound.Instance.currentLevel.PlanetName}: Exterior lights disconnected from interior power");
                     }
+                }
             }
         }
 

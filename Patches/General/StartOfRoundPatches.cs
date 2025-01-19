@@ -97,6 +97,13 @@ namespace ButteryFixes.Patches.General
 
             __instance.mapScreen.mapCameraAnimator.transform.localPosition = new(0f, 0f, -0.95f);
             Plugin.Logger.LogDebug("Orbit visuals: Camera flash");
+
+            Camera shipCam = __instance.elevatorTransform.Find("Cameras/ShipCamera")?.GetComponent<Camera>();
+            if (shipCam != null)
+            {
+                shipCam.cullingMask |= (1 << LayerMask.NameToLayer("DecalStickableSurface"));
+                Plugin.Logger.LogDebug("Orbit visuals: Terminal on CCTV");
+            }
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetStats))]
@@ -171,7 +178,7 @@ namespace ButteryFixes.Patches.General
                 try
                 {
                     terminal.orderedVehicleFromTerminal = ES3.Load("ButteryFixes_DeliveryVehicle", GameNetworkManager.Instance.currentSaveFileName, -1);
-                    if (terminal.orderedVehicleFromTerminal >= 0f)
+                    if (terminal.orderedVehicleFromTerminal >= 0)
                     {
                         terminal.vehicleInDropship = true;
                         Plugin.Logger.LogInfo($"Dropship inventory was restocked from save file (Vehicle: {terminal.buyableVehicles[terminal.orderedVehicleFromTerminal].vehicleDisplayName})");
