@@ -19,7 +19,7 @@ namespace ButteryFixes.Patches.Objects
 
             if (playerBody == null)
             {
-                foreach (DeadBodyInfo deadBodyInfo in Object.FindObjectsOfType<DeadBodyInfo>())
+                foreach (DeadBodyInfo deadBodyInfo in Object.FindObjectsByType<DeadBodyInfo>(FindObjectsSortMode.None))
                 {
                     if (deadBodyInfo.playerScript == ___previousPlayerHeldBy)
                         playerBody = deadBodyInfo;

@@ -174,7 +174,7 @@ namespace ButteryFixes.Utility
             {
                 EnemyType enemyType = enemies[i].enemyType;
                 // prevent old birds from eating up spawns when there are no dormant nests left
-                if (enemyType.requireNestObjectsToSpawn && spawnProbabilities[i] > 0 && !Object.FindObjectsOfType<EnemyAINestSpawnObject>().Any(nest => nest.enemyType == enemyType))
+                if (enemyType.requireNestObjectsToSpawn && spawnProbabilities[i] > 0 && !Object.FindObjectsByType<EnemyAINestSpawnObject>(FindObjectsSortMode.None).Any(nest => nest.enemyType == enemyType))
                 {
                     Plugin.Logger.LogDebug($"Enemy \"{enemyType.enemyName}\" spawning is disabled; no nests present on map");
                     spawnProbabilities[i] = 0;

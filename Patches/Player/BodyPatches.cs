@@ -7,7 +7,7 @@ namespace ButteryFixes.Patches.Player
     [HarmonyPatch]
     internal class BodyPatches
     {
-        static bool dontCheckBadges;
+        static bool dontCheckRenderers;
 
         [HarmonyPatch(typeof(DeadBodyInfo), "Start")]
         [HarmonyPostfix]
@@ -56,9 +56,9 @@ namespace ButteryFixes.Patches.Player
                         // blowing up the cruiser probably shouldn't spawn the "melted" player corpse, instead use the normal model
                         else
                         {
-                            dontCheckBadges = true;
+                            dontCheckRenderers = true;
                             __instance.ChangeMesh(GlobalReferences.playerBody);
-                            dontCheckBadges = false;
+                            //dontCheckRenderers = false;
                         }
                     }
 
@@ -154,20 +154,23 @@ namespace ButteryFixes.Patches.Player
 
         [HarmonyPatch(typeof(DeadBodyInfo), nameof(DeadBodyInfo.ChangeMesh))]
         [HarmonyPostfix]
-        static void DeadBodyInfoPostChangeMesh(DeadBodyInfo __instance)
+        static void DeadBodyInfoPostChangeMesh(DeadBodyInfo __instance, Material changeMaterial)
         {
             if (Compatibility.DISABLE_PLAYERMODEL_PATCHES)
                 return;
 
-            if (dontCheckBadges)
+            if (dontCheckRenderers)
+            {
+                dontCheckRenderers = false;
                 return;
+            }
 
             foreach (Renderer rend in __instance.GetComponentsInChildren<Renderer>())
             {
-                if (rend.gameObject.layer == 0 && (rend.name.StartsWith("BetaBadge") || rend.name.StartsWith("LevelSticker")))
+                if (rend.gameObject.layer == 0 && ((rend.name.StartsWith("BetaBadge") || rend.name.StartsWith("LevelSticker")) || (changeMaterial != null && changeMaterial.name.StartsWith("SpooledPlayerMat"))))
                 {
                     rend.forceRenderingOff = true;
-                    Plugin.Logger.LogDebug($"Player corpse transformed; hide badge \"{rend.name}\"");
+                    Plugin.Logger.LogDebug($"Player corpse transformed; hide renderer \"{rend.name}\"");
                 }
             }
         }

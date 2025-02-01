@@ -14,7 +14,7 @@ namespace ButteryFixes.Patches.General
             if (!__instance.isHostingGame || StartOfRound.Instance.isChallengeFile || !StartOfRound.Instance.inShipPhase)
                 return;
 
-            Terminal terminal = Object.FindObjectOfType<Terminal>();
+            Terminal terminal = GlobalReferences.Terminal;
             if (terminal != null)
             {
                 try

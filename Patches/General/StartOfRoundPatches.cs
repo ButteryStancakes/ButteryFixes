@@ -84,7 +84,7 @@ namespace ButteryFixes.Patches.General
                 Plugin.Logger.LogDebug("Orbit visuals: Particles");
             }
 
-            BeltBagInventoryUI beltBagUI = Object.FindObjectOfType<BeltBagInventoryUI>(true);
+            BeltBagInventoryUI beltBagUI = Object.FindAnyObjectByType<BeltBagInventoryUI>(FindObjectsInactive.Include);
             if (beltBagUI != null)
             {
                 Navigation nav = new()
@@ -120,7 +120,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void PostResetShipFurniture(StartOfRound __instance)
         {
-            Terminal terminal = Object.FindObjectOfType<Terminal>();
+            Terminal terminal = GlobalReferences.Terminal;
             if (__instance.IsServer)
             {
                 // empty the dropship on game over
@@ -140,7 +140,7 @@ namespace ButteryFixes.Patches.General
                     if (__instance.isObjectAttachedToMagnet && __instance.attachedVehicle != null && __instance.attachedVehicle.TryGetComponent(out NetworkObject netObj) && netObj.IsSpawned)
                     {
                         __instance.isObjectAttachedToMagnet = false;
-                        foreach (GrabbableObject grabObj in Object.FindObjectsOfType<GrabbableObject>())
+                        foreach (GrabbableObject grabObj in Object.FindObjectsByType<GrabbableObject>(FindObjectsSortMode.None))
                         {
                             if (grabObj.transform.parent == __instance.attachedVehicle.transform && grabObj.TryGetComponent(out NetworkObject netObj2) && netObj2.IsSpawned)
                             {
@@ -171,7 +171,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void PostLoadShipGrabbableItems()
         {
-            Terminal terminal = Object.FindObjectOfType<Terminal>();
+            Terminal terminal = GlobalReferences.Terminal;
             // reload the dropship's contents from the save file, if any exist
             if (terminal != null)
             {
@@ -228,7 +228,7 @@ namespace ButteryFixes.Patches.General
         {
             if (!__instance.IsServer && __instance.inShipPhase && !GameNetworkManager.Instance.gameHasStarted)
             {
-                foreach (GrabbableObject grabbableObject in Object.FindObjectsOfType<GrabbableObject>())
+                foreach (GrabbableObject grabbableObject in Object.FindObjectsByType<GrabbableObject>(FindObjectsSortMode.None))
                 {
                     grabbableObject.scrapPersistedThroughRounds = true;
                     grabbableObject.isInElevator = true;
@@ -278,7 +278,7 @@ namespace ButteryFixes.Patches.General
         {
             // this needs to run before the scene unloads or it will miss the apparatus
             GlobalReferences.scrapNotCollected = 0;
-            foreach (GrabbableObject grabbableObject in Object.FindObjectsOfType<GrabbableObject>())
+            foreach (GrabbableObject grabbableObject in Object.FindObjectsByType<GrabbableObject>(FindObjectsSortMode.None))
             {
                 NetworkObject networkObject = grabbableObject.GetComponent<NetworkObject>();
                 if (networkObject == null || !networkObject.IsSpawned)
@@ -291,7 +291,7 @@ namespace ButteryFixes.Patches.General
                 }
             }
             // unkilled butlers are still worth the knife they didn't drop
-            foreach (ButlerEnemyAI butlerEnemyAI in Object.FindObjectsOfType<ButlerEnemyAI>())
+            foreach (ButlerEnemyAI butlerEnemyAI in Object.FindObjectsByType<ButlerEnemyAI>(FindObjectsSortMode.None))
             {
                 if (!butlerEnemyAI.isEnemyDead)
                 {
@@ -303,6 +303,9 @@ namespace ButteryFixes.Patches.General
                     }
                 }
             }
+
+            if (__instance.currentLevel.name != "CompanyBuildingLevel")
+                TimeOfDay.Instance.playDelayedMusicCoroutine = null;
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetShip))]
@@ -328,6 +331,24 @@ namespace ButteryFixes.Patches.General
                     Plugin.Logger.LogDebug($"Fixed player #{i} ({__instance.allPlayerScripts[i].playerUsername}) still bleeding after recovering full HP");
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(StartOfRound), "PositionSuitsOnRack")]
+        [HarmonyPostfix]
+        static void PostPositionSuitsOnRack()
+        {
+            UnlockableSuit[] unlockableSuits = Object.FindObjectsByType<UnlockableSuit>(FindObjectsSortMode.None);
+            /*if (unlockableSuits.Length > 1)
+            {*/
+                foreach (UnlockableSuit unlockableSuit in unlockableSuits)
+                {
+                    if (unlockableSuit.syncedSuitID.Value == 0)
+                    {
+                        unlockableSuit.gameObject.GetComponent<InteractTrigger>().hoverTip = "Change: " + StartOfRound.Instance.unlockablesList.unlockables[unlockableSuit.suitID].unlockableName;
+                        return;
+                    }
+                }    
+            //}
         }
     }
 }

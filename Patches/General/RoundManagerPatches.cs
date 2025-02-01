@@ -33,7 +33,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void PostPowerSwitchOffClientRpc()
         {
-            Object.FindObjectOfType<BreakerBox>()?.breakerBoxHum.Stop();
+            Object.FindAnyObjectByType<BreakerBox>()?.breakerBoxHum.Stop();
         }
 
         [HarmonyPatch(typeof(RoundManager), "SetExitIDs")]
@@ -42,7 +42,7 @@ namespace ButteryFixes.Patches.General
         {
             if (Configuration.fixFireExits.Value)
             {
-                foreach (EntranceTeleport entranceTeleport in Object.FindObjectsOfType<EntranceTeleport>())
+                foreach (EntranceTeleport entranceTeleport in Object.FindObjectsByType<EntranceTeleport>(FindObjectsSortMode.None))
                 {
                     if (entranceTeleport.entranceId > 0 && !entranceTeleport.isEntranceToBuilding)
                     {
@@ -110,7 +110,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPrefix]
         static void PreRefreshLightsList()
         {
-            if (!Compatibility.INSTALLED_REBALANCED_MOONS && (StartOfRound.Instance.currentLevel.name == "DineLevel" || StartOfRound.Instance.currentLevel.name == "ArtificeLevel"))
+            if (!Compatibility.INSTALLED_REBALANCED_MOONS && (StartOfRound.Instance.currentLevel.sceneName == "Level6Dine" || StartOfRound.Instance.currentLevel.sceneName == "Level9Artifice"))
             {
                 foreach (GameObject poweredLight in GameObject.FindGameObjectsWithTag("PoweredLight"))
                 {
@@ -128,7 +128,7 @@ namespace ButteryFixes.Patches.General
         static void PostSpawnOutsideHazards(RoundManager __instance)
         {
             // this can't run in OnSceneLoaded because the navmesh needs to be baked first
-            if (StartOfRound.Instance.currentLevel.name == "DineLevel")
+            if (!Compatibility.INSTALLED_REBALANCED_MOONS && StartOfRound.Instance.currentLevel.sceneName == "Level6Dine")
             {
                 foreach (string chainlinkFenceName in new string[]{
                     "ChainlinkFence",
@@ -181,7 +181,7 @@ namespace ButteryFixes.Patches.General
                 return;
             }
 
-            foreach (SpikeRoofTrap spikeRoofTrap in Object.FindObjectsOfType<SpikeRoofTrap>())
+            foreach (SpikeRoofTrap spikeRoofTrap in Object.FindObjectsByType<SpikeRoofTrap>(FindObjectsSortMode.None))
             {
                 if (Vector3.Distance(spikeRoofTrap.spikeTrapAudio.transform.position, mineshaftElevatorController.elevatorBottomPoint.position) < 7f)
                 {

@@ -111,7 +111,7 @@ namespace ButteryFixes.Patches.General
                 bool inOrbit = StartOfRound.Instance.inShipPhase;
                 if (!inOrbit)
                 {
-                    HangarShipDoor hangarShipDoor = Object.FindObjectOfType<HangarShipDoor>();
+                    HangarShipDoor hangarShipDoor = Object.FindAnyObjectByType<HangarShipDoor>();
                     if (hangarShipDoor != null && !hangarShipDoor.buttonsEnabled)
                         inOrbit = true;
                 }
@@ -121,8 +121,8 @@ namespace ButteryFixes.Patches.General
                 {
                     int objects = 0;
                     int value = 0;
-                    Transform cruiser = Object.FindObjectOfType<VehicleController>()?.transform;
-                    foreach (GrabbableObject grabbableObject in Object.FindObjectsOfType<GrabbableObject>())
+                    Transform cruiser = Object.FindAnyObjectByType<VehicleController>()?.transform;
+                    foreach (GrabbableObject grabbableObject in Object.FindObjectsByType<GrabbableObject>(FindObjectsSortMode.None))
                     {
                         bool inVehicle = StartOfRound.Instance.isObjectAttachedToMagnet && cruiser != null && grabbableObject.transform.parent == cruiser;
                         if ((grabbableObject.isInShipRoom || grabbableObject.isInElevator || inVehicle) && grabbableObject.itemProperties.isScrap && grabbableObject is not RagdollGrabbableObject)

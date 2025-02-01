@@ -197,7 +197,7 @@ namespace ButteryFixes.Utility
             // fire exits
             if (rotateFireExit)
             {
-                foreach (EntranceTeleport entranceTeleport in Object.FindObjectsOfType<EntranceTeleport>())
+                foreach (EntranceTeleport entranceTeleport in Object.FindObjectsByType<EntranceTeleport>(FindObjectsSortMode.None))
                 {
                     if (entranceTeleport.isEntranceToBuilding && entranceTeleport.entranceId > 0)
                     {
@@ -241,7 +241,7 @@ namespace ButteryFixes.Utility
             // move the ship node with the ship as it's landing or taking off
             if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
             {
-                GlobalReferences.shipNode = Object.FindObjectsOfType<ScanNodeProperties>().FirstOrDefault(scanNodeProperties => scanNodeProperties.headerText == "Ship")?.transform;
+                GlobalReferences.shipNode = Object.FindObjectsByType<ScanNodeProperties>(FindObjectsSortMode.None).FirstOrDefault(scanNodeProperties => scanNodeProperties.headerText == "Ship")?.transform;
                 if (GlobalReferences.shipNode != null)
                     GlobalReferences.shipNodeOffset = GlobalReferences.shipNode.position - GlobalReferences.shipDefaultPos;
             }

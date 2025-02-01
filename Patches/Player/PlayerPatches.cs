@@ -23,7 +23,7 @@ namespace ButteryFixes.Patches.Player
 
         static List<PlayerControllerB> bunnyhoppingPlayers = new(50);
 
-        static float safeTimer = 0;
+        static float safeTimer = 0, safeTimer2 = 0;
 
         [HarmonyPatch(typeof(PlayerControllerB), "Update")]
         [HarmonyPostfix]
@@ -50,6 +50,18 @@ namespace ButteryFixes.Patches.Player
                     }
                 }
                 else if (safeTimer > 0f)
+                    safeTimer = 0f;
+
+                if (__instance.throwingObject)
+                {
+                    safeTimer2 += Time.deltaTime;
+                    if (safeTimer2 > 2f)
+                    {
+                        Plugin.Logger.LogWarning("Player's interactions probably got stuck - resetting");
+                        __instance.throwingObject = false;
+                    }
+                }
+                else if (safeTimer2 > 0f)
                     safeTimer = 0f;
             }
         }

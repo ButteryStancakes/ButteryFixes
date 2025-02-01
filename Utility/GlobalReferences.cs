@@ -8,6 +8,18 @@ namespace ButteryFixes.Utility
         // Experimentation, Assurance, Vow, Gordion, March, Adamance, Rend, Dine, Offense, Titan, Artifice, Liquidation, Embrion
         internal const int NUM_LEVELS = 13;
 
+        static Terminal terminal;
+        internal static Terminal Terminal
+        {
+            get
+            {
+                if (terminal == null)
+                    terminal = Object.FindAnyObjectByType<Terminal>();
+
+                return terminal;
+            }
+        }
+
         internal static Dictionary<string, EnemyType> allEnemiesList = [];
 
         internal static float dopplerLevelMult = 1f;

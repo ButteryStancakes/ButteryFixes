@@ -73,7 +73,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void PostGetNewStoryLogClientRpc(int logID)
         {
-            foreach (StoryLog storyLog in Object.FindObjectsOfType<StoryLog>())
+            foreach (StoryLog storyLog in Object.FindObjectsByType<StoryLog>(FindObjectsSortMode.None))
             {
                 if (storyLog.storyLogID == logID)
                 {
