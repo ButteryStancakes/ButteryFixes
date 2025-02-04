@@ -100,7 +100,7 @@ namespace ButteryFixes.Utility
         internal static void FakeFootstepAlert(PlayerControllerB player)
         {
             bool noiseIsInsideClosedShip = player.isInHangarShipRoom && StartOfRound.Instance.hangarDoorsClosed;
-            if (player.IsOwner ? player.isSprinting : playerWasLastSprinting[player.actualClientId])
+            if ((int)player.actualClientId < playerWasLastSprinting.Length && (player.IsOwner ? player.isSprinting : playerWasLastSprinting[(int)player.actualClientId]))
                 RoundManager.Instance.PlayAudibleNoise(player.transform.position, 22f, 0.6f, 0, noiseIsInsideClosedShip, 3322);
             else
                 RoundManager.Instance.PlayAudibleNoise(player.transform.position, 17f, 0.4f, 0, noiseIsInsideClosedShip, 3322);

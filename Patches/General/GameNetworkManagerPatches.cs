@@ -1,6 +1,5 @@
 ﻿using ButteryFixes.Utility;
 using HarmonyLib;
-using UnityEngine;
 
 namespace ButteryFixes.Patches.General
 {

@@ -214,8 +214,8 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPostfix]
         static void PostPlayFootstepSound(PlayerControllerB __instance)
         {
-            if (__instance.IsServer && !__instance.IsOwner)
-                NonPatchFunctions.playerWasLastSprinting[__instance.actualClientId] = __instance.playerBodyAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Sprinting");
+            if (__instance.IsServer && !__instance.IsOwner && (int)__instance.actualClientId < NonPatchFunctions.playerWasLastSprinting.Length)
+                NonPatchFunctions.playerWasLastSprinting[(int)__instance.actualClientId] = __instance.playerBodyAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Sprinting");
         }
 
         [HarmonyPatch(typeof(PlayerControllerB), "QEItemInteract_performed")]
