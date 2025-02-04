@@ -32,10 +32,6 @@ namespace ButteryFixes.Utility
                         else
                             enemy.Value.requireNestObjectsToSpawn = false;
                         break;
-                    case "MaskedPlayerEnemy":
-                        enemy.Value.isOutsideEnemy = false;
-                        Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Subtract from indoor power, not outdoor power");
-                        break;
                     case "Blob":
                         if (!Compatibility.INSTALLED_EVERYTHING_CAN_DIE)
                         {
@@ -265,24 +261,6 @@ namespace ButteryFixes.Utility
                         break;
                     case "TeaKettle":
                         shovelPickUp = item.grabSFX;
-                        break;
-                    case "TragedyMask":
-                        GlobalReferences.tragedyMaskRandomClips = item.spawnPrefab.GetComponent<RandomPeriodicAudioPlayer>()?.randomClips;
-                        MeshFilter maskMesh = item.spawnPrefab.transform.Find("MaskMesh")?.GetComponent<MeshFilter>();
-                        if (maskMesh != null)
-                        {
-                            MeshFilter eyesFilled = maskMesh.transform.Find("EyesFilled")?.GetComponent<MeshFilter>();
-                            if (eyesFilled != null && GlobalReferences.tragedyMaskEyesFilled != null)
-                            {
-                                eyesFilled.mesh = GlobalReferences.tragedyMaskEyesFilled;
-                                MeshFilter maskLOD = maskMesh.transform.Find("ComedyMaskLOD")?.GetComponent<MeshFilter>();
-                                if (maskLOD != null && GlobalReferences.tragedyMaskLOD != null)
-                                {
-                                    maskLOD.mesh = GlobalReferences.tragedyMaskLOD;
-                                    Plugin.Logger.LogDebug("Meshes: Tragedy");
-                                }
-                            }
-                        }
                         break;
                     case "WeedKillerBottle":
                         item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;

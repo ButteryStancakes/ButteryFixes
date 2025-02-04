@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using HarmonyLib;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace ButteryFixes.Utility
@@ -24,11 +26,6 @@ namespace ButteryFixes.Utility
 
         internal static float dopplerLevelMult = 1f;
 
-        // tragedy mimic patches
-        internal static Mesh tragedyMask, tragedyMaskLOD, tragedyMaskEyesFilled;
-        internal static Material tragedyMaskMat;
-        internal static AudioClip[] tragedyMaskRandomClips;
-
         // player corpse burn effect
         internal static Mesh playerBody;
         internal static Material scavengerSuitBurnt;
@@ -48,5 +45,9 @@ namespace ButteryFixes.Utility
 
         // for cozy lights
         internal static Animator shipAnimator;
+
+        // optimization
+        internal static VehicleController vehicleController;
+        internal static FieldInfo VEHICLE_CONTROLLER = AccessTools.Field(typeof(GlobalReferences), nameof(vehicleController));
     }
 }

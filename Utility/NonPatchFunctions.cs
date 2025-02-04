@@ -106,37 +106,6 @@ namespace ButteryFixes.Utility
                 RoundManager.Instance.PlayAudibleNoise(player.transform.position, 17f, 0.4f, 0, noiseIsInsideClosedShip, 3322);
         }
 
-        internal static void ConvertMaskToTragedy(Transform mask)
-        {
-            Transform mesh = mask.Find("Mesh");
-            if (mesh != null && GlobalReferences.tragedyMask != null && GlobalReferences.tragedyMaskMat != null)
-            {
-                mesh.GetComponent<MeshFilter>().mesh = GlobalReferences.tragedyMask;
-                mesh.GetComponent<MeshRenderer>().sharedMaterial = GlobalReferences.tragedyMaskMat;
-
-                MeshFilter tragedyMaskEyesFilled = mesh.Find("EyesFilled")?.GetComponent<MeshFilter>();
-                if (tragedyMaskEyesFilled != null && GlobalReferences.tragedyMaskEyesFilled != null)
-                {
-                    tragedyMaskEyesFilled.mesh = GlobalReferences.tragedyMaskEyesFilled;
-
-                    MeshFilter tragedyMaskLOD = mask.Find("ComedyMaskLOD1")?.GetComponent<MeshFilter>();
-                    if (tragedyMaskLOD != null && GlobalReferences.tragedyMaskLOD != null)
-                    {
-                        tragedyMaskLOD.mesh = GlobalReferences.tragedyMaskLOD;
-                        tragedyMaskLOD.GetComponent<MeshRenderer>().sharedMaterial = GlobalReferences.tragedyMaskMat;
-
-                        Plugin.Logger.LogDebug("All mask meshes replaced successfully");
-                    }
-                    else
-                        Plugin.Logger.LogWarning("Failed to replace mask eyes");
-                }
-                else
-                    Plugin.Logger.LogWarning("Failed to replace mask LOD");
-            }
-            else
-                Plugin.Logger.LogWarning("Failed to replace mask mesh");
-        }
-
         internal static void ForceRefreshAllHelmetLights(PlayerControllerB player, bool forceOff = false)
         {
             for (int i = 0; i < player.allHelmetLights.Length; i++)

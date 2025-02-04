@@ -7,15 +7,15 @@ namespace ButteryFixes
         internal const string GUID_FAST_CLIMBING = "inoyu.FastClimbing", GUID_BETTER_LADDERS = "e3s1.BetterLadders";
         internal const string GUID_GENERAL_IMPROVEMENTS = "ShaosilGaming.GeneralImprovements";
         internal const string GUID_MODEL_REPLACEMENT_API = "meow.ModelReplacementAPI";
-        internal const string GUID_STARLANCER_AI_FIX = "AudioKnight.StarlancerAIFix";
         internal const string GUID_BETTER_SPRAY_PAINT = "taffyko.BetterSprayPaint";
         internal const string GUID_EVERYTHING_CAN_DIE = "nwnt.EverythingCanDie";
         internal const string GUID_LETHAL_QUANTITIES = "LethalQuantities";
         internal const string GUID_TOUCHSCREEN = "me.pm.TheDeadSnake";
         internal const string GUID_REBALANCED_MOONS = "dopadream.lethalcompany.rebalancedmoons";
+        internal const string GUID_CRUISER_ADDITIONS = "4902.Cruiser_Additions";
 
         internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES, INSTALLED_REBALANCED_MOONS;
-        internal static bool DISABLE_LADDER_PATCH, DISABLE_PLAYERMODEL_PATCHES, DISABLE_ENEMY_MESH_PATCH, DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX;
+        internal static bool DISABLE_LADDER_PATCH, DISABLE_PLAYERMODEL_PATCHES, DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX;
 
         internal static void Init()
         {
@@ -35,12 +35,6 @@ namespace ButteryFixes
             {
                 DISABLE_PLAYERMODEL_PATCHES = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Playermodel patches will be disabled");
-            }
-
-            if (Chainloader.PluginInfos.ContainsKey(GUID_STARLANCER_AI_FIX))
-            {
-                DISABLE_ENEMY_MESH_PATCH = true;
-                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - EnableEnemyMesh patch will be disabled");
             }
 
             if (Chainloader.PluginInfos.ContainsKey(GUID_BETTER_SPRAY_PAINT))

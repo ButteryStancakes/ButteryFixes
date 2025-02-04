@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using BepInEx.Bootstrap;
+using ButteryFixes.Utility;
+using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -77,7 +79,47 @@ namespace ButteryFixes.Patches.Objects
             }
 
             // reduce to a warning, because HighQuotaFixes includes a different solution for this issue, and Cruiser Additions patches it the exact same way as I do
-            Plugin.Logger.LogWarning("Cruiser collect transpiler failed");
+            if (!Chainloader.PluginInfos.ContainsKey(Compatibility.GUID_CRUISER_ADDITIONS))
+                Plugin.Logger.LogWarning("Cruiser collect transpiler failed");
+            return instructions;
+        }
+
+        [HarmonyPatch(typeof(VehicleController), "Awake")]
+        [HarmonyPostfix]
+        static void VehicleControllerPostAwake(VehicleController __instance)
+        {
+            if (GlobalReferences.vehicleController == null)
+                GlobalReferences.vehicleController = __instance;
+        }
+
+        [HarmonyPatch(typeof(BushWolfEnemy), nameof(BushWolfEnemy.Update))]
+        [HarmonyPatch(typeof(ClipboardItem), nameof(ClipboardItem.Update))]
+        [HarmonyPatch(typeof(ForestGiantAI), nameof(ForestGiantAI.OnCollideWithPlayer))]
+        [HarmonyPatch(typeof(Landmine), nameof(Landmine.SpawnExplosion))]
+        [HarmonyPatch(typeof(MouthDogAI), nameof(MouthDogAI.OnCollideWithPlayer))]
+        [HarmonyPatch(typeof(SprayPaintItem), nameof(SprayPaintItem.TrySprayingWeedKillerBottle))]
+        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.SyncShipUnlockablesClientRpc))]
+        [HarmonyPatch(typeof(Terminal), nameof(Terminal.LoadNewNodeIfAffordable))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> CacheVehicleController(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            for (int i = 0; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Call)
+                {
+                    string methodName = codes[i].operand.ToString();
+                    if (methodName.Contains("FindObjectOfType") && methodName.Contains("VehicleController"))
+                    {
+                        codes[i].opcode = OpCodes.Ldsfld;
+                        codes[i].operand = GlobalReferences.VEHICLE_CONTROLLER;
+                        Plugin.Logger.LogDebug($"Transpiler ({__originalMethod.DeclaringType}.{__originalMethod.Name}): Cache Cruiser script");
+                    }
+                }
+            }
+
+            //Plugin.Logger.LogWarning($"{__originalMethod.Name} transpiler failed");
             return instructions;
         }
     }

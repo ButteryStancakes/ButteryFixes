@@ -41,5 +41,14 @@ namespace ButteryFixes.Patches.Enemies
             Plugin.Logger.LogError("Old Bird stomp transpiler failed");
             return instructions;
         }
+
+        [HarmonyPatch(typeof(RadMechAI), nameof(RadMechAI.DoAIInterval))]
+        [HarmonyPostfix]
+        static void RadMechAIPostDoAIInterval(RadMechAI __instance)
+        {
+            // avoid sliding in game over cutscene
+            if (__instance.IsOwner && StartOfRound.Instance.allPlayersDead)
+                __instance.agent.speed = 0f;
+        }
     }
 }

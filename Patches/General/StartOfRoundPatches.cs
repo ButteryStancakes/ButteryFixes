@@ -27,28 +27,6 @@ namespace ButteryFixes.Patches.General
             __instance.speakerAudioSource.dopplerLevel = GlobalReferences.dopplerLevelMult;
             Plugin.Logger.LogDebug("Doppler level: Ship speaker");
 
-            GameObject tragedyRagdoll = StartOfRound.Instance.playerRagdolls.FirstOrDefault(playerRagdoll => playerRagdoll.name == "PlayerRagdollWithTragedyMask Variant");
-            if (tragedyRagdoll != null)
-            {
-                // cache all of the visual references to the tragedy mask (the item and enemy prefabs are broken, only the ragdoll has all the correct assets)
-                foreach (MeshFilter meshFilter in tragedyRagdoll.GetComponentsInChildren<MeshFilter>())
-                {
-                    switch (meshFilter.name)
-                    {
-                        case "Mesh":
-                            GlobalReferences.tragedyMask = meshFilter.sharedMesh;
-                            GlobalReferences.tragedyMaskMat = meshFilter.GetComponent<MeshRenderer>()?.sharedMaterial;
-                            break;
-                        case "ComedyMaskLOD1":
-                            GlobalReferences.tragedyMaskLOD = meshFilter.sharedMesh;
-                            break;
-                        case "EyesFilled":
-                            GlobalReferences.tragedyMaskEyesFilled = meshFilter.sharedMesh;
-                            break;
-                    }
-                }
-            }
-
             GlobalReferences.playerBody = StartOfRound.Instance.playerRagdolls[0].GetComponent<SkinnedMeshRenderer>().sharedMesh;
             GlobalReferences.scavengerSuitBurnt = StartOfRound.Instance.playerRagdolls[6].GetComponent<SkinnedMeshRenderer>().sharedMaterial;
             GlobalReferences.smokeParticle = StartOfRound.Instance.playerRagdolls[6].transform.Find("SmokeParticle")?.gameObject;
