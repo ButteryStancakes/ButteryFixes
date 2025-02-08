@@ -81,53 +81,53 @@ namespace ButteryFixes.Patches.Player
                         Plugin.Logger.LogDebug("Fixed helmet material on player corpse");
                     }
 
-                    if (suit.headCostumeObject == null && suit.lowerTorsoCostumeObject == null)
-                        return;
-
-                    // tail costume piece
                     Transform lowerTorso = __instance.transform.Find("spine.001");
-                    if (suit.lowerTorsoCostumeObject != null)
-                    {
-                        Transform tailbone = snipped ? __instance.detachedHeadObject : lowerTorso;
-                        if (tailbone != null)
-                        {
-                            GameObject tail = Object.Instantiate(suit.lowerTorsoCostumeObject, tailbone.position, tailbone.rotation, tailbone);
-                            if (!__instance.setMaterialToPlayerSuit || burnt)
-                            {
-                                foreach (Renderer tailRend in tail.GetComponentsInChildren<Renderer>())
-                                    tailRend.sharedMaterial = suitMaterial;
-                            }
-                            // special offset for snipping
-                            if (snipped)
-                                tail.transform.SetPositionAndRotation(new Vector3(-0.0400025733f, -0.0654963329f, -0.0346327312f), Quaternion.Euler(19.4403114f, 0.0116598327f, 0.0529587828f));
-                            Plugin.Logger.LogDebug("Torso attachment complete for player corpse");
-                        }
-                    }
-
                     Transform chest = lowerTorso?.Find("spine.002/spine.003");
 
-                    // hat costume piece
-                    bool party = suit.headCostumeObject.name.StartsWith("PartyHatContainer");
-                    if (suit.headCostumeObject != null && (!party || (!burnt && mesh.sharedMaterial != GlobalReferences.scavengerSuitBurnt)))
+                    if (suit.headCostumeObject != null || suit.lowerTorsoCostumeObject != null)
                     {
-                        Transform head = __instance.detachedHeadObject;
-                        if ((head == null || snipped) && chest != null)
-                            head = chest.Find("spine.004");
-                        if (head != null)
+                        // tail costume piece
+                        if (suit.lowerTorsoCostumeObject != null)
                         {
-                            GameObject hat = Object.Instantiate(suit.headCostumeObject, head.position, head.rotation, head);
-                            // special offset/scale for decapitations
-                            if (head == __instance.detachedHeadObject)
+                            Transform tailbone = snipped ? __instance.detachedHeadObject : lowerTorso;
+                            if (tailbone != null)
                             {
-                                hat.transform.SetPositionAndRotation(new Vector3(0.0698937327f, 0.0544735007f, -0.685245395f), Quaternion.Euler(96.69699f, 0f, 0f));
-                                hat.transform.localScale = new Vector3(hat.transform.localScale.x / head.localScale.x, hat.transform.localScale.y / head.localScale.y, hat.transform.localScale.z / head.localScale.z);
+                                GameObject tail = Object.Instantiate(suit.lowerTorsoCostumeObject, tailbone.position, tailbone.rotation, tailbone);
+                                if (!__instance.setMaterialToPlayerSuit || burnt)
+                                {
+                                    foreach (Renderer tailRend in tail.GetComponentsInChildren<Renderer>())
+                                        tailRend.sharedMaterial = suitMaterial;
+                                }
+                                // special offset for snipping
+                                if (snipped)
+                                    tail.transform.SetPositionAndRotation(new Vector3(-0.0400025733f, -0.0654963329f, -0.0346327312f), Quaternion.Euler(19.4403114f, 0.0116598327f, 0.0529587828f));
+                                Plugin.Logger.LogDebug("Torso attachment complete for player corpse");
                             }
-                            if ((!__instance.setMaterialToPlayerSuit || burnt) && !party)
+                        }
+
+                        // hat costume piece
+                        bool party = suit.headCostumeObject.name.StartsWith("PartyHatContainer");
+                        if (suit.headCostumeObject != null && (!party || (!burnt && mesh.sharedMaterial != GlobalReferences.scavengerSuitBurnt)))
+                        {
+                            Transform head = __instance.detachedHeadObject;
+                            if ((head == null || snipped) && chest != null)
+                                head = chest.Find("spine.004");
+                            if (head != null)
                             {
-                                foreach (Renderer hatRend in hat.GetComponentsInChildren<Renderer>())
-                                    hatRend.sharedMaterial = suitMaterial;
+                                GameObject hat = Object.Instantiate(suit.headCostumeObject, head.position, head.rotation, head);
+                                // special offset/scale for decapitations
+                                if (head == __instance.detachedHeadObject)
+                                {
+                                    hat.transform.SetPositionAndRotation(new Vector3(0.0698937327f, 0.0544735007f, -0.685245395f), Quaternion.Euler(96.69699f, 0f, 0f));
+                                    hat.transform.localScale = new Vector3(hat.transform.localScale.x / head.localScale.x, hat.transform.localScale.y / head.localScale.y, hat.transform.localScale.z / head.localScale.z);
+                                }
+                                if ((!__instance.setMaterialToPlayerSuit || burnt) && !party)
+                                {
+                                    foreach (Renderer hatRend in hat.GetComponentsInChildren<Renderer>())
+                                        hatRend.sharedMaterial = suitMaterial;
+                                }
+                                Plugin.Logger.LogDebug("Head attachment complete for player corpse");
                             }
-                            Plugin.Logger.LogDebug("Head attachment complete for player corpse");
                         }
                     }
 

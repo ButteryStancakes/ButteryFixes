@@ -44,57 +44,5 @@ namespace ButteryFixes.Patches.Objects
             __instance.shotgunShellLeft.forceRenderingOff = true;
             __instance.shotgunShellRight.forceRenderingOff = true;
         }
-
-        [HarmonyPatch(typeof(ShotgunItem), nameof(ShotgunItem.ShootGun))]
-        [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> ShotgunItemTransShootGun(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
-        {
-            List<CodeInstruction> codes = instructions.ToList();
-
-            bool fixEarsRinging = false;
-            for (int i = 2; i < codes.Count; i++)
-            {
-                // first distance check for tinnitus/screenshake
-                if (!fixEarsRinging && codes[i].opcode == OpCodes.Bge_Un && codes[i - 2].opcode == OpCodes.Ldloc_2)
-                {
-                    for (int j = i + 1; j < codes.Count - 1; j++)
-                    {
-                        int insertAt = -1;
-                        if (codes[j + 1].opcode == OpCodes.Ldloc_2)
-                        {
-                            // first jump from if/else branches
-                            if (insertAt >= 0 && codes[j].opcode == OpCodes.Br)
-                            {
-                                codes.Insert(insertAt, new(OpCodes.Br, codes[j].operand));
-                                Plugin.Logger.LogDebug("Transpiler (Shotgun blast): Fix ear-ringing severity in extremely close range");
-                                fixEarsRinging = true;
-                                break;
-                            }
-                            // the end of the first if branch
-                            else if (insertAt < 0 && codes[j].opcode == OpCodes.Stloc_S)
-                                insertAt = j + 1;
-                        }
-                    }
-                }
-                else if (codes[i].opcode == OpCodes.Newarr && (System.Type)codes[i].operand == typeof(RaycastHit) && codes[i - 1].opcode == OpCodes.Ldc_I4_S && (sbyte)codes[i - 1].operand == 10)
-                {
-                    codes[i - 1].operand = 50;
-                    Plugin.Logger.LogDebug("Transpiler (Shotgun blast): Resize target colliders array");
-                }
-                else if (codes[i].opcode == OpCodes.Call && codes[i].operand.ToString().Contains("SphereCastNonAlloc"))
-                {
-                    codes.InsertRange(i + 2, [
-                        new(OpCodes.Ldarg_1),
-                        new(OpCodes.Ldloca_S, codes[i + 1].operand),
-                        new(OpCodes.Ldarg_0),
-                        new(OpCodes.Ldflda, ReflectionCache.ENEMY_COLLIDERS),
-                        new(OpCodes.Call, AccessTools.Method(typeof(NonPatchFunctions), nameof(NonPatchFunctions.ShotgunPreProcess))),
-                    ]);
-                    Plugin.Logger.LogDebug("Transpiler (Shotgun blast): Pre-process shotgun targets");
-                }
-            }
-
-            return codes;
-        }
     }
 }

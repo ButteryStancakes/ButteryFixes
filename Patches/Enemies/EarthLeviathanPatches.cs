@@ -12,5 +12,12 @@ namespace ButteryFixes.Patches.Enemies
         {
             return !playerScript.isInHangarShipRoom;
         }
+
+        [HarmonyPatch(typeof(SandWormAI), nameof(SandWormAI.OnCollideWithEnemy))]
+        [HarmonyPrefix]
+        static bool SandWormAI_Pre_OnCollideWithEnemy(SandWormAI __instance, EnemyAI enemyScript)
+        {
+            return __instance.enemyType != enemyScript.enemyType;
+        }
     }
 }
