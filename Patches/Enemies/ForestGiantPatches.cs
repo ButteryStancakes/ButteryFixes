@@ -11,6 +11,8 @@ namespace ButteryFixes.Patches.Enemies
     [HarmonyPatch]
     internal class ForestGiantPatches
     {
+        static int lastGiantRange = 70;
+
         [HarmonyPatch(typeof(ForestGiantAI), nameof(ForestGiantAI.AnimationEventA))]
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> ForestGiantAITransAnimationEventA(IEnumerable<CodeInstruction> instructions)
@@ -42,6 +44,27 @@ namespace ButteryFixes.Patches.Enemies
         {
             for (int i = 0; i < __instance.playerStealthMeters.Length; i++)
                 __instance.playerStealthMeters[i] = Mathf.Clamp01(__instance.playerStealthMeters[i]);
+        }
+
+        [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.GetAllPlayersInLineOfSight))]
+        [HarmonyPostfix]
+        static void ForestGiantAIPostGetAllPlayersInLineOfSight(EnemyAI __instance, int range)
+        {
+            if (__instance is ForestGiantAI)
+                lastGiantRange = range;
+        }
+
+        [HarmonyPatch(typeof(ForestGiantAI), nameof(ForestGiantAI.GiantSeePlayerEffect))]
+        [HarmonyPrefix]
+        static bool ForestGiantAI_Pre_GiantSeePlayerEffect(EnemyAI __instance)
+        {
+            if (__instance.eye == null || GameNetworkManager.Instance.localPlayerController.gameplayCamera == null)
+                return true;
+
+            if (lastGiantRange > 30 && TimeOfDay.Instance.currentLevelWeather == LevelWeatherType.Foggy)
+                lastGiantRange = 30;
+
+            return Vector3.Distance(__instance.eye.position, GameNetworkManager.Instance.localPlayerController.gameplayCamera.transform.position) <= lastGiantRange;
         }
     }
 }

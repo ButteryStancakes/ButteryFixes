@@ -154,5 +154,29 @@ namespace ButteryFixes.Utility
             Plugin.Logger.LogDebug($"Hive price recalculated: ${price} -> ${temp}");
             return temp;
         }
+
+        internal static IEnumerator InteractionTemporarilyLocksCamera(InteractTrigger trigger)
+        {
+            if (trigger == null)
+                yield break;
+
+            float startTime = Time.realtimeSinceStartup;
+
+            while (trigger.playerScriptInSpecialAnimation != GameNetworkManager.Instance.localPlayerController && Time.realtimeSinceStartup - startTime < 2f)
+                yield return null;
+
+            if (trigger.playerScriptInSpecialAnimation != GameNetworkManager.Instance.localPlayerController)
+            {
+                Plugin.Logger.LogDebug("Failed to lock animation for local player, who never entered animation state");
+                yield break;
+            }
+
+            GlobalReferences.lockingCamera++;
+
+            yield return new WaitForSeconds(trigger.animationWaitTime);
+
+            if (GlobalReferences.lockingCamera > 0)
+                GlobalReferences.lockingCamera--;
+        }
     }
 }

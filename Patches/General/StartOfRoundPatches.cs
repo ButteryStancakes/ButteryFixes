@@ -27,9 +27,9 @@ namespace ButteryFixes.Patches.General
             __instance.speakerAudioSource.dopplerLevel = GlobalReferences.dopplerLevelMult;
             Plugin.Logger.LogDebug("Doppler level: Ship speaker");
 
-            GlobalReferences.playerBody = StartOfRound.Instance.playerRagdolls[0].GetComponent<SkinnedMeshRenderer>().sharedMesh;
-            GlobalReferences.scavengerSuitBurnt = StartOfRound.Instance.playerRagdolls[6].GetComponent<SkinnedMeshRenderer>().sharedMaterial;
-            GlobalReferences.smokeParticle = StartOfRound.Instance.playerRagdolls[6].transform.Find("SmokeParticle")?.gameObject;
+            GlobalReferences.playerBody = __instance.playerRagdolls[0].GetComponent<SkinnedMeshRenderer>().sharedMesh;
+            GlobalReferences.scavengerSuitBurnt = __instance.playerRagdolls[6].GetComponent<SkinnedMeshRenderer>().sharedMaterial;
+            GlobalReferences.smokeParticle = __instance.playerRagdolls[6].transform.Find("SmokeParticle")?.gameObject;
 
             ScriptableObjectOverrides.OverrideItems();
             AudioSource stickyNote = __instance.elevatorTransform.Find("StickyNoteItem")?.GetComponent<AudioSource>();
@@ -244,7 +244,7 @@ namespace ButteryFixes.Patches.General
         static void StartOfRoundPostLateUpdate(StartOfRound __instance)
         {
             if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && GlobalReferences.shipNode != null)
-                GlobalReferences.shipNode.position = StartOfRound.Instance.elevatorTransform.position + GlobalReferences.shipNodeOffset;
+                GlobalReferences.shipNode.position = __instance.elevatorTransform.position + GlobalReferences.shipNodeOffset;
 
             if (SoundManager.Instance != null && SoundManager.Instance.echoEnabled && GameNetworkManager.Instance.localPlayerController != null && GameNetworkManager.Instance.localPlayerController.isPlayerDead && GameNetworkManager.Instance.localPlayerController.spectatedPlayerScript != null && !GameNetworkManager.Instance.localPlayerController.spectatedPlayerScript.isInsideFactory)
                 SoundManager.Instance.SetEchoFilter(false);
@@ -313,19 +313,19 @@ namespace ButteryFixes.Patches.General
 
         [HarmonyPatch(typeof(StartOfRound), "PositionSuitsOnRack")]
         [HarmonyPostfix]
-        static void PostPositionSuitsOnRack()
+        static void PostPositionSuitsOnRack(StartOfRound __instance)
         {
             UnlockableSuit[] unlockableSuits = Object.FindObjectsByType<UnlockableSuit>(FindObjectsSortMode.None);
             /*if (unlockableSuits.Length > 1)
             {*/
-                foreach (UnlockableSuit unlockableSuit in unlockableSuits)
+            foreach (UnlockableSuit unlockableSuit in unlockableSuits)
+            {
+                if (unlockableSuit.syncedSuitID.Value == 0)
                 {
-                    if (unlockableSuit.syncedSuitID.Value == 0)
-                    {
-                        unlockableSuit.gameObject.GetComponent<InteractTrigger>().hoverTip = "Change: " + StartOfRound.Instance.unlockablesList.unlockables[unlockableSuit.suitID].unlockableName;
-                        return;
-                    }
-                }    
+                    unlockableSuit.gameObject.GetComponent<InteractTrigger>().hoverTip = "Change: " + __instance.unlockablesList.unlockables[unlockableSuit.suitID].unlockableName;
+                    return;
+                }
+            }
             //}
         }
     }

@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using ButteryFixes.Utility;
+using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -38,6 +39,10 @@ namespace ButteryFixes.Patches.General
                         break;
                 }
             }
+
+            TerminalNode logFile3 = __instance.logEntryFiles.FirstOrDefault(logEntryFile => logEntryFile.name == "LogFile3");
+            if (logFile3 != null && !logFile3.displayText.Contains("fuckng"))
+                logFile3.displayText = logFile3.displayText.Replace("PYSCHOTIC", "fuckng PYSCHOTIC");
 
             TerminalKeyword buy = __instance.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.name == "Buy");
 
@@ -183,28 +188,28 @@ namespace ButteryFixes.Patches.General
                     if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == numberOfItemsInDropship)
                         break;*/
 
-                    if (codes[i].opcode == OpCodes.Callvirt)
+                if (codes[i].opcode == OpCodes.Callvirt)
+                {
+                    string methodName = codes[i].ToString();
+                    if (methodName.Contains("System.Collections.Generic.List") && methodName.Contains("Add"))
                     {
-                        string methodName = codes[i].ToString();
-                        if (methodName.Contains("System.Collections.Generic.List") && methodName.Contains("Add"))
-                        {
-                            if (shovel && walkies)
-                                return codes;
+                        if (shovel && walkies)
+                            return codes;
 
-                            if (!shovel && codes[i - 1].opcode == OpCodes.Ldc_I4_5)
-                            {
-                                shovel = true;
-                                codes[i - 1].opcode = OpCodes.Ldc_I4_2;
-                                Plugin.Logger.LogDebug("Transpiler (Survival kit): Stun grenade -> shovel");
-                            }
-                            else if (!walkies && codes[i - 1].opcode == OpCodes.Ldc_I4_6)
-                            {
-                                walkies = true;
-                                codes[i - 1].opcode = OpCodes.Ldc_I4_0;
-                                Plugin.Logger.LogDebug("Transpiler (Survival kit): Boomboxes -> walkie-talkies");
-                            }
+                        if (!shovel && codes[i - 1].opcode == OpCodes.Ldc_I4_5)
+                        {
+                            shovel = true;
+                            codes[i - 1].opcode = OpCodes.Ldc_I4_2;
+                            Plugin.Logger.LogDebug("Transpiler (Survival kit): Stun grenade -> shovel");
+                        }
+                        else if (!walkies && codes[i - 1].opcode == OpCodes.Ldc_I4_6)
+                        {
+                            walkies = true;
+                            codes[i - 1].opcode = OpCodes.Ldc_I4_0;
+                            Plugin.Logger.LogDebug("Transpiler (Survival kit): Boomboxes -> walkie-talkies");
                         }
                     }
+                }
                 /*}
                 // need to make sure this skips to to the correct occurrence
                 else if (codes[i].opcode == OpCodes.Ldfld && (FieldInfo)codes[i].operand == buyItemIndex && codes[i + 1].opcode == OpCodes.Ldc_I4_S && (sbyte)codes[i + 1].operand == -7)
@@ -213,6 +218,29 @@ namespace ButteryFixes.Patches.General
 
             Plugin.Logger.LogError("Survival kit transpiler failed");
             return instructions;
+        }
+
+        [HarmonyPatch(typeof(Terminal), nameof(Terminal.BeginUsingTerminal))]
+        [HarmonyPostfix]
+        static void Terminal_Post_BeginUsingTerminal(Terminal __instance)
+        {
+            if (Configuration.lockInTerminal.Value)
+            {
+                GlobalReferences.lockingCamera++;
+                // enable screen immediately (normally delayed by 1-2 frames)
+                __instance.terminalUIScreen.gameObject.SetActive(true);
+                // select text field immediately (normally delayed 1s)
+                __instance.screenText.ActivateInputField();
+                __instance.screenText.Select();
+            }
+        }
+
+        [HarmonyPatch(typeof(Terminal), nameof(Terminal.QuitTerminal))]
+        [HarmonyPrefix]
+        static void Terminal_Pre_QuitTerminal(Terminal __instance)
+        {
+            if (GlobalReferences.lockingCamera > 0 && GameNetworkManager.Instance.localPlayerController.inTerminalMenu)
+                GlobalReferences.lockingCamera--;
         }
     }
 }

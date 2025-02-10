@@ -1,7 +1,6 @@
 ﻿using DunGen;
 using DunGen.Graph;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace ButteryFixes.Utility
@@ -50,7 +49,7 @@ namespace ButteryFixes.Utility
                         }
                         break;
 
-                    // --- MINESHAFT ---
+                        // --- MINESHAFT ---
                 }
 
                 if (tile.name.StartsWith("Cave") || tile.name.Contains("Tunnel"))

@@ -1,7 +1,7 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
-using UnityEngine.Rendering;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace ButteryFixes.Patches.Player
 {

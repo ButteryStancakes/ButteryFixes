@@ -56,7 +56,7 @@ namespace ButteryFixes.Patches.Objects
         {
             if (__instance.IsServer && __instance.radioAudio.isPlaying && Time.realtimeSinceStartup > radioPingTimestamp)
             {
-                radioPingTimestamp = Time.realtimeSinceStartup + 2f;
+                radioPingTimestamp = Time.realtimeSinceStartup + 1f;
                 RoundManager.Instance.PlayAudibleNoise(__instance.radioAudio.transform.position, 16f, Mathf.Min((__instance.radioAudio.volume + __instance.radioInterference.volume) * 0.5f, 0.9f), 0, false, 2692);
             }
         }
@@ -92,12 +92,12 @@ namespace ButteryFixes.Patches.Objects
                 GlobalReferences.vehicleController = __instance;
         }
 
-        [HarmonyPatch(typeof(BushWolfEnemy), nameof(BushWolfEnemy.Update))]
+        //[HarmonyPatch(typeof(BushWolfEnemy), nameof(BushWolfEnemy.Update))]
         [HarmonyPatch(typeof(ClipboardItem), nameof(ClipboardItem.Update))]
         [HarmonyPatch(typeof(ForestGiantAI), nameof(ForestGiantAI.OnCollideWithPlayer))]
         [HarmonyPatch(typeof(Landmine), nameof(Landmine.SpawnExplosion))]
         [HarmonyPatch(typeof(MouthDogAI), nameof(MouthDogAI.OnCollideWithPlayer))]
-        [HarmonyPatch(typeof(SprayPaintItem), nameof(SprayPaintItem.TrySprayingWeedKillerBottle))]
+        //[HarmonyPatch(typeof(SprayPaintItem), nameof(SprayPaintItem.TrySprayingWeedKillerBottle))]
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.SyncShipUnlockablesClientRpc))]
         [HarmonyPatch(typeof(Terminal), nameof(Terminal.LoadNewNodeIfAffordable))]
         [HarmonyTranspiler]
@@ -113,14 +113,14 @@ namespace ButteryFixes.Patches.Objects
                     if (methodName.Contains("FindObjectOfType") && methodName.Contains("VehicleController"))
                     {
                         codes[i].opcode = OpCodes.Ldsfld;
-                        codes[i].operand = GlobalReferences.VEHICLE_CONTROLLER;
+                        codes[i].operand = ReflectionCache.VEHICLE_CONTROLLER;
                         Plugin.Logger.LogDebug($"Transpiler ({__originalMethod.DeclaringType}.{__originalMethod.Name}): Cache Cruiser script");
                     }
                 }
             }
 
             //Plugin.Logger.LogWarning($"{__originalMethod.Name} transpiler failed");
-            return instructions;
+            return codes;
         }
     }
 }

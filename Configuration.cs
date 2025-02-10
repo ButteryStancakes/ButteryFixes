@@ -22,7 +22,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, unlimitedOldBirds, restoreShipIcon, limitSpawnChance, fixHivePrices;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, unlimitedOldBirds, restoreShipIcon, limitSpawnChance, fixHivePrices, lockInTerminal;
 
         internal static void Init(ConfigFile cfg)
         {
@@ -132,6 +132,12 @@ namespace ButteryFixes
                 "ScanOnShip",
                 false,
                 "Allows the \"scan\" command on the terminal to count the number and value of the items on your ship, when in orbit or parked at Gordion.");
+
+            lockInTerminal = configFile.Bind(
+                "Extra",
+                "LockInTerminal",
+                false,
+                "The camera will be frozen when you use the terminal, and typing should be more immediately responsive.\nThis will also lock the camera when charging items or pulling the lever.");
         }
 
         static void MigrateLegacyConfigs()

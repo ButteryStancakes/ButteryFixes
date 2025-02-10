@@ -1,10 +1,10 @@
-﻿using HarmonyLib;
+﻿using GameNetcodeStuff;
+using HarmonyLib;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Linq;
 using UnityEngine;
-using GameNetcodeStuff;
 
 namespace ButteryFixes.Patches.General
 {

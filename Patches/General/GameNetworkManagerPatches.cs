@@ -32,7 +32,7 @@ namespace ButteryFixes.Patches.General
                 }
                 catch (System.Exception e)
                 {
-                    Plugin.Logger.LogError($"An error occurred while trying to save dropship inventory to file \"{GameNetworkManager.Instance.currentSaveFileName}\"");
+                    Plugin.Logger.LogError($"An error occurred while trying to save dropship inventory to file \"{__instance.currentSaveFileName}\"");
                     Plugin.Logger.LogError(e);
                 }
             }
@@ -43,6 +43,7 @@ namespace ButteryFixes.Patches.General
         static void GameNetworkManagerPostDisconnect()
         {
             GlobalReferences.allEnemiesList.Clear();
+            GlobalReferences.lockingCamera = 0;
         }
     }
 }

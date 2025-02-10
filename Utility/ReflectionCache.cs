@@ -12,5 +12,7 @@ namespace ButteryFixes.Utility
         internal static readonly FieldInfo CURRENT_LEVEL = AccessTools.Field(typeof(RoundManager), nameof(RoundManager.currentLevel));
 
         internal static readonly MethodInfo SPAWN_PROBABILITIES_POST_PROCESS = AccessTools.Method(typeof(NonPatchFunctions), nameof(NonPatchFunctions.SpawnProbabilitiesPostProcess));
+
+        internal static FieldInfo VEHICLE_CONTROLLER = AccessTools.Field(typeof(GlobalReferences), nameof(GlobalReferences.vehicleController));
     }
 }

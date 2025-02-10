@@ -1,6 +1,4 @@
-﻿using HarmonyLib;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace ButteryFixes.Utility
@@ -48,6 +46,8 @@ namespace ButteryFixes.Utility
 
         // optimization
         internal static VehicleController vehicleController;
-        internal static FieldInfo VEHICLE_CONTROLLER = AccessTools.Field(typeof(GlobalReferences), nameof(vehicleController));
+
+        // lock in terminal
+        internal static int lockingCamera;
     }
 }

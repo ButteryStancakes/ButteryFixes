@@ -1,4 +1,5 @@
-﻿using ButteryFixes.Utility;
+﻿using ButteryFixes.Patches.General;
+using ButteryFixes.Utility;
 using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
@@ -240,6 +241,22 @@ namespace ButteryFixes.Patches.Player
                 GameNetworkManager.Instance.localPlayerController.SetItemInElevator(true, true, placeObject);
                 Plugin.Logger.LogDebug($"Item \"{placeObject.itemProperties.itemName}\" #{placeObject.GetInstanceID()} was placed inside a magnetized Cruiser and auto-collected");
             }
+        }
+
+        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.PlayerLookInput))]
+        [HarmonyPrefix]
+        static void PlayerControllerB_Pre_PlayerLookInput(PlayerControllerB __instance, ref bool __state)
+        {
+            __state = __instance.disableLookInput;
+            if (!__state && GlobalReferences.lockingCamera > 0)
+                __instance.disableLookInput = true;
+        }
+
+        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.PlayerLookInput))]
+        [HarmonyPostfix]
+        static void PlayerControllerB_Post_PlayerLookInput(PlayerControllerB __instance, bool __state)
+        {
+            __instance.disableLookInput = __state;
         }
     }
 }

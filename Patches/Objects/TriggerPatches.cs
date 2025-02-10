@@ -11,7 +11,7 @@ namespace ButteryFixes.Patches.Objects
         [HarmonyPrefix]
         static void InteractTriggerPreInteract(InteractTrigger __instance, ref bool __state, bool ___hasTriggered)
         {
-            __state =  __instance.triggerOnce && !___hasTriggered && __instance.touchTrigger;
+            __state = __instance.triggerOnce && !___hasTriggered && __instance.touchTrigger;
         }
 
         [HarmonyPatch(typeof(InteractTrigger), nameof(InteractTrigger.Interact))]

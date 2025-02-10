@@ -1,5 +1,4 @@
-﻿using BepInEx.Bootstrap;
-using HarmonyLib;
+﻿using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -98,6 +97,7 @@ namespace ButteryFixes.Utility
             {
                 //{ "Airhorn", true },
                 //{ "Clock", false },
+                { "ControlPad", false },
                 { "DustPan", true },
                 { "FancyCup", true },
                 //{ "Flask", false },
@@ -266,10 +266,10 @@ namespace ButteryFixes.Utility
                         item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
                         Plugin.Logger.LogDebug("Audio rolloff: Weed killer");
                         break;
-                    /*case "Zeddog":
-                        item.dropSFX = item.grabSFX; //null
-                        Plugin.Logger.LogDebug($"Audio: {item.itemName}");
-                        break;*/
+                        /*case "Zeddog":
+                            item.dropSFX = item.grabSFX; //null
+                            Plugin.Logger.LogDebug($"Audio: {item.itemName}");
+                            break;*/
                 }
 
                 if (linearRolloff)
