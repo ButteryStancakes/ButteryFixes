@@ -165,6 +165,12 @@ namespace ButteryFixes.Utility
                     break;
                 case "Level9Artifice":
                     Plugin.Logger.LogDebug("Detected landing on Artifice");
+                    GameObject circularRoofBeam = GameObject.Find("/Environment/Map/WarehouseV1 (2)/CircularRoofBeam");
+                    if (circularRoofBeam != null)
+                    {
+                        circularRoofBeam.SetActive(false);
+                        Plugin.Logger.LogDebug("Artifice - Hide out-of-bounds objects");
+                    }
                     break;
                 case "Level10Adamance":
                     Plugin.Logger.LogDebug("Detected landing on Adamance");

@@ -122,6 +122,7 @@ namespace ButteryFixes.Utility
                 { "ChemicalJug", true },
                 { "ClownHorn", false },
                 { "ComedyMask", false },
+                { "RubberDuck", false },
                 { "TragedyMask", false }
             };
             Dictionary<string, bool> inspectable = new()
@@ -135,8 +136,8 @@ namespace ButteryFixes.Utility
             };
             ScanNodeProperties scanNodeProperties;
 
-            AudioClip shovelPickUp = null, pickUpPlasticBin = null, dropPlastic1 = null;
-            List<Item> metalSFXItems = [], plasticSFXItems = [];
+            AudioClip shovelPickUp = null, pickUpPlasticBin = null, dropPlastic1 = null, grabBottle = null, grabCardboardBox = null;
+            List<Item> metalSFXItems = [], plasticSFXItems = [], glassSFXItems = [], cardboardSFXItems = [];
             foreach (Item item in StartOfRound.Instance.allItemsList.itemsList)
             {
                 if (item == null)
@@ -158,20 +159,17 @@ namespace ButteryFixes.Utility
                         pickUpPlasticBin = item.grabSFX;
                         break;
                     case "Brush":
-                    //case "PerfumeBottle":
+                    case "Candy":
+                    case "Dentures":
                     //case "Phone":
-                    //case "PickleJar":
                     case "PillBottle":
-                    //case "PlasticCup":
+                    case "PlasticCup":
                     case "Remote":
+                    case "SoccerBall":
                     case "SteeringWheel":
                     case "Toothpaste":
                     case "ToyCube":
                         plasticSFXItems.Add(item);
-                        break;
-                    case "Candy":
-                        item.grabSFX = null;
-                        Plugin.Logger.LogDebug($"Audio: {item.itemName}");
                         break;
                     case "ClownHorn":
                         item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 0.4f;
@@ -191,9 +189,12 @@ namespace ButteryFixes.Utility
                     case "FancyLamp":
                         item.verticalOffset = 0f;
                         break;
+                    case "FancyPainting":
+                        cardboardSFXItems.Add(item);
+                        break;
                     case "FishTestProp":
                         linearRolloff = true;
-                        //plasticSFXItems.Add(item);
+                        plasticSFXItems.Add(item);
                         break;
                     case "Flashlight":
                     case "ProFlashlight":
@@ -202,6 +203,9 @@ namespace ButteryFixes.Utility
                         sharedMaterials[1] = flashlightItem.bulbDark;
                         flashlightItem.flashlightMesh.sharedMaterials = sharedMaterials;
                         Plugin.Logger.LogDebug($"Bulb off: {item.itemName}");
+                        break;
+                    case "Flask":
+                        grabBottle = item.grabSFX;
                         break;
                     case "Hairdryer":
                         item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 2f;
@@ -242,6 +246,10 @@ namespace ButteryFixes.Utility
                     case "Mug":
                         dropPlastic1 = item.dropSFX;
                         break;
+                    case "PerfumeBottle":
+                    case "PickleJar":
+                        glassSFXItems.Add(item);
+                        break;
                     case "RedLocustHive":
                         linearRolloff = true;
                         item.spawnPrefab.GetComponent<PhysicsProp>().isInFactory = false;
@@ -262,14 +270,17 @@ namespace ButteryFixes.Utility
                     case "TeaKettle":
                         shovelPickUp = item.grabSFX;
                         break;
+                    case "TragedyMask":
+                        grabCardboardBox = item.grabSFX;
+                        break;
                     case "WeedKillerBottle":
                         item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
                         Plugin.Logger.LogDebug("Audio rolloff: Weed killer");
                         break;
-                        /*case "Zeddog":
-                            item.dropSFX = item.grabSFX; //null
-                            Plugin.Logger.LogDebug($"Audio: {item.itemName}");
-                            break;*/
+                    /*case "Zeddog":
+                        item.dropSFX = item.grabSFX; //null
+                        Plugin.Logger.LogDebug($"Audio: {item.itemName}");
+                        break;*/
                 }
 
                 if (linearRolloff)
@@ -365,6 +376,22 @@ namespace ButteryFixes.Utility
                     Plugin.Logger.LogDebug($"Audio: {plasticSFXItem.itemName}");
                     if (plasticSFXItem.name == "PillBottle" && dropPlastic1 != null)
                         plasticSFXItem.dropSFX = dropPlastic1;
+                }
+            }
+            if (grabBottle != null)
+            {
+                foreach (Item glassSFXItem in glassSFXItems)
+                {
+                    glassSFXItem.grabSFX = grabBottle;
+                    Plugin.Logger.LogDebug($"Audio: {glassSFXItem.itemName}");
+                }
+            }
+            if (grabCardboardBox != null)
+            {
+                foreach (Item cardboardSFXItem in cardboardSFXItems)
+                {
+                    cardboardSFXItem.grabSFX = grabCardboardBox;
+                    Plugin.Logger.LogDebug($"Audio: {cardboardSFXItem.itemName}");
                 }
             }
         }

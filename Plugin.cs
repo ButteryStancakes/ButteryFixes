@@ -15,9 +15,10 @@ namespace ButteryFixes
     [BepInDependency(Compatibility.GUID_EVERYTHING_CAN_DIE, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_TOUCHSCREEN, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_REBALANCED_MOONS, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(Compatibility.GUID_BETTER_STAMINA, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.11.2";
+        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.12.0";
         internal static new ManualLogSource Logger;
 
         void Awake()
@@ -26,6 +27,9 @@ namespace ButteryFixes
 
             Compatibility.Init();
             Configuration.Init(Config);
+
+            if (RestoreFilmGrain.GetTextures())
+                SceneManager.sceneLoaded += RestoreFilmGrain.OverrideVolumes;
 
             new Harmony(PLUGIN_GUID).PatchAll();
 

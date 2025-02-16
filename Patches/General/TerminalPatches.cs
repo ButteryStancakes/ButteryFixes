@@ -5,12 +5,16 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace ButteryFixes.Patches.General
 {
     [HarmonyPatch]
     internal class TerminalPatches
     {
+        static int groupCreditsLastFrame = -1;
+        static RectTransform groupCreditsBackground;
+
         [HarmonyPatch(typeof(Terminal), "Start")]
         [HarmonyPostfix]
         static void TerminalPostStart(Terminal __instance)
@@ -77,6 +81,22 @@ namespace ButteryFixes.Patches.General
                     Plugin.Logger.LogDebug("Price: Welcome mat");
                 }
             }
+
+            if (!Compatibility.DISABLE_PRICE_TEXT_FITTING)
+            {
+                groupCreditsLastFrame = -1;
+                if (groupCreditsBackground == null)
+                {
+                    foreach (Transform child in __instance.topRightText.transform.parent)
+                    {
+                        if (child.name == "Image" && child.TryGetComponent(out Image image) && image.enabled)
+                        {
+                            groupCreditsBackground = (RectTransform)child;
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         [HarmonyPatch(typeof(Terminal), "TextPostProcess")]
@@ -108,7 +128,7 @@ namespace ButteryFixes.Patches.General
 
         [HarmonyPatch(typeof(Terminal), "TextPostProcess")]
         [HarmonyPrefix]
-        [HarmonyPriority(Priority.First)]
+        [HarmonyPriority(Priority.First - 1)]
         static void TerminalPreTextPostProcess(Terminal __instance, ref string modifiedDisplayText)
         {
             if (Configuration.scanOnShip.Value && modifiedDisplayText.Contains("[scanForItems]"))
@@ -144,6 +164,20 @@ namespace ButteryFixes.Patches.General
 
             if (modifiedDisplayText.Contains("[numberOfItemsOnRoute]") && __instance.vehicleInDropship)
                 modifiedDisplayText = modifiedDisplayText.Replace("[numberOfItemsOnRoute]", "1 purchased vehicle on route.");
+
+            if (Configuration.filterDecor.Value && modifiedDisplayText.Contains("[unlockablesSelectionList]") && __instance.ShipDecorSelection != null)
+            {
+                TerminalNode[] filteredDecor = __instance.ShipDecorSelection.Where(node => !StartOfRound.Instance.unlockablesList.unlockables[node.shipUnlockableID].hasBeenUnlockedByPlayer).ToArray();
+                if (filteredDecor.Length < 1)
+                    modifiedDisplayText = modifiedDisplayText.Replace("[unlockablesSelectionList]", "[No items available]");
+                else
+                {
+                    string allDecor = string.Empty;
+                    foreach (TerminalNode decor in filteredDecor)
+                        allDecor += $"\n{decor.creatureName}  //  ${decor.itemCost}";
+                    modifiedDisplayText = modifiedDisplayText.Replace("[unlockablesSelectionList]", allDecor);
+                }
+            }
         }
 
         [HarmonyPatch(typeof(Terminal), "ParsePlayerSentence")]
@@ -241,6 +275,29 @@ namespace ButteryFixes.Patches.General
         {
             if (GlobalReferences.lockingCamera > 0 && GameNetworkManager.Instance.localPlayerController.inTerminalMenu)
                 GlobalReferences.lockingCamera--;
+        }
+
+        [HarmonyPatch(typeof(Terminal), nameof(Terminal.Update))]
+        [HarmonyPostfix]
+        static void Terminal_Post_Update(Terminal __instance)
+        {
+            if (!Compatibility.DISABLE_PRICE_TEXT_FITTING && __instance.terminalInUse && groupCreditsLastFrame != __instance.groupCredits && __instance.terminalUIScreen.gameObject.activeSelf && __instance.topRightText.isActiveAndEnabled)
+            {
+                groupCreditsLastFrame = __instance.groupCredits;
+
+                // resize text box to fit more digits
+                if (groupCreditsBackground != null)
+                {
+                    float extraWidth = Mathf.Clamp(__instance.topRightText.preferredWidth - 88.4f, 0f, 75.08f);
+                    Plugin.Logger.LogDebug($"Terminal text: {__instance.topRightText.text}");
+                    Plugin.Logger.LogDebug($"Terminal text preferred width: {__instance.topRightText.preferredWidth}");
+                    if (groupCreditsBackground.sizeDelta.x != (75.175f + extraWidth))
+                    {
+                        groupCreditsBackground.localPosition = new(-181.89f + (extraWidth * 0.5f), groupCreditsBackground.localPosition.y, groupCreditsBackground.localPosition.z);
+                        groupCreditsBackground.sizeDelta = new(75.175f + extraWidth, groupCreditsBackground.sizeDelta.y);
+                    }
+                }
+            }
         }
     }
 }

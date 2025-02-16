@@ -16,13 +16,21 @@ namespace ButteryFixes
         High
     }
 
+    internal enum FilmGrains
+    {
+        None,
+        MenuOnly,
+        Full
+    }
+
     internal class Configuration
     {
         static ConfigFile configFile;
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, unlimitedOldBirds, restoreShipIcon, limitSpawnChance, fixHivePrices, lockInTerminal;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, unlimitedOldBirds, restoreShipIcon, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor;
+        internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
         {
@@ -113,6 +121,12 @@ namespace ButteryFixes
                 "ShowApparatusValue",
                 false,
                 "Actually show the apparatus' value on the scanner instead of \"???\" (in vanilla, it is always $80)");
+
+            restoreFilmGrain = configFile.Bind(
+                "Visual",
+                "RestoreFilmGrain",
+                FilmGrains.None,
+                "Restores film grain effects from pre-release versions of the game. WARNING: Be aware that this will cause white screens on certain hardware.");
         }
 
         static void AudioConfig()
@@ -138,6 +152,12 @@ namespace ButteryFixes
                 "LockInTerminal",
                 false,
                 "The camera will be frozen when you use the terminal, and typing should be more immediately responsive.\nThis will also lock the camera when charging items or pulling the lever.");
+
+            filterDecor = configFile.Bind(
+                "Extra",
+                "FilterDecor",
+                false,
+                "Decorations (suits, furniture, etc.) you have already purchased will be filtered out of the shop's list on the terminal, potentially allowing you to see the unused \"[No items available]\" text.");
         }
 
         static void MigrateLegacyConfigs()
