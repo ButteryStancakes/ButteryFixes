@@ -122,6 +122,20 @@ namespace ButteryFixes.Utility
                     break;
                 case "Level5Rend":
                     Plugin.Logger.LogDebug("Detected landing on Rend");
+                    GameObject cube002 = GameObject.Find("/Environment/Map/CementFacility1/Cube.002");
+                    if (cube002 != null)
+                    {
+                        GameObject cube002_2 = new("Cube.002 (2)");
+                        cube002_2.transform.SetParent(cube002.transform.parent);
+                        cube002_2.transform.SetLocalPositionAndRotation(new(-24.297f, cube002.transform.localPosition.y, 19.699f), cube002.transform.localRotation);
+                        cube002_2.transform.localScale = new(cube002.transform.localScale.x, 0.655802f, cube002.transform.localScale.z);
+                        cube002_2.layer = cube002.layer;
+                        cube002_2.AddComponent<MeshFilter>().sharedMesh = cube002.GetComponent<MeshCollider>().sharedMesh;
+                        Renderer cubeRend = cube002.GetComponent<Renderer>();
+                        cube002_2.AddComponent<MeshRenderer>().sharedMaterial = cubeRend.sharedMaterial;
+                        cubeRend.enabled = false;
+                        Plugin.Logger.LogDebug("Rend - Adjust fire exit visuals");
+                    }
                     break;
                 case "Level6Dine":
                     Plugin.Logger.LogDebug("Detected landing on Dine");
@@ -170,6 +184,12 @@ namespace ButteryFixes.Utility
                     {
                         circularRoofBeam.SetActive(false);
                         Plugin.Logger.LogDebug("Artifice - Hide out-of-bounds objects");
+                    }
+                    Transform fireExitDoor = GameObject.Find("/Environment/FireExit/FireExitDoorContainer/FireExitDoor")?.transform;
+                    if (fireExitDoor != null)
+                    {
+                        fireExitDoor.localPosition = new(12.356f, fireExitDoor.localPosition.y, -13.3f);
+                        Plugin.Logger.LogDebug("Artifice - Adjust fire exit position");
                     }
                     break;
                 case "Level10Adamance":

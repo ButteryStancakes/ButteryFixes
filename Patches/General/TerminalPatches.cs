@@ -14,6 +14,7 @@ namespace ButteryFixes.Patches.General
     {
         static int groupCreditsLastFrame = -1;
         static RectTransform groupCreditsBackground;
+        static TerminalKeyword gordion = null;
 
         [HarmonyPatch(typeof(Terminal), "Start")]
         [HarmonyPostfix]
@@ -93,6 +94,68 @@ namespace ButteryFixes.Patches.General
                         {
                             groupCreditsBackground = (RectTransform)child;
                             break;
+                        }
+                    }
+                }
+            }
+
+            if (Configuration.typeGordion.Value)
+            {
+                if (!__instance.terminalNodes.allKeywords.Any(keyword => keyword.word == "gordion"))
+                {
+                    TerminalKeyword companyMoon = __instance.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.word == "company");
+                    if (companyMoon != null)
+                    {
+                        TerminalKeyword route = companyMoon.defaultVerb;
+                        if (route != null)
+                        {
+                            if (gordion == null)
+                            {
+                                gordion = (TerminalKeyword)ScriptableObject.CreateInstance(typeof(TerminalKeyword));
+                                gordion.word = "gordion";
+                                gordion.defaultVerb = route;
+                            }
+
+                            CompatibleNoun companyNoun = route.compatibleNouns.FirstOrDefault(compatibleNoun => compatibleNoun.noun == companyMoon);
+                            if (companyNoun != null)
+                            {
+                                route.compatibleNouns =
+                                [
+                                    .. route.compatibleNouns,
+                                    new()
+                                    {
+                                        noun = gordion,
+                                        result = companyNoun.result
+                                    },
+                                ];
+                                __instance.terminalNodes.allKeywords =
+                                [
+                                    .. __instance.terminalNodes.allKeywords,
+                                    gordion
+                                ];
+
+                                Plugin.Logger.LogDebug("Terminal: Registered \"gordion\" to route");
+
+                                TerminalKeyword info = __instance.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.word == "info");
+                                if (info != null)
+                                {
+                                    CompatibleNoun companyNoun2 = info.compatibleNouns.FirstOrDefault(compatibleNoun => compatibleNoun.noun == companyMoon);
+                                    if (companyNoun2 != null)
+                                    {
+                                        info.compatibleNouns =
+                                        [
+                                            .. info.compatibleNouns,
+                                            new()
+                                            {
+                                                noun = gordion,
+                                                result = companyNoun2.result
+                                            },
+                                        ];
+
+                                        Plugin.Logger.LogDebug("Terminal: Registered \"gordion\" to info");
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -289,8 +352,8 @@ namespace ButteryFixes.Patches.General
                 if (groupCreditsBackground != null)
                 {
                     float extraWidth = Mathf.Clamp(__instance.topRightText.preferredWidth - 88.4f, 0f, 75.08f);
-                    Plugin.Logger.LogDebug($"Terminal text: {__instance.topRightText.text}");
-                    Plugin.Logger.LogDebug($"Terminal text preferred width: {__instance.topRightText.preferredWidth}");
+                    //Plugin.Logger.LogDebug($"Terminal text: {__instance.topRightText.text}");
+                    //Plugin.Logger.LogDebug($"Terminal text preferred width: {__instance.topRightText.preferredWidth}");
                     if (groupCreditsBackground.sizeDelta.x != (75.175f + extraWidth))
                     {
                         groupCreditsBackground.localPosition = new(-181.89f + (extraWidth * 0.5f), groupCreditsBackground.localPosition.y, groupCreditsBackground.localPosition.z);

@@ -241,6 +241,11 @@ namespace ButteryFixes.Patches.Player
                 GameNetworkManager.Instance.localPlayerController.SetItemInElevator(true, true, placeObject);
                 Plugin.Logger.LogDebug($"Item \"{placeObject.itemProperties.itemName}\" #{placeObject.GetInstanceID()} was placed inside a magnetized Cruiser and auto-collected");
             }
+
+            // fix items shrinking/growing when dropped in elevator/cruiser
+            Transform trans = placeObject.transform;
+            Vector3 scalar = new(trans.localScale.x / trans.lossyScale.x, trans.localScale.y / trans.lossyScale.y, trans.localScale.z / trans.lossyScale.z);
+            placeObject.transform.localScale = Vector3.Scale(placeObject.originalScale, scalar);
         }
 
         [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.PlayerLookInput))]

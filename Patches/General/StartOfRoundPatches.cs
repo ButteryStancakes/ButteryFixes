@@ -25,7 +25,8 @@ namespace ButteryFixes.Patches.General
                 _ => 1f,
             };
             __instance.speakerAudioSource.dopplerLevel = GlobalReferences.dopplerLevelMult;
-            Plugin.Logger.LogDebug("Doppler level: Ship speaker");
+            __instance.shipDoorAudioSource.dopplerLevel = GlobalReferences.dopplerLevelMult;
+            Plugin.Logger.LogDebug("Doppler level: Ship speakers");
 
             GlobalReferences.playerBody = __instance.playerRagdolls[0].GetComponent<SkinnedMeshRenderer>().sharedMesh;
             GlobalReferences.scavengerSuitBurnt = __instance.playerRagdolls[6].GetComponent<SkinnedMeshRenderer>().sharedMaterial;
@@ -316,8 +317,8 @@ namespace ButteryFixes.Patches.General
         static void PostPositionSuitsOnRack(StartOfRound __instance)
         {
             UnlockableSuit[] unlockableSuits = Object.FindObjectsByType<UnlockableSuit>(FindObjectsSortMode.None);
-            /*if (unlockableSuits.Length > 1)
-            {*/
+            //if (unlockableSuits.Length > 1)
+            //{
             foreach (UnlockableSuit unlockableSuit in unlockableSuits)
             {
                 if (unlockableSuit.syncedSuitID.Value == 0)

@@ -1,4 +1,5 @@
 ﻿using ButteryFixes.Utility;
+using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,10 +49,18 @@ namespace ButteryFixes.Patches.Enemies
 
         [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.GetAllPlayersInLineOfSight))]
         [HarmonyPostfix]
-        static void ForestGiantAIPostGetAllPlayersInLineOfSight(EnemyAI __instance, int range)
+        static void ForestGiantAIPostGetAllPlayersInLineOfSight(EnemyAI __instance, PlayerControllerB[] __result, int range)
         {
-            if (__instance is ForestGiantAI)
+            if (__instance is ForestGiantAI forestGiantAI)
+            {
                 lastGiantRange = range;
+                // when no players are in line of sight, forget about players you've seen before
+                if (__result == null && __instance.IsOwner && Configuration.fixGiantSight.Value)
+                {
+                    for (int i = 0; i < forestGiantAI.playerStealthMeters.Length; i++)
+                        forestGiantAI.playerStealthMeters[i] = Mathf.Clamp01(forestGiantAI.playerStealthMeters[i] - (0.33f * Time.deltaTime));
+                }
+            }
         }
 
         [HarmonyPatch(typeof(ForestGiantAI), nameof(ForestGiantAI.GiantSeePlayerEffect))]

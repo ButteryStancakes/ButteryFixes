@@ -13,7 +13,7 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPostfix]
         static void DeadBodyInfoPostStart(DeadBodyInfo __instance)
         {
-            if (__instance.grabBodyObject != null && (__instance.playerScript.isInHangarShipRoom || StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(__instance.grabBodyObject.transform.position)))
+            if (__instance.grabBodyObject != null && (__instance.playerScript.isInHangarShipRoom || StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(__instance.grabBodyObject.transform.position) || StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(__instance.playerScript.transform.position)))
                 __instance.playerScript.SetItemInElevator(true, true, __instance.grabBodyObject);
 
             if (Compatibility.DISABLE_PLAYERMODEL_PATCHES)

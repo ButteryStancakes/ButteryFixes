@@ -18,9 +18,10 @@ namespace ButteryFixes
 
     internal enum FilmGrains
     {
-        None,
+        None = -1,
         MenuOnly,
-        Full
+        Full,
+        AlsoRadar
     }
 
     internal class Configuration
@@ -29,7 +30,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, unlimitedOldBirds, restoreShipIcon, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, unlimitedOldBirds, restoreShipIcon, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion;
         internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
@@ -98,6 +99,12 @@ namespace ButteryFixes
                 "FixHivePrices",
                 true,
                 "(Host only) Fixes some errors with the vanilla bee hive pricing logic. This will let different hives be worth different values on the same day, and also reduces the price of hives that spawn extremely close to the ship.");
+
+            fixGiantSight = configFile.Bind(
+                "Gameplay",
+                "FixGiantSight",
+                true,
+                "(Host only) Fix Forest Keepers permanently remembering players and instantly entering chase on-sight. (Their memory is meant to decay when those players are not visible, but due to a logical error, it can never decrease unless at least one other player is being observed by the giant.)");
         }
 
         static void VisualConfig()
@@ -110,6 +117,12 @@ namespace ButteryFixes
                 "\"DontChange\" makes no changes - vanilla is 860x520, but this setting is also compatible with other resolution mods.\n" +
                 "\"Low\" is 620x350. \"High\" is 970x580.");
 
+            restoreFilmGrain = configFile.Bind(
+                "Visual",
+                "RestoreFilmGrain",
+                FilmGrains.None,
+                "Restores film grain effects from pre-release versions of the game. WARNING: Be aware that this will cause white screens on certain hardware.");
+
             restoreShipIcon = configFile.Bind(
                 "Visual",
                 "RestoreShipIcon",
@@ -121,12 +134,6 @@ namespace ButteryFixes
                 "ShowApparatusValue",
                 false,
                 "Actually show the apparatus' value on the scanner instead of \"???\" (in vanilla, it is always $80)");
-
-            restoreFilmGrain = configFile.Bind(
-                "Visual",
-                "RestoreFilmGrain",
-                FilmGrains.None,
-                "Restores film grain effects from pre-release versions of the game. WARNING: Be aware that this will cause white screens on certain hardware.");
         }
 
         static void AudioConfig()
@@ -158,6 +165,12 @@ namespace ButteryFixes
                 "FilterDecor",
                 false,
                 "Decorations (suits, furniture, etc.) you have already purchased will be filtered out of the shop's list on the terminal, potentially allowing you to see the unused \"[No items available]\" text.");
+
+            typeGordion = configFile.Bind(
+                "Extra",
+                "TypeGordion",
+                false,
+                "You can type \"Gordion\" into the terminal (in place of \"company\") when using the route/info commands.");
         }
 
         static void MigrateLegacyConfigs()
@@ -168,6 +181,8 @@ namespace ButteryFixes
             // moved to Chameleon
             configFile.Bind("Visual", "FancyEntranceDoors", false, "Legacy setting, use \"Chameleon\" instead");
             configFile.Remove(configFile["Visual", "FancyEntranceDoors"].Definition);
+
+            configFile.Save();
         }
     }
 }

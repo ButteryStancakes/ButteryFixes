@@ -30,6 +30,13 @@ namespace ButteryFixes.Utility
                         }
                         else
                             enemy.Value.requireNestObjectsToSpawn = false;
+
+                        SkinnedMeshRenderer dormantBody = enemy.Value.nestSpawnPrefab.GetComponentInChildren<SkinnedMeshRenderer>();
+                        if (dormantBody != null)
+                        {
+                            dormantBody.gameObject.layer = 19;
+                            Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Fix \"nest\" rendering on radar");
+                        }
                         break;
                     case "Blob":
                         if (!Compatibility.INSTALLED_EVERYTHING_CAN_DIE)
@@ -171,8 +178,12 @@ namespace ButteryFixes.Utility
                     case "ToyCube":
                         plasticSFXItems.Add(item);
                         break;
+                    case "CashRegister":
+                        item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 2.35f;
+                        Plugin.Logger.LogDebug("Cooldown: Clown horn");
+                        break;
                     case "ClownHorn":
-                        item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 0.4f;
+                        item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 0.35f;
                         Plugin.Logger.LogDebug("Cooldown: Clown horn");
                         break;
                     case "Cog1":
@@ -208,7 +219,7 @@ namespace ButteryFixes.Utility
                         grabBottle = item.grabSFX;
                         break;
                     case "Hairdryer":
-                        item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 2f;
+                        item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 1.35f;
                         Plugin.Logger.LogDebug("Cooldown: Hairdryer");
                         break;
                     case "Key":
@@ -263,7 +274,7 @@ namespace ButteryFixes.Utility
                     case "Shotgun":
                         if (item.minValue == 30 && item.maxValue == 100)
                         {
-                            item.minValue = 63; // 25
+                            item.minValue = 75; // 30
                             item.maxValue = 225; // 89 + 1
                         }
                         break;
@@ -415,11 +426,11 @@ namespace ButteryFixes.Utility
                         Plugin.Logger.LogDebug("Doppler level: Disco ball");
                         break;
                     case "JackOLantern":
-                        unlockableItem.prefabObject.GetComponentInChildren<InteractTrigger>().cooldownTime = 0.5f;
+                        unlockableItem.prefabObject.GetComponentInChildren<InteractTrigger>().cooldownTime = 0.45f;
                         Plugin.Logger.LogDebug("Cooldown: Jack o' Lantern");
                         break;
                     case "Plushie pajama man":
-                        unlockableItem.prefabObject.GetComponentInChildren<InteractTrigger>().cooldownTime = 0.54f;
+                        unlockableItem.prefabObject.GetComponentInChildren<InteractTrigger>().cooldownTime = 0.2f;
                         Plugin.Logger.LogDebug("Cooldown: Plushie pajama man");
                         break;
                     case "Inverse Teleporter":

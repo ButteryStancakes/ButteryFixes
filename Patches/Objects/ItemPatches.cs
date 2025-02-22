@@ -62,5 +62,17 @@ namespace ButteryFixes.Patches.Objects
                 __instance.playerHeldBy.playerBodyAnimator.SetTrigger(__instance.itemProperties.twoHandedAnimation ? "SwitchHoldAnimationTwoHanded" : "SwitchHoldAnimation");
             }
         }
+
+        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.EquipItem))]
+        [HarmonyPostfix]
+        static void GrabbableObject_Post_EquipItem(GrabbableObject __instance)
+        {
+            // fix items being too big/small when grabbed out of cruiser or elevator
+            if (__instance.transform.lossyScale != __instance.originalScale)
+            {
+                __instance.transform.SetParent(StartOfRound.Instance.propsContainer);
+                __instance.transform.localScale = __instance.originalScale;
+            }
+        }
     }
 }

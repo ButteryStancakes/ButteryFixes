@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.SceneManagement;
@@ -35,13 +36,20 @@ namespace ButteryFixes.Utility
 
             foreach (Volume volume in Object.FindObjectsByType<Volume>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
-                if (volume.sharedProfile.name != "UIEffects" && Configuration.restoreFilmGrain.Value != FilmGrains.Full)
+                if (volume.sharedProfile.name != "UIEffects" && Configuration.restoreFilmGrain.Value < FilmGrains.Full)
                     continue;
 
                 switch (volume.sharedProfile.name)
                 {
                     case "UIEffects":
                         ApplyFilmGrain(volume.sharedProfile, 0.085f, 0.06f, scanline);
+
+                        volume.sharedProfile.TryGet(out Bloom bloom);
+                        if (bloom != null)
+                        {
+                            bloom.active = true;
+                            Plugin.Logger.LogDebug($"Bloom: {volume.sharedProfile.name}");
+                        }
                         break;
                     case "IngameHUD":
                         ApplyFilmGrain(volume.sharedProfile, 0f, 0.49f, scanline);
@@ -52,12 +60,11 @@ namespace ButteryFixes.Utility
                     case "InsanityVolume":
                         ApplyFilmGrain(volume.sharedProfile, 0.374f, 0.558f, type: FilmGrainLookup.Large02);
                         break;
-                    /*
                     case "RadarCameraVolume 1":
-                    case "SecurityCameraVolume":
-                        ApplyFilmGrain(volume.sharedProfile, 0.125f, 1f, scanline);
+                    //case "SecurityCameraVolume":
+                        if (Configuration.restoreFilmGrain.Value == FilmGrains.AlsoRadar)
+                            ApplyFilmGrain(volume.sharedProfile, 0.125f, 1f, scanline);
                         break;
-                    */
                     case "WakeUpVolume":
                         ApplyFilmGrain(volume.sharedProfile, 0.112f, 0.524f, scanline);
                         break;
