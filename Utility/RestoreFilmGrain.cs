@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.SceneManagement;
@@ -61,7 +60,7 @@ namespace ButteryFixes.Utility
                         ApplyFilmGrain(volume.sharedProfile, 0.374f, 0.558f, type: FilmGrainLookup.Large02);
                         break;
                     case "RadarCameraVolume 1":
-                    //case "SecurityCameraVolume":
+                        //case "SecurityCameraVolume":
                         if (Configuration.restoreFilmGrain.Value == FilmGrains.AlsoRadar)
                             ApplyFilmGrain(volume.sharedProfile, 0.125f, 1f, scanline);
                         break;

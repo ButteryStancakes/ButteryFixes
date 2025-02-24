@@ -1,9 +1,9 @@
-﻿using ButteryFixes.Patches.General;
-using ButteryFixes.Utility;
+﻿using ButteryFixes.Utility;
 using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -63,7 +63,7 @@ namespace ButteryFixes.Patches.Player
                     }
                 }
                 else if (safeTimer2 > 0f)
-                    safeTimer = 0f;
+                    safeTimer2 = 0f;
             }
         }
 
@@ -262,6 +262,14 @@ namespace ButteryFixes.Patches.Player
         static void PlayerControllerB_Post_PlayerLookInput(PlayerControllerB __instance, bool __state)
         {
             __instance.disableLookInput = __state;
+        }
+
+        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.DiscardHeldObject))]
+        [HarmonyPrefix]
+        static void PlayerControllerB_Pre_DiscardHeldObject(PlayerControllerB __instance, bool placeObject, NetworkObject parentObjectTo)
+        {
+            if (!Compatibility.DISABLE_INTERACT_FIX && __instance.IsOwner && placeObject && parentObjectTo != null)
+                __instance.throwingObject = true;
         }
     }
 }

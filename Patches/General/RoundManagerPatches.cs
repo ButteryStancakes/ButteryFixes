@@ -196,5 +196,13 @@ namespace ButteryFixes.Patches.General
                 }
             }
         }
+
+        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.RefreshEnemiesList))]
+        [HarmonyPostfix]
+        static void RoundManager_Post_RefreshEnemiesList(RoundManager __instance)
+        {
+            if (StartOfRound.Instance.isChallengeFile && Configuration.limitSpawnChance.Value)
+                __instance.enemyRushIndex = -1;
+        }
     }
 }

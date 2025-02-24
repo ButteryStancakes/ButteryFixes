@@ -288,10 +288,10 @@ namespace ButteryFixes.Utility
                         item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
                         Plugin.Logger.LogDebug("Audio rolloff: Weed killer");
                         break;
-                    /*case "Zeddog":
-                        item.dropSFX = item.grabSFX; //null
-                        Plugin.Logger.LogDebug($"Audio: {item.itemName}");
-                        break;*/
+                        /*case "Zeddog":
+                            item.dropSFX = item.grabSFX; //null
+                            Plugin.Logger.LogDebug($"Audio: {item.itemName}");
+                            break;*/
                 }
 
                 if (linearRolloff)
