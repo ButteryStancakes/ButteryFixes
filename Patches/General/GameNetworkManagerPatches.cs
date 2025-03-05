@@ -44,6 +44,7 @@ namespace ButteryFixes.Patches.General
         {
             GlobalReferences.allEnemiesList.Clear();
             GlobalReferences.lockingCamera = 0;
+            ButlerRadar.ClearAllButlers();
         }
     }
 }

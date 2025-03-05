@@ -23,25 +23,25 @@ namespace ButteryFixes.Utility
                     Plugin.Logger.LogDebug("Detected landing on Experimentation");
                     if (bigMachine != null)
                     {
-                        bigMachine.localPosition = new Vector3(-112.04f, bigMachine.localPosition.y, bigMachine.localPosition.z);
+                        bigMachine.localPosition = new(-112.04f, bigMachine.localPosition.y, bigMachine.localPosition.z);
                         Plugin.Logger.LogDebug("Experimentation - Fixed factory ambience");
                     }
                     // fix fog triggers from the water tower
                     Transform cube7 = GameObject.Find("/Environment/ReverbTriggers (1)/Cube (7)")?.transform;
                     if (cube7 != null)
                     {
-                        cube7.localPosition = new Vector3(-147.8f, cube7.localPosition.y, -81.2f);
-                        cube7.localScale = new Vector3(129.6264f, cube7.localScale.y, 184.7249f);
+                        cube7.localPosition = new(-147.8f, cube7.localPosition.y, -81.2f);
+                        cube7.localScale = new(129.6264f, cube7.localScale.y, 184.7249f);
                         Transform cube9 = GameObject.Find("/Environment/ReverbTriggers (1)/Cube (9)")?.transform;
                         if (cube9 != null)
                         {
-                            cube9.localPosition = new Vector3(-145.4f, cube9.localPosition.y, -42.1f);
-                            cube9.localScale = new Vector3(171.2598f, cube9.localScale.y, 326.2066f);
+                            cube9.localPosition = new(-145.4f, cube9.localPosition.y, -42.1f);
+                            cube9.localScale = new(171.2598f, cube9.localScale.y, 326.2066f);
                             Transform cube8 = GameObject.Find("/Environment/ReverbTriggers (1)/Cube (8)")?.transform;
                             if (cube8 != null)
                             {
-                                cube8.localPosition = new Vector3(-117.39f, cube8.localPosition.y, -87.23f);
-                                cube8.localScale = new Vector3(10.4316f, cube8.localScale.y, 15.95104f);
+                                cube8.localPosition = new(-117.39f, cube8.localPosition.y, -87.23f);
+                                cube8.localScale = new(10.4316f, cube8.localScale.y, 15.95104f);
                                 Plugin.Logger.LogDebug("Experimentation - Adjusted water tower fog triggers");
                             }
                         }
@@ -49,7 +49,7 @@ namespace ButteryFixes.Utility
                     Transform steelDoor = GameObject.Find("/Environment/SteelDoor")?.transform;
                     if (steelDoor != null)
                     {
-                        steelDoor.localPosition = new Vector3(-194.668f, 19.788f, steelDoor.localPosition.z);
+                        steelDoor.localPosition = new(-194.668f, 19.788f, steelDoor.localPosition.z);
                         Plugin.Logger.LogDebug("Experimentation - Fixed old back entrance");
                     }
                     // hide weird untextured geometry
@@ -136,6 +136,11 @@ namespace ButteryFixes.Utility
                         cubeRend.enabled = false;
                         Plugin.Logger.LogDebug("Rend - Adjust fire exit visuals");
                     }
+                    if (bigMachine != null)
+                    {
+                        bigMachine.localPosition = new(63.5566711f, -18.0999107f, -139.493729f);
+                        Plugin.Logger.LogDebug("Rend - Fixed factory ambience");
+                    }
                     break;
                 case "Level6Dine":
                     Plugin.Logger.LogDebug("Detected landing on Dine");
@@ -143,8 +148,8 @@ namespace ButteryFixes.Utility
                     Transform killTrigger4 = GameObject.Find("/Environment/Map/KillTrigger (4)")?.transform;
                     if (killTrigger4 != null)
                     {
-                        killTrigger4.localPosition = new Vector3(148.11f, killTrigger4.localPosition.y, 83.61f);
-                        killTrigger4.localScale = new Vector3(35.3778f, killTrigger4.localScale.y, killTrigger4.localScale.z);
+                        killTrigger4.localPosition = new(148.11f, killTrigger4.localPosition.y, 83.61f);
+                        killTrigger4.localScale = new(35.3778f, killTrigger4.localScale.y, killTrigger4.localScale.z);
                         Plugin.Logger.LogDebug("Dine - Fixed death pit");
                     }
                     break;
@@ -152,7 +157,7 @@ namespace ButteryFixes.Utility
                     Plugin.Logger.LogDebug("Detected landing on Offense");
                     if (bigMachine != null)
                     {
-                        bigMachine.localPosition = new Vector3(27.6018715f, 24.056633f, -67.7034225f);
+                        bigMachine.localPosition = new(27.6018715f, 24.056633f, -67.7034225f);
                         Plugin.Logger.LogDebug("Offense - Fixed factory ambience");
                     }
                     modelsIntroScene.AddRange([
@@ -173,7 +178,7 @@ namespace ButteryFixes.Utility
                     Plugin.Logger.LogDebug("Detected landing on Titan");
                     if (bigMachine != null)
                     {
-                        bigMachine.localPosition = new Vector3(-36.0699997f, 55.1199989f, 26.1499996f);
+                        bigMachine.localPosition = new(-36.0699997f, 55.1199989f, 26.1499996f);
                         Plugin.Logger.LogDebug("Titan - Fixed factory ambience");
                     }
                     break;
@@ -191,12 +196,26 @@ namespace ButteryFixes.Utility
                         fireExitDoor.localPosition = new(12.356f, fireExitDoor.localPosition.y, -13.3f);
                         Plugin.Logger.LogDebug("Artifice - Adjust fire exit position");
                     }
+                    /*if (bigMachine != null)
+                    {
+                        bigMachine.localPosition = new(bigMachine.localPosition.x, 14.2f, bigMachine.localPosition.z);
+                        Plugin.Logger.LogDebug("Artifice - Fixed factory ambience");
+                    }*/
+                    if (Configuration.restoreArtificeAmbience.Value)
+                    {
+                        AudioSource nightTimeSilenceBass = GameObject.Find("/Systems/Audio/HighAndLowAltitudeBG/LowAudio")?.GetComponent<AudioSource>();
+                        if (nightTimeSilenceBass != null)
+                        {
+                            nightTimeSilenceBass.Play();
+                            Plugin.Logger.LogDebug("Artifice - Restored nighttime ambience");
+                        }
+                    }
                     break;
                 case "Level10Adamance":
                     Plugin.Logger.LogDebug("Detected landing on Adamance");
                     if (bigMachine != null)
                     {
-                        bigMachine.localPosition = new Vector3(-108.444908f, -3.29539537f, 8.0433712f);
+                        bigMachine.localPosition = new(-108.444908f, -3.29539537f, 8.0433712f);
                         Plugin.Logger.LogDebug("Adamance - Fixed factory ambience");
                     }
                     rotateFireExit = false;
@@ -205,12 +224,18 @@ namespace ButteryFixes.Utility
                     Plugin.Logger.LogDebug("Detected landing on Embrion");
                     if (bigMachine != null)
                     {
-                        bigMachine.localPosition = new Vector3(202.604599f, 14.0158f, 3.28045521f);
+                        bigMachine.localPosition = new(202.604599f, 14.0158f, 3.28045521f);
                         Plugin.Logger.LogDebug("Embrion - Fixed factory ambience");
                     }
                     break;
                 case "CompanyBuilding":
                     Plugin.Logger.LogDebug("Detected landing on Gordion");
+                    GameObject scanNodeMainEntrance = GameObject.Find("/Environment/ScanNodes/ScanNode");
+                    if (scanNodeMainEntrance != null)
+                    {
+                        scanNodeMainEntrance.SetActive(false);
+                        Plugin.Logger.LogDebug("Gordion - Disabled \"Main entrance\" scan node");
+                    }
                     break;
                 default:
                     Plugin.Logger.LogInfo("Landed on unknown moon");

@@ -19,9 +19,9 @@ namespace ButteryFixes
     internal enum FilmGrains
     {
         None = -1,
-        MenuOnly,
-        Full,
-        AlsoRadar
+        MenusOnly,
+        NotRadar,
+        Full
     }
 
     internal class Configuration
@@ -30,7 +30,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanOnShip, fixFireExits, unlimitedOldBirds, restoreShipIcon, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, restoreShipIcon, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade;
         internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
@@ -134,6 +134,12 @@ namespace ButteryFixes
                 "ShowApparatusValue",
                 false,
                 "Actually show the apparatus' value on the scanner instead of \"???\" (in vanilla, it is always $80)");
+
+            disableLODFade = configFile.Bind(
+                "Visual",
+                "DisableLODFade",
+                true,
+                "Disables level-of-detail cross-fading, which is broken in vanilla. This does not prevent \"pop in\" (when moving towards/away from objects) from occurring, but makes it happen only once instead of twice.");
         }
 
         static void AudioConfig()
@@ -144,15 +150,21 @@ namespace ButteryFixes
                 MusicDopplerLevel.Reduced,
                 "Controls how much Unity's simulated \"Doppler effect\" applies to music sources like the dropship, boombox, etc. (This is what causes pitch distortion when moving towards/away from the source of the music)\n" +
                 "\"Vanilla\" makes no changes. \"Reduced\" will make the effect more subtle. \"None\" will disable it completely (so music always plays at the correct pitch)");
+
+            restoreArtificeAmbience = configFile.Bind(
+                "Audio",
+                "RestoreArtificeAmbience",
+                true,
+                "Restores the unique night-time ambience on Artifice, which is broken and doesn't play in vanilla.");
         }
 
         static void ExtraConfig()
         {
-            scanOnShip = configFile.Bind(
+            scanImprovements = configFile.Bind(
                 "Extra",
-                "ScanOnShip",
+                "ScanImprovements",
                 false,
-                "Allows the \"scan\" command on the terminal to count the number and value of the items on your ship, when in orbit or parked at Gordion.");
+                "Allows the \"scan\" command on the terminal to count the value of items on your ship in orbit. Butlers' knives will be visible on the map and \"scan\" command before they are killed.");
 
             lockInTerminal = configFile.Bind(
                 "Extra",
@@ -181,6 +193,14 @@ namespace ButteryFixes
             // moved to Chameleon
             configFile.Bind("Visual", "FancyEntranceDoors", false, "Legacy setting, use \"Chameleon\" instead");
             configFile.Remove(configFile["Visual", "FancyEntranceDoors"].Definition);
+            // updated to ScanImprovements
+            if (!scanImprovements.Value)
+            {
+                bool scanOnShip = configFile.Bind("Extra", "ScanOnShip", false, "Legacy setting, doesn't work").Value;
+                if (scanOnShip)
+                    scanImprovements.Value = true;
+                configFile.Remove(configFile["Extra", "ScanOnShip"].Definition);
+            }
 
             configFile.Save();
         }

@@ -249,6 +249,8 @@ namespace ButteryFixes.Patches.General
 
             if (SoundManager.Instance != null && SoundManager.Instance.echoEnabled && GameNetworkManager.Instance.localPlayerController != null && GameNetworkManager.Instance.localPlayerController.isPlayerDead && GameNetworkManager.Instance.localPlayerController.spectatedPlayerScript != null && !GameNetworkManager.Instance.localPlayerController.spectatedPlayerScript.isInsideFactory)
                 SoundManager.Instance.SetEchoFilter(false);
+
+            ButlerRadar.UpdateButlers();
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ShipHasLeft))]
@@ -285,6 +287,8 @@ namespace ButteryFixes.Patches.General
 
             if (__instance.currentLevel.name != "CompanyBuildingLevel")
                 TimeOfDay.Instance.playDelayedMusicCoroutine = null;
+
+            ButlerRadar.ClearAllButlers();
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetShip))]

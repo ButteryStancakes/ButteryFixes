@@ -15,6 +15,13 @@ namespace ButteryFixes.Patches.General
         static int groupCreditsLastFrame = -1;
         static RectTransform groupCreditsBackground;
         static TerminalKeyword gordion = null;
+        static readonly Dictionary<string, (int, int)> valueOverrides = new()
+        {
+            { "Knife", (28, 36) },
+            { "RedLocustHive", (40, 150) },
+            { "Shotgun", (25, 90) }, // 25 from v50 beta
+            { "LungApparatus", (40, 131) }, // 130 from v9
+        };
 
         [HarmonyPatch(typeof(Terminal), "Start")]
         [HarmonyPostfix]
@@ -160,6 +167,13 @@ namespace ButteryFixes.Patches.General
                     }
                 }
             }
+
+            TerminalNode shipCosmeticsList = __instance.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.name == "Upgrades")?.specialKeywordResult;
+            if (shipCosmeticsList != null)
+            {
+                shipCosmeticsList.displayText = shipCosmeticsList.displayText.Replace("* Teleporter      //    Price: $400", "* Loud horn      //    Price: $100\n* Signal Translator      //    Price: $255\n* Teleporter      //    Price: $375\n* Inverse Teleporter      //    Price: $425");
+                Plugin.Logger.LogDebug("Terminal: Upgrades");
+            }
         }
 
         [HarmonyPatch(typeof(Terminal), "TextPostProcess")]
@@ -192,36 +206,65 @@ namespace ButteryFixes.Patches.General
         [HarmonyPatch(typeof(Terminal), "TextPostProcess")]
         [HarmonyPrefix]
         [HarmonyPriority(Priority.First - 1)]
+        [HarmonyBefore(Compatibility.GUID_LETHAL_FIXES)]
         static void TerminalPreTextPostProcess(Terminal __instance, ref string modifiedDisplayText)
         {
-            if (Configuration.scanOnShip.Value && modifiedDisplayText.Contains("[scanForItems]"))
+            if (Configuration.scanImprovements.Value && modifiedDisplayText.Contains("[scanForItems]"))
             {
-                bool inOrbit = StartOfRound.Instance.inShipPhase;
-                if (!inOrbit)
+                bool scanOnShip = StartOfRound.Instance.inShipPhase || (GlobalReferences.HangarShipDoor != null && !GlobalReferences.HangarShipDoor.buttonsEnabled) || StartOfRound.Instance.currentLevel.name == "CompanyBuildingLevel";
+
+                int objects = 0;
+                int value = 0;
+                System.Random rand = new(StartOfRound.Instance.randomMapSeed + 91);
+                string vehicleText = string.Empty;
+                foreach (GrabbableObject grabbableObject in Object.FindObjectsByType<GrabbableObject>(FindObjectsSortMode.None))
                 {
-                    HangarShipDoor hangarShipDoor = Object.FindAnyObjectByType<HangarShipDoor>();
-                    if (hangarShipDoor != null && !hangarShipDoor.buttonsEnabled)
-                        inOrbit = true;
+                    if (!grabbableObject.itemProperties.isScrap || grabbableObject is RagdollGrabbableObject)
+                        continue;
+
+                    bool inShip = grabbableObject.isInShipRoom || grabbableObject.isInElevator;
+                    bool inCruiser = scanOnShip && StartOfRound.Instance.isObjectAttachedToMagnet && GlobalReferences.vehicleController != null && grabbableObject.transform.parent == GlobalReferences.vehicleController.transform;
+
+                    if (inShip == scanOnShip || inCruiser)
+                    {
+                        if (scanOnShip || objects < 1)
+                            value += grabbableObject.scrapValue;
+                        else
+                        {
+                            int min = grabbableObject.itemProperties.minValue, max = grabbableObject.itemProperties.maxValue;
+                            if (valueOverrides.TryGetValue(grabbableObject.itemProperties.name, out (int realMin, int realMax) values))
+                            {
+                                min = values.realMin;
+                                max = values.realMax;
+                            }
+                            else
+                            {
+                                min = (int)(min * RoundManager.Instance.scrapValueMultiplier);
+                                max = (int)(max * RoundManager.Instance.scrapValueMultiplier);
+                            }
+
+                            value += Mathf.Clamp(rand.Next(min, max), grabbableObject.scrapValue - (6 * objects), grabbableObject.scrapValue + (9 * objects));
+                        }
+                        objects++;
+
+                        if (inCruiser && string.IsNullOrEmpty(vehicleText))
+                            vehicleText = " and Cruiser";
+                    }
                 }
 
-                string vehicleText = string.Empty;
-                if (inOrbit || StartOfRound.Instance.currentLevel.name == "CompanyBuildingLevel")
-                {
-                    int objects = 0;
-                    int value = 0;
-                    Transform cruiser = Object.FindAnyObjectByType<VehicleController>()?.transform;
-                    foreach (GrabbableObject grabbableObject in Object.FindObjectsByType<GrabbableObject>(FindObjectsSortMode.None))
-                    {
-                        bool inVehicle = StartOfRound.Instance.isObjectAttachedToMagnet && cruiser != null && grabbableObject.transform.parent == cruiser;
-                        if ((grabbableObject.isInShipRoom || grabbableObject.isInElevator || inVehicle) && grabbableObject.itemProperties.isScrap && grabbableObject is not RagdollGrabbableObject)
-                        {
-                            objects++;
-                            value += grabbableObject.scrapValue;
-                            if (inVehicle && string.IsNullOrEmpty(vehicleText))
-                                vehicleText = " and Cruiser";
-                        }
-                    }
+                if (scanOnShip)
                     modifiedDisplayText = modifiedDisplayText.Replace("[scanForItems]", $"There are {objects} objects inside the ship{vehicleText}, totalling at an exact value of ${value}.");
+                else
+                {
+                    // also count unkilled butlers
+                    for (int i = 0; i < ButlerRadar.CountButlers(); i++)
+                    {
+                        (int min, int max) = valueOverrides["Knife"];
+                        value += Mathf.Clamp(rand.Next(min, max), 35 - (6 * objects), 35 + (9 * objects));
+                        objects++;
+                    }
+
+                    modifiedDisplayText = modifiedDisplayText.Replace("[scanForItems]", $"There are {objects} objects outside the ship, totalling at an approximate value of ${value}.");
                 }
             }
 

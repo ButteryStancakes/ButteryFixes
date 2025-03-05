@@ -8,15 +8,27 @@ namespace ButteryFixes.Utility
         // Experimentation, Assurance, Vow, Gordion, March, Adamance, Rend, Dine, Offense, Titan, Artifice, Liquidation, Embrion
         internal const int NUM_LEVELS = 13;
 
-        static Terminal terminal;
+        static Terminal _terminal;
         internal static Terminal Terminal
         {
             get
             {
-                if (terminal == null)
-                    terminal = Object.FindAnyObjectByType<Terminal>();
+                if (_terminal == null)
+                    _terminal = Object.FindAnyObjectByType<Terminal>();
 
-                return terminal;
+                return _terminal;
+            }
+        }
+
+        static HangarShipDoor hangarShipDoor;
+        internal static HangarShipDoor HangarShipDoor
+        {
+            get
+            {
+                if (hangarShipDoor == null)
+                    hangarShipDoor = Object.FindAnyObjectByType<HangarShipDoor>();
+
+                return hangarShipDoor;
             }
         }
 

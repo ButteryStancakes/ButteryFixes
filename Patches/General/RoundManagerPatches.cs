@@ -171,6 +171,18 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void PostFinishGeneratingNewLevelClientRpc(RoundManager __instance)
         {
+            if (Configuration.disableLODFade.Value)
+            {
+                foreach (LODGroup lodGroup in Object.FindObjectsByType<LODGroup>(FindObjectsSortMode.None))
+                {
+                    if (lodGroup.fadeMode != LODFadeMode.None)
+                    {
+                        lodGroup.fadeMode = LODFadeMode.None;
+                        Plugin.Logger.LogDebug($"Disable LOD fade on \"{lodGroup.name}\"");
+                    }
+                }
+            }
+
             if (!__instance.IsServer || __instance.currentDungeonType != 4)
                 return;
 

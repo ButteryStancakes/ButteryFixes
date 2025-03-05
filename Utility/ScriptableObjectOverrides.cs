@@ -248,11 +248,6 @@ namespace ButteryFixes.Utility
                             scanNodeProperties.subText = $"Value: ${scanNodeProperties.scrapValue}";
                             Plugin.Logger.LogDebug("Scan node: Kitchen knife");
                         }
-                        if (item.minValue == 70 && item.maxValue == 210)
-                        {
-                            // knife value has never been randomized, but 35 is not the average of 28-84
-                            item.maxValue = 105; // 42 + 1
-                        }
                         break;
                     case "Mug":
                         dropPlastic1 = item.dropSFX;
@@ -265,18 +260,6 @@ namespace ButteryFixes.Utility
                         linearRolloff = true;
                         item.spawnPrefab.GetComponent<PhysicsProp>().isInFactory = false;
                         Plugin.Logger.LogDebug("Factory: Hive");
-                        if (item.minValue == 90 && item.maxValue == 140)
-                        {
-                            item.minValue = 100; // 40
-                            item.maxValue = 375; // 149 + 1
-                        }
-                        break;
-                    case "Shotgun":
-                        if (item.minValue == 30 && item.maxValue == 100)
-                        {
-                            item.minValue = 75; // 30
-                            item.maxValue = 225; // 89 + 1
-                        }
                         break;
                     case "TeaKettle":
                         shovelPickUp = item.grabSFX;
