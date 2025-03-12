@@ -13,6 +13,7 @@ namespace ButteryFixes.Patches.Objects
     internal class CruiserPatches
     {
         static float radioPingTimestamp;
+        static Transform keyHolder;
 
         [HarmonyPatch(typeof(VehicleController), "DestroyCar")]
         [HarmonyPostfix]
@@ -121,6 +122,24 @@ namespace ButteryFixes.Patches.Objects
 
             //Plugin.Logger.LogWarning($"{__originalMethod.Name} transpiler failed");
             return codes;
+        }
+
+        [HarmonyPatch(typeof(VehicleController), nameof(VehicleController.Update))]
+        [HarmonyPostfix]
+        static void VehicleController_Post_Update(VehicleController __instance)
+        {
+            if (__instance.keyIsInDriverHand && __instance.localPlayerInControl && __instance.vehicleID == 0 && __instance.currentDriver?.localItemHolder != null)
+            {
+                if (keyHolder == null)
+                {
+                    keyHolder = new GameObject("ButteryFixes_CarKeyHolder").transform;
+                    keyHolder.SetParent(__instance.currentDriver.localItemHolder.parent, false);
+                    keyHolder.SetLocalPositionAndRotation(new(-0.002f, 0.036f, -0.042f), Quaternion.Euler(-3.616f, -2.302f, -179.855f));
+                    keyHolder.position += keyHolder.rotation * new Vector3(-__instance.positionOffset.x, -__instance.positionOffset.y, __instance.positionOffset.z);
+                }
+                else
+                    __instance.keyObject.transform.SetPositionAndRotation(keyHolder.position, keyHolder.rotation);
+            }
         }
     }
 }

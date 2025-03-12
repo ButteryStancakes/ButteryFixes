@@ -16,6 +16,7 @@ namespace ButteryFixes
         internal const string GUID_REBALANCED_MOONS = "dopadream.lethalcompany.rebalancedmoons";
         internal const string GUID_CRUISER_ADDITIONS = "4902.Cruiser_Additions";
         internal const string GUID_TERMINAL_STUFF = "darmuh.TerminalStuff";
+        internal const string GUID_LOBBY_COMPATIBILITY = "BMX.LobbyCompatibility";
 
         internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_MORE_COMPANY, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES, INSTALLED_REBALANCED_MOONS;
         internal static bool DISABLE_LADDER_PATCH, DISABLE_PLAYERMODEL_PATCHES, DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING;
@@ -80,6 +81,12 @@ namespace ButteryFixes
             {
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Price text patch will be disabled");
                 DISABLE_PRICE_TEXT_FITTING = true;
+            }
+
+            if (Chainloader.PluginInfos.ContainsKey(GUID_LOBBY_COMPATIBILITY))
+            {
+                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Lobby Compatibility detected");
+                LobbyCompatibility.Init();
             }
         }
     }

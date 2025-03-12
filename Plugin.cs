@@ -17,9 +17,11 @@ namespace ButteryFixes
     [BepInDependency(Compatibility.GUID_TOUCHSCREEN, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_REBALANCED_MOONS, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_BETTER_STAMINA, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(Compatibility.GUID_LETHAL_FIXES, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(Compatibility.GUID_LOBBY_COMPATIBILITY, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.13.0";
+        internal const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.13.1";
         internal static new ManualLogSource Logger;
 
         void Awake()

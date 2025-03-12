@@ -23,7 +23,7 @@ namespace ButteryFixes.Utility
                     Plugin.Logger.LogDebug("Detected landing on Experimentation");
                     if (bigMachine != null)
                     {
-                        bigMachine.localPosition = new(-112.04f, bigMachine.localPosition.y, bigMachine.localPosition.z);
+                        bigMachine.localPosition = new(-96.45731f, bigMachine.localPosition.y, bigMachine.localPosition.z);
                         Plugin.Logger.LogDebug("Experimentation - Fixed factory ambience");
                     }
                     // fix fog triggers from the water tower
@@ -50,13 +50,16 @@ namespace ButteryFixes.Utility
                     if (steelDoor != null)
                     {
                         steelDoor.localPosition = new(-194.668f, 19.788f, steelDoor.localPosition.z);
+                        InteractTrigger cube = steelDoor.Find("DoorMesh/Cube")?.GetComponent<InteractTrigger>();
+                        if (cube != null)
+                            cube.hoverTip = cube.hoverTip.Replace("[ LMB ]", "[LMB]");
                         Plugin.Logger.LogDebug("Experimentation - Fixed old back entrance");
                     }
                     // hide weird untextured geometry
-                    Renderer cube = GameObject.Find("/Environment/Map/Cube (1)")?.GetComponent<Renderer>();
-                    if (cube != null)
+                    Renderer cube1 = GameObject.Find("/Environment/Map/Cube (1)")?.GetComponent<Renderer>();
+                    if (cube1 != null)
                     {
-                        cube.enabled = false;
+                        cube1.enabled = false;
                         Plugin.Logger.LogDebug("Experimentation - Hide untextured geometry");
                     }
                     modelsIntroScene.AddRange([
