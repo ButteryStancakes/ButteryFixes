@@ -27,6 +27,18 @@ namespace ButteryFixes.Utility
                         }
                         break;
 
+                    // locker room
+                    case "4x4BigStairTile":
+                        foreach (RandomScrapSpawn randomScrapSpawn in tile.GetComponentsInChildren<RandomScrapSpawn>())
+                        {
+                            if (randomScrapSpawn.name.StartsWith("SmallItemsSpawn"))
+                            {
+                                randomScrapSpawn.gameObject.SetActive(false);
+                                Plugin.Logger.LogDebug($"{tile.name}: Fix scrap stacking");
+                            }
+                        }
+                        break;
+
                     // --- MANOR ---
 
                     // kitchen
@@ -49,7 +61,7 @@ namespace ButteryFixes.Utility
                         }
                         break;
 
-                        // --- MINESHAFT ---
+                    // --- MINESHAFT ---
                 }
 
                 if (tile.name.StartsWith("Cave") || tile.name.Contains("Tunnel"))

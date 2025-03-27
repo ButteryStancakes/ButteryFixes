@@ -36,18 +36,46 @@ namespace ButteryFixes.Patches.General
             Object.FindAnyObjectByType<BreakerBox>()?.breakerBoxHum.Stop();
         }
 
-        [HarmonyPatch(typeof(RoundManager), "SetExitIDs")]
+        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SetExitIDs))]
         [HarmonyPostfix]
         static void PostSetExitIDs(RoundManager __instance)
         {
+            if (GlobalReferences.exitIDsSet)
+                return;
+            GlobalReferences.exitIDsSet = true;
+
+            /*if (!GlobalReferences.needToFetchExitPoints && !Configuration.fixFireExits.Value)
+                return;*/
+
+            EntranceTeleport[] entranceTeleports = Object.FindObjectsByType<EntranceTeleport>(FindObjectsSortMode.None);
+
+            if (GlobalReferences.needToFetchExitPoints)
+            {
+                foreach (EntranceTeleport teleport in entranceTeleports)
+                {
+                    foreach (EntranceTeleport teleport2 in entranceTeleports)
+                    {
+                        if (teleport.entranceId == teleport2.entranceId && teleport.isEntranceToBuilding != teleport2.isEntranceToBuilding)
+                        {
+                            teleport.exitPoint = teleport2.entrancePoint;
+                            teleport.exitPointAudio = teleport2.entrancePointAudio;
+                            teleport.gotExitPoint = true;
+                            break;
+                        }
+                    }
+                }
+                Plugin.Logger.LogInfo("Successfully remapped exitPoints for all EntranceTeleports.");
+                GlobalReferences.needToFetchExitPoints = false;
+            }
+
             if (Configuration.fixFireExits.Value)
             {
-                foreach (EntranceTeleport entranceTeleport in Object.FindObjectsByType<EntranceTeleport>(FindObjectsSortMode.None))
+                foreach (EntranceTeleport entranceTeleport in entranceTeleports)
                 {
                     if (entranceTeleport.entranceId > 0 && !entranceTeleport.isEntranceToBuilding)
                     {
                         entranceTeleport.entrancePoint.localRotation = Quaternion.Euler(entranceTeleport.entrancePoint.localEulerAngles.x, entranceTeleport.entrancePoint.localEulerAngles.y + 180f, entranceTeleport.entrancePoint.localEulerAngles.z);
-                        Plugin.Logger.LogInfo("Fixed rotation of internal fire exit");
+                        Plugin.Logger.LogDebug("Fixed rotation of internal fire exit");
                     }
                 }
             }
@@ -82,21 +110,21 @@ namespace ButteryFixes.Patches.General
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> TransAssignRandomEnemyToVent(IEnumerable<CodeInstruction> instructions)
         {
-            return TransSpawnRandomEnemy(instructions.ToList(), "firstTimeSpawningEnemies", nameof(SelectableLevel.Enemies), "Spawner");
+            return TransSpawnRandomEnemy(instructions.ToList(), nameof(RoundManager.firstTimeSpawningEnemies), nameof(SelectableLevel.Enemies), "Spawner");
         }
 
         [HarmonyPatch(typeof(RoundManager), "SpawnRandomOutsideEnemy")]
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> TransSpawnRandomOutsideEnemy(IEnumerable<CodeInstruction> instructions)
         {
-            return TransSpawnRandomEnemy(instructions.ToList(), "firstTimeSpawningOutsideEnemies", nameof(SelectableLevel.OutsideEnemies), "Outside spawner");
+            return TransSpawnRandomEnemy(instructions.ToList(), nameof(RoundManager.firstTimeSpawningOutsideEnemies), nameof(SelectableLevel.OutsideEnemies), "Outside spawner");
         }
 
         [HarmonyPatch(typeof(RoundManager), "SpawnRandomDaytimeEnemy")]
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> TransSpawnRandomDaytimeEnemy(IEnumerable<CodeInstruction> instructions)
         {
-            return TransSpawnRandomEnemy(instructions.ToList(), "firstTimeSpawningDaytimeEnemies", nameof(SelectableLevel.DaytimeEnemies), "Daytime spawner");
+            return TransSpawnRandomEnemy(instructions.ToList(), nameof(RoundManager.firstTimeSpawningDaytimeEnemies), nameof(SelectableLevel.DaytimeEnemies), "Daytime spawner");
         }
 
         [HarmonyPatch(typeof(RoundManager), "Awake")]

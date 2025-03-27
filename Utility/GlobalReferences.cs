@@ -61,5 +61,9 @@ namespace ButteryFixes.Utility
 
         // lock in terminal
         internal static int lockingCamera;
+
+        // fire exit fix
+        internal static bool exitIDsSet;
+        internal static bool needToFetchExitPoints;
     }
 }

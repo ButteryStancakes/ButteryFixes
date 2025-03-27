@@ -37,6 +37,15 @@ namespace ButteryFixes.Utility
                             dormantBody.gameObject.layer = 19;
                             Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Fix \"nest\" rendering on radar");
                         }
+
+                        ScanNodeProperties scanOldBird = enemy.Value.nestSpawnPrefab.GetComponentInChildren<ScanNodeProperties>();
+                        if (scanOldBird != null)
+                        {
+                            scanOldBird.requiresLineOfSight = false;
+                            scanOldBird.transform.localPosition = new(0f, scanOldBird.transform.localPosition.y, 0f);
+                            Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Scan on both sides");
+                        }
+
                         break;
                     case "Blob":
                         if (!Compatibility.INSTALLED_EVERYTHING_CAN_DIE)
@@ -271,10 +280,10 @@ namespace ButteryFixes.Utility
                         item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
                         Plugin.Logger.LogDebug("Audio rolloff: Weed killer");
                         break;
-                        /*case "Zeddog":
-                            item.dropSFX = item.grabSFX; //null
-                            Plugin.Logger.LogDebug($"Audio: {item.itemName}");
-                            break;*/
+                    /*case "Zeddog":
+                        item.dropSFX = item.grabSFX; //null
+                        Plugin.Logger.LogDebug($"Audio: {item.itemName}");
+                        break;*/
                 }
 
                 if (linearRolloff)

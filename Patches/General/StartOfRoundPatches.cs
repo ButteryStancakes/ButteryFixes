@@ -289,6 +289,8 @@ namespace ButteryFixes.Patches.General
                 TimeOfDay.Instance.playDelayedMusicCoroutine = null;
 
             ButlerRadar.ClearAllButlers();
+
+            GlobalReferences.exitIDsSet = false;
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetShip))]
