@@ -60,7 +60,7 @@ namespace ButteryFixes.Utility
                         ApplyFilmGrain(volume.sharedProfile, 0.374f, 0.558f, type: FilmGrainLookup.Large02);
                         break;
                     case "RadarCameraVolume 1":
-                    //case "SecurityCameraVolume":
+                        //case "SecurityCameraVolume":
                         if (Configuration.restoreFilmGrain.Value == FilmGrains.Full)
                             ApplyFilmGrain(volume.sharedProfile, 0.125f, 1f, scanline);
                         break;

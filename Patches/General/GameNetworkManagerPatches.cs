@@ -45,8 +45,6 @@ namespace ButteryFixes.Patches.General
             GlobalReferences.allEnemiesList.Clear();
             GlobalReferences.lockingCamera = 0;
             ButlerRadar.ClearAllButlers();
-            GlobalReferences.exitIDsSet = false;
-            GlobalReferences.needToFetchExitPoints = false;
         }
     }
 }

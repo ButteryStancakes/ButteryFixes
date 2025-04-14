@@ -17,7 +17,7 @@ namespace ButteryFixes.Patches.General
         static TerminalKeyword gordion = null;
         static readonly Dictionary<string, (int, int)> valueOverrides = new()
         {
-            { "Knife", (28, 36) },
+            { "Knife", (28, 84) },
             { "RedLocustHive", (40, 150) },
             { "Shotgun", (25, 90) }, // 25 from v50 beta
             { "LungApparatus", (40, 131) }, // 130 from v9
@@ -27,6 +27,16 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void TerminalPostStart(Terminal __instance)
         {
+            if (!Compatibility.ENABLE_VAIN_SHROUDS)
+            {
+                TerminalNode vainShroudFile = __instance.enemyFiles.FirstOrDefault(enemyFile => enemyFile.name == "VainShroudFile");
+                if (vainShroudFile != null && __instance.scannedEnemyIDs.Contains(vainShroudFile.creatureFileID))
+                {
+                    Compatibility.ENABLE_VAIN_SHROUDS = true;
+                    Plugin.Logger.LogDebug("Vain Shrouds have already been scanned on this save");
+                }
+            }
+
             foreach (TerminalNode enemyFile in __instance.enemyFiles)
             {
                 switch (enemyFile.name)
@@ -39,15 +49,26 @@ namespace ButteryFixes.Patches.General
                         }
                         break;
                     case "RadMechFile":
-                        if (!enemyFile.displayText.Contains("Sigurd"))
+                        if (!enemyFile.displayText.Contains("Anglen"))
                         {
-                            enemyFile.displayText = enemyFile.displayText.Replace("OLD BIRDS", "OLD BIRDS\n\nSigurd's danger level: 95%").Replace("\n The subject of who developed the Old Birds has been an intense debate since their first recorded appearance on December 18 of 2143, when a large number of Old Birds invaded the", "\n The subject of who developed the Old Birds has been an intense debate since their first recorded appearance on December 18 of 2143, when over fifty Old Birds invaded the Anglen Capital. This is considered one of the first major causes for the downfall of the Anglen Empire. The most commonly upheld theory takes into account the tension between the Anglen and Buemoch military throughout the 2100's, however nothing has been proven in the centuries since.") + " DON'T MESS AROUND OR THEYLL GIVE YOU A RIDE.tHEY LOSE TRACK QUICK AND THEY CANT TURN VERY FAST, THEYRE DUMB AND THEY WONT SHUT UP sorry caps";
-                            Plugin.Logger.LogDebug("Bestiary: Old Birds");
+                            enemyFile.displayText = enemyFile.displayText.Replace(
+                                "\n The subject of who developed the Old Birds has been an intense debate since their first recorded appearance on December 18 of 2143, when a large number of Old Birds invaded the",
+                                "\n The subject of who developed the Old Birds has been an intense debate since their first recorded appearance on December 18 of 2143, when over fifty Old Birds invaded the Anglen Capital. This is considered one of the first major causes for the downfall of the Anglen Empire. The most commonly upheld theory takes into account the tension between the Anglen and Buemoch military throughout the 2100's, however nothing has been proven in the centuries since.");
                         }
+                        if (!enemyFile.displayText.Contains("Sigurd") && Compatibility.ENABLE_VAIN_SHROUDS)
+                        {
+                            enemyFile.displayText = enemyFile.displayText.Replace("OLD BIRDS", "OLD BIRDS\n\nSigurd's danger level: 95%")
+                                + " DON'T MESS AROUND OR THEYLL GIVE YOU A RIDE.tHEY LOSE TRACK QUICK AND THEY CANT TURN VERY FAST, THEYRE DUMB AND THEY WONT SHUT UP sorry caps";
+                        }
+                        Plugin.Logger.LogDebug("Bestiary: Old Birds");
                         break;
                     case "MaskHornetsFile":
                         enemyFile.creatureName = enemyFile.creatureName[0].ToString().ToUpper() + enemyFile.creatureName[1..];
                         Plugin.Logger.LogDebug("Bestiary: Mask hornets");
+                        break;
+                    case "HygrodereFile":
+                        enemyFile.displayText = enemyFile.displayText.Replace("Hydrogere", "Hygrodere").Replace("Prostita", "Protista");
+                        Plugin.Logger.LogDebug("Bestiary: Hygrodere");
                         break;
                 }
             }

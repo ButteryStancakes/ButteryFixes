@@ -17,9 +17,10 @@ namespace ButteryFixes
         internal const string GUID_CRUISER_ADDITIONS = "4902.Cruiser_Additions";
         internal const string GUID_TERMINAL_STUFF = "darmuh.TerminalStuff";
         internal const string GUID_LOBBY_COMPATIBILITY = "BMX.LobbyCompatibility";
+        internal const string GUID_YES_FOX = "uk.1a3.yesfox";
 
         internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_MORE_COMPANY, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES, INSTALLED_REBALANCED_MOONS;
-        internal static bool DISABLE_LADDER_PATCH, DISABLE_PLAYERMODEL_PATCHES, DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING;
+        internal static bool DISABLE_LADDER_PATCH, DISABLE_PLAYERMODEL_PATCHES, DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING, ENABLE_VAIN_SHROUDS;
 
         internal static void Init()
         {
@@ -87,6 +88,12 @@ namespace ButteryFixes
             {
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Lobby Compatibility detected");
                 LobbyCompatibility.Init();
+            }
+
+            if (Chainloader.PluginInfos.ContainsKey(GUID_YES_FOX))
+            {
+                ENABLE_VAIN_SHROUDS = true;
+                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - YesFox detected");
             }
         }
     }

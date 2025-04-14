@@ -61,7 +61,7 @@ namespace ButteryFixes.Utility
                         }
                         break;
 
-                    // --- MINESHAFT ---
+                        // --- MINESHAFT ---
                 }
 
                 if (tile.name.StartsWith("Cave") || tile.name.Contains("Tunnel"))

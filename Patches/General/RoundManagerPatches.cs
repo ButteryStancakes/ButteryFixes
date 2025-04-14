@@ -40,34 +40,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void PostSetExitIDs(RoundManager __instance)
         {
-            if (GlobalReferences.exitIDsSet)
-                return;
-            GlobalReferences.exitIDsSet = true;
-
-            /*if (!GlobalReferences.needToFetchExitPoints && !Configuration.fixFireExits.Value)
-                return;*/
-
             EntranceTeleport[] entranceTeleports = Object.FindObjectsByType<EntranceTeleport>(FindObjectsSortMode.None);
-
-            if (GlobalReferences.needToFetchExitPoints)
-            {
-                foreach (EntranceTeleport teleport in entranceTeleports)
-                {
-                    foreach (EntranceTeleport teleport2 in entranceTeleports)
-                    {
-                        if (teleport.entranceId == teleport2.entranceId && teleport.isEntranceToBuilding != teleport2.isEntranceToBuilding)
-                        {
-                            teleport.exitPoint = teleport2.entrancePoint;
-                            teleport.exitPointAudio = teleport2.entrancePointAudio;
-                            teleport.gotExitPoint = true;
-                            break;
-                        }
-                    }
-                }
-                Plugin.Logger.LogInfo("Successfully remapped exitPoints for all EntranceTeleports.");
-                GlobalReferences.needToFetchExitPoints = false;
-            }
-
             if (Configuration.fixFireExits.Value)
             {
                 foreach (EntranceTeleport entranceTeleport in entranceTeleports)
@@ -210,6 +183,8 @@ namespace ButteryFixes.Patches.General
                     }
                 }
             }
+
+            NonPatchFunctions.TestForVainShrouds();
 
             if (!__instance.IsServer || __instance.currentDungeonType != 4)
                 return;

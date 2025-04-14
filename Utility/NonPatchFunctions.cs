@@ -178,5 +178,21 @@ namespace ButteryFixes.Utility
             if (GlobalReferences.lockingCamera > 0)
                 GlobalReferences.lockingCamera--;
         }
+
+        internal static void TestForVainShrouds()
+        {
+            if (Compatibility.ENABLE_VAIN_SHROUDS || StartOfRound.Instance == null)
+                return;
+
+            foreach (SelectableLevel level in StartOfRound.Instance.levels)
+            {
+                if (level.moldSpreadIterations > 0 && level.canSpawnMold)
+                {
+                    Compatibility.ENABLE_VAIN_SHROUDS = true;
+                    Plugin.Logger.LogInfo("YesFox is not installed, but current save file still has Vain Shrouds");
+                    return;
+                }
+            }
+        }
     }
 }

@@ -289,8 +289,6 @@ namespace ButteryFixes.Patches.General
                 TimeOfDay.Instance.playDelayedMusicCoroutine = null;
 
             ButlerRadar.ClearAllButlers();
-
-            GlobalReferences.exitIDsSet = false;
         }
 
         [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetShip))]
@@ -334,6 +332,14 @@ namespace ButteryFixes.Patches.General
                 }
             }
             //}
+        }
+
+        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.LoadPlanetsMoldSpreadData))]
+        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.SetPlanetsMold))]
+        [HarmonyPostfix]
+        static void StartOfRound_Post_PlanetsMold(StartOfRound __instance)
+        {
+            NonPatchFunctions.TestForVainShrouds();
         }
     }
 }
