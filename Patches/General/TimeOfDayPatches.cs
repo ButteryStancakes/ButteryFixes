@@ -1,30 +1,26 @@
-﻿using HarmonyLib;
-using UnityEngine;
+﻿using ButteryFixes.Utility;
+using HarmonyLib;
 
 namespace ButteryFixes.Patches.General
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(TimeOfDay))]
     internal class TimeOfDayPatches
     {
-        [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.PlayTimeMusicDelayed))]
+        [HarmonyPatch(nameof(TimeOfDay.PlayTimeMusicDelayed))]
         [HarmonyPrefix]
-        static void PrePlayTimeMusicDelayed(TimeOfDay __instance, ref Coroutine ___playDelayedMusicCoroutine)
+        static void TimeOfDay_Pre_PlayTimeMusicDelayed(TimeOfDay __instance)
         {
             // allow music to play again, unless visiting Gordion multiple times in a row
             if (StartOfRound.Instance.currentLevel.name != "CompanyBuildingLevel" && !__instance.TimeOfDayMusic.isPlaying && !SoundManager.Instance.musicSource.isPlaying)
-                ___playDelayedMusicCoroutine = null;
+                __instance.playDelayedMusicCoroutine = null;
         }
 
-        [HarmonyPatch(typeof(TimeOfDay), "Awake")]
+        [HarmonyPatch(nameof(TimeOfDay.OnDayChanged))]
+        [HarmonyAfter(Compatibility.GUID_YES_FOX)]
         [HarmonyPostfix]
-        static void TimeOfDayPostAwake(TimeOfDay __instance)
+        static void TimeOfDay_Post_OnDayChanged(StartOfRound __instance)
         {
-            KillLocalPlayer meteorCrushingTrigger = __instance.MeteorWeather?.meteorPrefab?.GetComponentInChildren<KillLocalPlayer>();
-            if (meteorCrushingTrigger != null)
-            {
-                meteorCrushingTrigger.deathAnimation = 6;
-                Plugin.Logger.LogDebug("Meteor weather: Burnt death animation");
-            }
+            NonPatchFunctions.TestForVainShrouds();
         }
     }
 }

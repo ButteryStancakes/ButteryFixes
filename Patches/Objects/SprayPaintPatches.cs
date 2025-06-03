@@ -3,50 +3,49 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using UnityEngine;
-using UnityEngine.Rendering.HighDefinition;
 
 namespace ButteryFixes.Patches.Objects
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(SprayPaintItem))]
     class SprayPaintPatches
     {
-        [HarmonyPatch(typeof(SprayPaintItem), nameof(SprayPaintItem.LateUpdate))]
+        [HarmonyPatch(nameof(SprayPaintItem.LateUpdate))]
         [HarmonyPrefix]
-        static void SprayPaintItemPreLateUpdate(SprayPaintItem __instance, ref bool ___isSpraying, ref float ___sprayInterval, DecalProjector ___delayedSprayPaintDecal)
+        static void SprayPaintItem_Pre_LateUpdate(SprayPaintItem __instance)
         {
-            if (___isSpraying)
+            if (__instance.isSpraying)
             {
                 if (__instance.itemProperties.canBeInspected && __instance.playerHeldBy != null && __instance.playerHeldBy.IsInspectingItem)
                 {
-                    ___isSpraying = false;
+                    __instance.isSpraying = false;
                     __instance.StopSpraying();
                 }
                 // make painting sequential decals smoother
-                else if (!Compatibility.DISABLE_SPRAY_PAINT_PATCHES && !__instance.isWeedKillerSprayBottle && ___sprayInterval > 0f && ___delayedSprayPaintDecal != null && ___delayedSprayPaintDecal.enabled && ___sprayInterval < (__instance.sprayIntervalSpeed - Time.fixedDeltaTime))
-                    ___sprayInterval = 0f;
+                else if (!Compatibility.DISABLE_SPRAY_PAINT_PATCHES && !__instance.isWeedKillerSprayBottle && __instance.sprayInterval > 0f && __instance.delayedSprayPaintDecal != null && __instance.delayedSprayPaintDecal.enabled && __instance.sprayInterval < (__instance.sprayIntervalSpeed - Time.fixedDeltaTime))
+                    __instance.sprayInterval = 0f;
             }
         }
 
-        [HarmonyPatch(typeof(SprayPaintItem), nameof(SprayPaintItem.ItemActivate))]
+        [HarmonyPatch(nameof(SprayPaintItem.ItemActivate))]
         [HarmonyPrefix]
-        static void SprayPaintItemPreItemActivate(SprayPaintItem __instance, ref bool buttonDown, float ___sprayCanTank)
+        static void SprayPaintItem_Pre_ItemActivate(SprayPaintItem __instance, ref bool buttonDown)
         {
-            if (buttonDown && __instance.itemProperties.canBeInspected && __instance.playerHeldBy != null && __instance.playerHeldBy.IsInspectingItem && ___sprayCanTank > 0f)
+            if (buttonDown && __instance.itemProperties.canBeInspected && __instance.playerHeldBy != null && __instance.playerHeldBy.IsInspectingItem && __instance.sprayCanTank > 0f)
                 buttonDown = false;
         }
 
-        [HarmonyPatch(typeof(SprayPaintItem), nameof(SprayPaintItem.EquipItem))]
+        [HarmonyPatch(nameof(SprayPaintItem.EquipItem))]
         [HarmonyPostfix]
-        static void SprayPaintItemPostEquipItem(SprayPaintItem __instance)
+        static void SprayPaintItem_Post_EquipItem(SprayPaintItem __instance)
         {
             // can't shake weed killer
             if (__instance.isWeedKillerSprayBottle)
                 __instance.playerHeldBy.equippedUsableItemQE = false;
         }
 
-        [HarmonyPatch(typeof(SprayPaintItem), nameof(SprayPaintItem.Start))]
+        [HarmonyPatch(nameof(SprayPaintItem.Start))]
         [HarmonyPostfix]
-        static void SprayPaintItemPostStart(SprayPaintItem __instance, ref int ___sprayCanMatsIndex)
+        static void SprayPaintItem_Post_Start(SprayPaintItem __instance)
         {
             if (!__instance.isWeedKillerSprayBottle)
             {
@@ -58,17 +57,17 @@ namespace ButteryFixes.Patches.Objects
                 }
                 if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
                 {
-                    ___sprayCanMatsIndex = new System.Random((int)__instance.NetworkObjectId).Next(__instance.particleMats.Length);
-                    __instance.sprayParticle.GetComponent<ParticleSystemRenderer>().material = __instance.particleMats[___sprayCanMatsIndex];
-                    __instance.sprayCanNeedsShakingParticle.GetComponent<ParticleSystemRenderer>().material = __instance.particleMats[___sprayCanMatsIndex];
+                    __instance.sprayCanMatsIndex = new System.Random((int)__instance.NetworkObjectId).Next(__instance.particleMats.Length);
+                    __instance.sprayParticle.GetComponent<ParticleSystemRenderer>().material = __instance.particleMats[__instance.sprayCanMatsIndex];
+                    __instance.sprayCanNeedsShakingParticle.GetComponent<ParticleSystemRenderer>().material = __instance.particleMats[__instance.sprayCanMatsIndex];
                     Plugin.Logger.LogDebug($"Rerolled spray can #{__instance.NetworkObjectId} color");
                 }
             }
         }
 
-        [HarmonyPatch(typeof(SprayPaintItem), "AddSprayPaintLocal")]
+        [HarmonyPatch(nameof(SprayPaintItem.AddSprayPaintLocal))]
         [HarmonyPrefix]
-        static void PreAddSprayPaintLocal(SprayPaintItem __instance, ref int ___sprayPaintMask, ref int ___addSprayPaintWithFrameDelay, DecalProjector ___delayedSprayPaintDecal)
+        static void SprayPaintItem_Pre_AddSprayPaintLocal(SprayPaintItem __instance)
         {
             if (Compatibility.DISABLE_SPRAY_PAINT_PATCHES)
                 return;
@@ -76,21 +75,21 @@ namespace ButteryFixes.Patches.Objects
             // don't collide with player (same bug as jetpack)
             int placeableShipObjects = (1 << 26);
             if (__instance.isInShipRoom || __instance.isInElevator || (__instance.playerHeldBy != null && (__instance.playerHeldBy.isInHangarShipRoom || __instance.playerHeldBy.isInElevator)) || StartOfRound.Instance.inShipPhase || RoundManager.Instance.mapPropsContainer == null)
-                ___sprayPaintMask |= placeableShipObjects;
+                __instance.sprayPaintMask |= placeableShipObjects;
             else
-                ___sprayPaintMask &= ~placeableShipObjects;
+                __instance.sprayPaintMask &= ~placeableShipObjects;
 
             // force spray paint decals to appear if framerate is too low
-            if (___addSprayPaintWithFrameDelay > 0)
+            if (__instance.addSprayPaintWithFrameDelay > 0)
             {
-                ___addSprayPaintWithFrameDelay = 0;
-                ___delayedSprayPaintDecal.enabled = true;
+                __instance.addSprayPaintWithFrameDelay = 0;
+                __instance.delayedSprayPaintDecal.enabled = true;
             }
         }
 
-        [HarmonyPatch(typeof(SprayPaintItem), "AddSprayPaintLocal")]
+        [HarmonyPatch(nameof(SprayPaintItem.AddSprayPaintLocal))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> TransAddSprayPaintLocal(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> SprayPaintItem_Trans_AddSprayPaintLocal(IEnumerable<CodeInstruction> instructions)
         {
             if (Compatibility.DISABLE_SPRAY_PAINT_PATCHES)
                 return instructions;

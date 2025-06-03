@@ -8,13 +8,13 @@ using UnityEngine.UI;
 
 namespace ButteryFixes.Patches.General
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(StartOfRound))]
     internal class StartOfRoundPatches
     {
-        [HarmonyPatch(typeof(StartOfRound), "Awake")]
+        [HarmonyPatch(nameof(StartOfRound.Awake))]
         [HarmonyBefore(Compatibility.GUID_GENERAL_IMPROVEMENTS)]
         [HarmonyPostfix]
-        static void StartOfRoundPostAwake(StartOfRound __instance)
+        static void StartOfRound_Post_Awake(StartOfRound __instance)
         {
             ScriptableObjectOverrides.OverrideSelectableLevels();
 
@@ -83,11 +83,21 @@ namespace ButteryFixes.Patches.General
                 shipCam.cullingMask |= (1 << LayerMask.NameToLayer("DecalStickableSurface"));
                 Plugin.Logger.LogDebug("Orbit visuals: Terminal on CCTV");
             }
+
+            // for suit matching
+            GameObject ragdollPieces = __instance.playerRagdolls.FirstOrDefault(ragdoll => ragdoll.name.StartsWith("RagdollPieces"));
+            if (ragdollPieces != null && !ragdollPieces.GetComponent<PlayerGibsLinker>())
+                ragdollPieces.AddComponent<PlayerGibsLinker>();
+
+            // performance improvement on some maps
+            if (GlobalReferences.fakeContour != null)
+                Object.Destroy(GlobalReferences.fakeContour);
+            GlobalReferences.fakeContour = new("ButteryFixes_FakeContour");
         }
 
-        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetStats))]
+        [HarmonyPatch(nameof(StartOfRound.ResetStats))]
         [HarmonyPostfix]
-        static void PostResetStats(StartOfRound __instance)
+        static void StartOfRound_Post_ResetStats(StartOfRound __instance)
         {
             // stop tracking "most profitable" between days
             for (int i = 0; i < __instance.gameStats.allPlayerStats.Length; i++)
@@ -95,9 +105,9 @@ namespace ButteryFixes.Patches.General
             Plugin.Logger.LogDebug("Cleared \"profitable\" stat for all employees");
         }
 
-        [HarmonyPatch(typeof(StartOfRound), "ResetShipFurniture")]
+        [HarmonyPatch(nameof(StartOfRound.ResetShipFurniture))]
         [HarmonyPostfix]
-        static void PostResetShipFurniture(StartOfRound __instance)
+        static void StartOfRound_Post_ResetShipFurniture(StartOfRound __instance)
         {
             Terminal terminal = GlobalReferences.Terminal;
             if (__instance.IsServer)
@@ -146,9 +156,9 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(StartOfRound), "LoadShipGrabbableItems")]
+        [HarmonyPatch(nameof(StartOfRound.LoadShipGrabbableItems))]
         [HarmonyPostfix]
-        static void PostLoadShipGrabbableItems()
+        static void StartOfRound_Post_LoadShipGrabbableItems()
         {
             Terminal terminal = GlobalReferences.Terminal;
             // reload the dropship's contents from the save file, if any exist
@@ -182,9 +192,9 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(StartOfRound), "SetTimeAndPlanetToSavedSettings")]
+        [HarmonyPatch(nameof(StartOfRound.SetTimeAndPlanetToSavedSettings))]
         [HarmonyPrefix]
-        static void PreSetTimeAndPlanetToSavedSettings()
+        static void StartOfRound_Pre_SetTimeAndPlanetToSavedSettings()
         {
             if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && Configuration.randomizeDefaultSeed.Value && GameNetworkManager.Instance.currentSaveFileName != "LCChallengeFile" && !ES3.KeyExists("RandomSeed", GameNetworkManager.Instance.currentSaveFileName))
             {
@@ -193,17 +203,17 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ReviveDeadPlayers))]
+        [HarmonyPatch(nameof(StartOfRound.ReviveDeadPlayers))]
         [HarmonyPostfix]
-        static void PostReviveDeadPlayers()
+        static void StartOfRound_Post_ReviveDeadPlayers()
         {
             GlobalReferences.crashedJetpackAsLocalPlayer = false;
             SoundManager.Instance.SetEchoFilter(false);
         }
 
-        [HarmonyPatch(typeof(StartOfRound), "Start")]
+        [HarmonyPatch(nameof(StartOfRound.Start))]
         [HarmonyPostfix]
-        static void StartOfRoundPostStart(StartOfRound __instance)
+        static void StartOfRound_Post_Start(StartOfRound __instance)
         {
             if (!__instance.IsServer && __instance.inShipPhase && !GameNetworkManager.Instance.gameHasStarted)
             {
@@ -226,9 +236,9 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ReviveDeadPlayers))]
+        [HarmonyPatch(nameof(StartOfRound.ReviveDeadPlayers))]
         [HarmonyPrefix]
-        static void PreReviveDeadPlayers(StartOfRound __instance)
+        static void StartOfRound_Pre_ReviveDeadPlayers(StartOfRound __instance)
         {
             if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
                 return;
@@ -240,9 +250,9 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.LateUpdate))]
+        [HarmonyPatch(nameof(StartOfRound.LateUpdate))]
         [HarmonyPostfix]
-        static void StartOfRoundPostLateUpdate(StartOfRound __instance)
+        static void StartOfRound_Post_LateUpdate(StartOfRound __instance)
         {
             if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && GlobalReferences.shipNode != null)
                 GlobalReferences.shipNode.position = __instance.elevatorTransform.position + GlobalReferences.shipNodeOffset;
@@ -253,9 +263,9 @@ namespace ButteryFixes.Patches.General
             ButlerRadar.UpdateButlers();
         }
 
-        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ShipHasLeft))]
+        [HarmonyPatch(nameof(StartOfRound.ShipHasLeft))]
         [HarmonyPostfix]
-        static void PostShipHasLeft(StartOfRound __instance)
+        static void StartOfRound_Post_ShipHasLeft(StartOfRound __instance)
         {
             // this needs to run before the scene unloads or it will miss the apparatus
             GlobalReferences.scrapNotCollected = 0;
@@ -291,18 +301,18 @@ namespace ButteryFixes.Patches.General
             ButlerRadar.ClearAllButlers();
         }
 
-        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ResetShip))]
+        [HarmonyPatch(nameof(StartOfRound.ResetShip))]
         [HarmonyPostfix]
-        static void PostResetShip(StartOfRound __instance)
+        static void StartOfRound_Post_ResetShip(StartOfRound __instance)
         {
             // fix Experimentation weather on screen after being fired
             if (!__instance.isChallengeFile)
                 __instance.SetMapScreenInfoToCurrentLevel();
         }
 
-        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.ReviveDeadPlayers))]
+        [HarmonyPatch(nameof(StartOfRound.ReviveDeadPlayers))]
         [HarmonyPostfix]
-        static void PostReviveDeadPlayers(StartOfRound __instance)
+        static void StartOfRound_Post_ReviveDeadPlayers(StartOfRound __instance)
         {
             // stop bleeding if you're healed at the end of the round
             for (int i = 0; i < __instance.allPlayerScripts.Length; i++)
@@ -316,9 +326,9 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(StartOfRound), "PositionSuitsOnRack")]
+        [HarmonyPatch(nameof(StartOfRound.PositionSuitsOnRack))]
         [HarmonyPostfix]
-        static void PostPositionSuitsOnRack(StartOfRound __instance)
+        static void StartOfRound_Post_PositionSuitsOnRack(StartOfRound __instance)
         {
             UnlockableSuit[] unlockableSuits = Object.FindObjectsByType<UnlockableSuit>(FindObjectsSortMode.None);
             //if (unlockableSuits.Length > 1)
@@ -334,8 +344,8 @@ namespace ButteryFixes.Patches.General
             //}
         }
 
-        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.LoadPlanetsMoldSpreadData))]
-        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.SetPlanetsMold))]
+        [HarmonyPatch(nameof(StartOfRound.LoadPlanetsMoldSpreadData))]
+        //[HarmonyPatch(nameof(StartOfRound.SetPlanetsMold))]
         [HarmonyPostfix]
         static void StartOfRound_Post_PlanetsMold(StartOfRound __instance)
         {

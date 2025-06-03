@@ -3,17 +3,17 @@ using HarmonyLib;
 
 namespace ButteryFixes.Patches.Enemies
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(SandWormAI))]
     internal class EarthLeviathanPatches
     {
-        [HarmonyPatch(typeof(SandWormAI), nameof(SandWormAI.EatPlayer))]
+        [HarmonyPatch(nameof(SandWormAI.EatPlayer))]
         [HarmonyPrefix]
-        static bool PreEatPlayer(PlayerControllerB playerScript)
+        static bool SandWormAI_Pre_EatPlayer(PlayerControllerB playerScript)
         {
             return !playerScript.isInHangarShipRoom;
         }
 
-        [HarmonyPatch(typeof(SandWormAI), nameof(SandWormAI.OnCollideWithEnemy))]
+        [HarmonyPatch(nameof(SandWormAI.OnCollideWithEnemy))]
         [HarmonyPrefix]
         static bool SandWormAI_Pre_OnCollideWithEnemy(SandWormAI __instance, EnemyAI enemyScript)
         {

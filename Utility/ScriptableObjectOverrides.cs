@@ -120,14 +120,14 @@ namespace ButteryFixes.Utility
                 //{ "Hairdryer", true },
                 { "LockPicker", true },
                 //{ "MagnifyingGlass", true },
-                { "MoldPan", true },
+                //{ "MoldPan", true },
                 { "Phone", true },
                 //{ "PlasticCup", false },
                 { "Shotgun", true },
-                { "SoccerBall", false },
+                //{ "SoccerBall", false },
                 { "SprayPaint", true },
                 //{ "SteeringWheel", true },
-                { "ToiletPaperRolls", false },
+                //{ "ToiletPaperRolls", false },
                 //{ "ToyTrain", false },
                 //{ "Zeddog", false }
             };
@@ -280,10 +280,10 @@ namespace ButteryFixes.Utility
                         item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
                         Plugin.Logger.LogDebug("Audio rolloff: Weed killer");
                         break;
-                        /*case "Zeddog":
-                            item.dropSFX = item.grabSFX; //null
-                            Plugin.Logger.LogDebug($"Audio: {item.itemName}");
-                            break;*/
+                    case "Zeddog":
+                        if (item.itemId == 0)
+                            item.itemId = GlobalReferences.ZED_DOG_ID;
+                        break;
                 }
 
                 if (linearRolloff)
@@ -360,6 +360,15 @@ namespace ButteryFixes.Utility
                 {
                     item.canBeGrabbedBeforeGameStart = grabbableBeforeStart[item.name];
                     Plugin.Logger.LogDebug($"Hold before ship has landed: {item.itemName} ({item.canBeGrabbedBeforeGameStart})");
+                }
+
+                for (int i = item.spawnPositionTypes.Count - 1; i >= 0; i--)
+                {
+                    if (item.spawnPositionTypes[i] != null && item.spawnPositionTypes[i].name == "TestItem")
+                    {
+                        Plugin.Logger.LogDebug($"\"{item.name}\" includes a broken spawngroup which will block it from spawning in normal gameplay. This has been fixed");
+                        item.spawnPositionTypes.RemoveAt(i);
+                    }
                 }
             }
 

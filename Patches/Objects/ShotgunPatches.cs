@@ -3,12 +3,12 @@ using HarmonyLib;
 
 namespace ButteryFixes.Patches.Objects
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(ShotgunItem))]
     internal class ShotgunPatches
     {
-        [HarmonyPatch(typeof(ShotgunItem), nameof(ShotgunItem.ReloadGunEffectsClientRpc))]
+        [HarmonyPatch(nameof(ShotgunItem.ReloadGunEffectsClientRpc))]
         [HarmonyPostfix]
-        static void PostReloadGunEffectsClientRpc(ShotgunItem __instance, bool start)
+        static void ShotgunItem_Post_ReloadGunEffectsClientRpc(ShotgunItem __instance, bool start)
         {
             // controls shells appearing/disappearing during reload for all clients (except for the one holding the gun)
             if (start && !__instance.IsOwner)
@@ -20,9 +20,9 @@ namespace ButteryFixes.Patches.Objects
             }
         }
 
-        [HarmonyPatch(typeof(ShotgunItem), nameof(ShotgunItem.Update))]
+        [HarmonyPatch(nameof(ShotgunItem.Update))]
         [HarmonyPostfix]
-        static void ShotgunItemPostUpdate(ShotgunItem __instance)
+        static void ShotgunItem_Post_Update(ShotgunItem __instance)
         {
             // shells should render during the reload animation (this specific patch only works for players)
             if (__instance.isReloading)
@@ -32,8 +32,8 @@ namespace ButteryFixes.Patches.Objects
             }
         }
 
-        [HarmonyPatch(typeof(ShotgunItem), nameof(ShotgunItem.Start))]
-        [HarmonyPatch(typeof(ShotgunItem), nameof(ShotgunItem.DiscardItem))]
+        [HarmonyPatch(nameof(ShotgunItem.Start))]
+        [HarmonyPatch(nameof(ShotgunItem.DiscardItem))]
         [HarmonyPostfix]
         static void DontRenderShotgunShells(ShotgunItem __instance)
         {

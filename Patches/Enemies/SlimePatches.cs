@@ -12,7 +12,7 @@ namespace ButteryFixes.Patches.Enemies
     {
         [HarmonyPatch(nameof(BlobAI.OnCollideWithPlayer))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> BlobAITransOnCollideWithPlayer(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> BlobAI_Trans_OnCollideWithPlayer(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
@@ -35,23 +35,22 @@ namespace ButteryFixes.Patches.Enemies
         // thanks Zaggy1024!
         [HarmonyPrefix]
         [HarmonyPatch(nameof(BlobAI.FixedUpdate))]
-        private static bool FixedUpdatePrefix(BlobAI __instance)
+        private static bool BlobAI_Pre_FixedUpdate(BlobAI __instance)
         {
             return false;
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(nameof(BlobAI.Update))]
-        private static void UpdatePostfix(BlobAI __instance)
+        private static void BlobAI_Post_Update(BlobAI __instance)
         {
             if (!__instance.ventAnimationFinished)
                 return;
+
             for (int i = 0; i < __instance.SlimeBonePositions.Length; i++)
             {
-                if (Vector3.Distance(__instance.centerPoint.position, __instance.SlimeBonePositions[i]) > __instance.distanceOfRaysLastFrame[i])
-                    __instance.SlimeBones[i].transform.position = Vector3.Lerp(__instance.SlimeBones[i].transform.position, __instance.SlimeBonePositions[i], 10f * Time.deltaTime);
-                else
-                    __instance.SlimeBones[i].transform.position = Vector3.Lerp(__instance.SlimeBones[i].transform.position, __instance.SlimeBonePositions[i], 5f * Time.deltaTime);
+                float speed = (Vector3.Distance(__instance.centerPoint.position, __instance.SlimeBonePositions[i]) > __instance.distanceOfRaysLastFrame[i]) ? 10f : 5f;
+                __instance.SlimeBones[i].transform.position = Vector3.Lerp(__instance.SlimeBones[i].transform.position, __instance.SlimeBonePositions[i], speed * Time.deltaTime);
             }
         }
     }

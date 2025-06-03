@@ -1,4 +1,5 @@
 ﻿using ButteryFixes.Utility;
+using DunGen;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,36 +10,36 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.General
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(RoundManager))]
     internal class RoundManagerPatches
     {
-        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.PredictAllOutsideEnemies))]
+        [HarmonyPatch(nameof(RoundManager.PredictAllOutsideEnemies))]
         [HarmonyPostfix]
-        static void PostPredictAllOutsideEnemies()
+        static void RoundManager_Post_PredictAllOutsideEnemies()
         {
             // cleans up leftover spawn numbers from previous day + spawn predictions (when generating nests)
             foreach (string name in GlobalReferences.allEnemiesList.Keys)
                 GlobalReferences.allEnemiesList[name].numberSpawned = 0;
         }
 
-        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.OnDestroy))]
+        [HarmonyPatch(nameof(RoundManager.OnDestroy))]
         [HarmonyPostfix]
-        static void RoundManagerPostOnDestroy(RoundManager __instance)
+        static void RoundManager_Post_OnDestroy(RoundManager __instance)
         {
             // prevents persistence when quitting mid-day and rehosting
             __instance.ResetEnemyVariables();
         }
 
-        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.PowerSwitchOffClientRpc))]
+        [HarmonyPatch(nameof(RoundManager.PowerSwitchOffClientRpc))]
         [HarmonyPostfix]
-        static void PostPowerSwitchOffClientRpc()
+        static void RoundManager_Post_PowerSwitchOffClientRpc()
         {
             Object.FindAnyObjectByType<BreakerBox>()?.breakerBoxHum.Stop();
         }
 
-        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SetExitIDs))]
+        [HarmonyPatch(nameof(RoundManager.SetExitIDs))]
         [HarmonyPostfix]
-        static void PostSetExitIDs(RoundManager __instance)
+        static void RoundManager_Post_SetExitIDs(RoundManager __instance)
         {
             EntranceTeleport[] entranceTeleports = Object.FindObjectsByType<EntranceTeleport>(FindObjectsSortMode.None);
             if (Configuration.fixFireExits.Value)
@@ -79,37 +80,37 @@ namespace ButteryFixes.Patches.General
             return codes;
         }
 
-        [HarmonyPatch(typeof(RoundManager), "AssignRandomEnemyToVent")]
+        [HarmonyPatch(nameof(RoundManager.AssignRandomEnemyToVent))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> TransAssignRandomEnemyToVent(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> RoundManager_Trans_AssignRandomEnemyToVent(IEnumerable<CodeInstruction> instructions)
         {
             return TransSpawnRandomEnemy(instructions.ToList(), nameof(RoundManager.firstTimeSpawningEnemies), nameof(SelectableLevel.Enemies), "Spawner");
         }
 
-        [HarmonyPatch(typeof(RoundManager), "SpawnRandomOutsideEnemy")]
+        [HarmonyPatch(nameof(RoundManager.SpawnRandomOutsideEnemy))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> TransSpawnRandomOutsideEnemy(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> RoundManager_Trans_SpawnRandomOutsideEnemy(IEnumerable<CodeInstruction> instructions)
         {
             return TransSpawnRandomEnemy(instructions.ToList(), nameof(RoundManager.firstTimeSpawningOutsideEnemies), nameof(SelectableLevel.OutsideEnemies), "Outside spawner");
         }
 
-        [HarmonyPatch(typeof(RoundManager), "SpawnRandomDaytimeEnemy")]
+        [HarmonyPatch(nameof(RoundManager.SpawnRandomDaytimeEnemy))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> TransSpawnRandomDaytimeEnemy(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> RoundManager_Trans_SpawnRandomDaytimeEnemy(IEnumerable<CodeInstruction> instructions)
         {
             return TransSpawnRandomEnemy(instructions.ToList(), nameof(RoundManager.firstTimeSpawningDaytimeEnemies), nameof(SelectableLevel.DaytimeEnemies), "Daytime spawner");
         }
 
-        [HarmonyPatch(typeof(RoundManager), "Awake")]
+        [HarmonyPatch(nameof(RoundManager.Awake))]
         [HarmonyPostfix]
-        static void RoundManagerPostAwake(RoundManager __instance)
+        static void RoundManager_Post_Awake(RoundManager __instance)
         {
             TileOverrides.OverrideTiles(__instance.dungeonFlowTypes);
         }
 
-        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.RefreshLightsList))]
+        [HarmonyPatch(nameof(RoundManager.RefreshLightsList))]
         [HarmonyPrefix]
-        static void PreRefreshLightsList()
+        static void RoundManager_Pre_RefreshLightsList()
         {
             if (!Compatibility.INSTALLED_REBALANCED_MOONS && (StartOfRound.Instance.currentLevel.sceneName == "Level6Dine" || StartOfRound.Instance.currentLevel.sceneName == "Level9Artifice"))
             {
@@ -124,9 +125,9 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(RoundManager), "SpawnOutsideHazards")]
+        [HarmonyPatch(nameof(RoundManager.SpawnOutsideHazards))]
         [HarmonyPostfix]
-        static void PostSpawnOutsideHazards(RoundManager __instance)
+        static void RoundManager_Post_SpawnOutsideHazards(RoundManager __instance)
         {
             // this can't run in OnSceneLoaded because the navmesh needs to be baked first
             if (!Compatibility.INSTALLED_REBALANCED_MOONS && StartOfRound.Instance.currentLevel.sceneName == "Level6Dine")
@@ -168,9 +169,9 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.FinishGeneratingNewLevelClientRpc))]
+        [HarmonyPatch(nameof(RoundManager.FinishGeneratingNewLevelClientRpc))]
         [HarmonyPostfix]
-        static void PostFinishGeneratingNewLevelClientRpc(RoundManager __instance)
+        static void RoundManager_Post_FinishGeneratingNewLevelClientRpc(RoundManager __instance)
         {
             if (Configuration.disableLODFade.Value)
             {
@@ -186,10 +187,32 @@ namespace ButteryFixes.Patches.General
 
             NonPatchFunctions.TestForVainShrouds();
 
+            GlobalReferences.caveTiles.Clear();
+            if (__instance.currentDungeonType == 4)
+            {
+                GameObject dungeonRoot = __instance.dungeonGenerator?.Root ?? GameObject.Find("/Systems/LevelGeneration/LevelGenerationRoot");
+                if (dungeonRoot == null)
+                {
+                    if (StartOfRound.Instance.currentLevel.name != "CompanyBuildingLevel")
+                        Plugin.Logger.LogWarning("Landed on a moon with no dungeon generated. This shouldn't happen");
+
+                    return;
+                }
+
+                foreach (Tile tile in dungeonRoot.GetComponentsInChildren<Tile>())
+                {
+                    if (tile.name.StartsWith("Cave"))
+                    {
+                        GlobalReferences.caveTiles.Add(tile.OverrideAutomaticTileBounds ? tile.transform.TransformBounds(tile.TileBoundsOverride) : tile.Bounds);
+                        Plugin.Logger.LogDebug($"Cached bounds of tile {tile.name}");
+                    }
+                }
+            }
+
             if (!__instance.IsServer || __instance.currentDungeonType != 4)
                 return;
 
-            MineshaftElevatorController mineshaftElevatorController = __instance.spawnedSyncedObjects.FirstOrDefault(spawnedSyncedObject => spawnedSyncedObject.name.StartsWith("MineshaftElevator"))?.GetComponent<MineshaftElevatorController>();
+            MineshaftElevatorController mineshaftElevatorController = RoundManager.Instance.currentMineshaftElevator ?? __instance.spawnedSyncedObjects.FirstOrDefault(spawnedSyncedObject => spawnedSyncedObject.name.StartsWith("MineshaftElevator"))?.GetComponent<MineshaftElevatorController>();
             if (mineshaftElevatorController == null)
             {
                 Plugin.Logger.LogWarning("Mineshaft interior was selected, but could not find the elevator on host");
@@ -212,12 +235,29 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.RefreshEnemiesList))]
-        [HarmonyPostfix]
-        static void RoundManager_Post_RefreshEnemiesList(RoundManager __instance)
+        [HarmonyPatch(nameof(RoundManager.SpawnScrapInLevel))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> RoundManager_Trans_SpawnScrapInLevel(IEnumerable<CodeInstruction> instructions)
         {
-            if (StartOfRound.Instance.isChallengeFile && Configuration.limitSpawnChance.Value)
-                __instance.enemyRushIndex = -1;
+            List<CodeInstruction> codes = instructions.ToList();
+
+            FieldInfo itemId = AccessTools.Field(typeof(Item), nameof(Item.itemId));
+            for (int i = 0; i < codes.Count - 1; i++)
+            {
+                if (codes[i].opcode == OpCodes.Ldfld && (FieldInfo)codes[i].operand == itemId && codes[i + 1].opcode == OpCodes.Ldc_I4 && (int)codes[i + 1].operand == 152767)
+                {
+                    /*codes[i].opcode = OpCodes.Call;
+                    codes[i].operand = AccessTools.DeclaredPropertyGetter(typeof(Object), nameof(Object.name));
+                    codes[i + 1].opcode = OpCodes.Ldstr;
+                    codes[i + 1].operand = "Zeddog";*/
+                    codes[i + 1].operand = GlobalReferences.ZED_DOG_ID;
+                    Plugin.Logger.LogDebug("Transpiler (Scrap spawn): Boost Zed Dog instead of gift box");
+                    return codes;
+                }
+            }
+
+            Plugin.Logger.LogError("Scrap spawn transpiler failed");
+            return instructions;
         }
     }
 }

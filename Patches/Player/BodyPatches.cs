@@ -4,19 +4,19 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.Player
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(DeadBodyInfo))]
     internal class BodyPatches
     {
         static bool dontCheckRenderers;
 
-        [HarmonyPatch(typeof(DeadBodyInfo), "Start")]
+        [HarmonyPatch(nameof(DeadBodyInfo.Start))]
         [HarmonyPostfix]
-        static void DeadBodyInfoPostStart(DeadBodyInfo __instance)
+        static void DeadBodyInfo_Post_Start(DeadBodyInfo __instance)
         {
             if (__instance.grabBodyObject != null && (__instance.playerScript.isInHangarShipRoom || StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(__instance.grabBodyObject.transform.position) || StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(__instance.playerScript.transform.position)))
                 __instance.playerScript.SetItemInElevator(true, true, __instance.grabBodyObject);
 
-            if (Compatibility.DISABLE_PLAYERMODEL_PATCHES)
+            if (!Configuration.playermodelPatches.Value)
                 return;
 
             if (__instance.causeOfDeath == CauseOfDeath.Stabbing)
@@ -35,12 +35,22 @@ namespace ButteryFixes.Patches.Player
 
                     // special handling for explosions
                     bool burnt = __instance.causeOfDeath == CauseOfDeath.Blast;
-                    if (!burnt && GlobalReferences.crashedJetpackAsLocalPlayer && __instance.playerScript == GameNetworkManager.Instance.localPlayerController)
+                    if (!burnt)
                     {
-                        burnt = true;
-                        GlobalReferences.crashedJetpackAsLocalPlayer = false;
-                        __instance.setMaterialToPlayerSuit = false;
-                        Plugin.Logger.LogInfo("Local player spawned a body after a jetpack crashed, caught in time to burn it");
+                        if (GlobalReferences.crashedJetpackAsLocalPlayer && __instance.playerScript == GameNetworkManager.Instance.localPlayerController)
+                        {
+                            burnt = true;
+                            GlobalReferences.crashedJetpackAsLocalPlayer = false;
+                            __instance.setMaterialToPlayerSuit = false;
+                            Plugin.Logger.LogInfo("Local player spawned a body after a jetpack crashed, caught in time to burn it");
+                        }
+                        else if (__instance.causeOfDeath == CauseOfDeath.Electrocution && __instance.playerScript == GlobalReferences.friedPlayer)
+                        {
+                            burnt = true;
+                            GlobalReferences.friedPlayer = null;
+                            __instance.setMaterialToPlayerSuit = false;
+                            Plugin.Logger.LogInfo("A player was just fried in electric chair, burn baby burn");
+                        }
                     }
 
                     if (burnt)
@@ -100,7 +110,7 @@ namespace ButteryFixes.Patches.Player
                                 }
                                 // special offset for snipping
                                 if (snipped)
-                                    tail.transform.SetPositionAndRotation(new Vector3(-0.0400025733f, -0.0654963329f, -0.0346327312f), Quaternion.Euler(19.4403114f, 0.0116598327f, 0.0529587828f));
+                                    tail.transform.SetLocalPositionAndRotation(new Vector3(-0.0400025733f, -0.0654963329f, -0.0346327312f), Quaternion.Euler(19.4403114f, 0.0116598327f, 0.0529587828f));
                                 Plugin.Logger.LogDebug("Torso attachment complete for player corpse");
                             }
                         }
@@ -118,7 +128,7 @@ namespace ButteryFixes.Patches.Player
                                 // special offset/scale for decapitations
                                 if (head == __instance.detachedHeadObject)
                                 {
-                                    hat.transform.SetPositionAndRotation(new Vector3(0.0698937327f, 0.0544735007f, -0.685245395f), Quaternion.Euler(96.69699f, 0f, 0f));
+                                    hat.transform.SetLocalPositionAndRotation(new Vector3(0.0698937327f, 0.0544735007f, -0.685245395f), Quaternion.Euler(96.69699f, 0f, 0f));
                                     hat.transform.localScale = new Vector3(hat.transform.localScale.x / head.localScale.x, hat.transform.localScale.y / head.localScale.y, hat.transform.localScale.z / head.localScale.z);
                                 }
                                 if ((!__instance.setMaterialToPlayerSuit || burnt) && !party)
@@ -152,11 +162,11 @@ namespace ButteryFixes.Patches.Player
             }
         }
 
-        [HarmonyPatch(typeof(DeadBodyInfo), nameof(DeadBodyInfo.ChangeMesh))]
+        [HarmonyPatch(nameof(DeadBodyInfo.ChangeMesh))]
         [HarmonyPostfix]
-        static void DeadBodyInfoPostChangeMesh(DeadBodyInfo __instance, Material changeMaterial)
+        static void DeadBodyInfo_Post_ChangeMesh(DeadBodyInfo __instance, Material changeMaterial)
         {
-            if (Compatibility.DISABLE_PLAYERMODEL_PATCHES)
+            if (!Configuration.playermodelPatches.Value)
                 return;
 
             if (dontCheckRenderers)
@@ -177,13 +187,13 @@ namespace ButteryFixes.Patches.Player
 
         [HarmonyPatch(typeof(RagdollGrabbableObject), nameof(RagdollGrabbableObject.Start))]
         [HarmonyPostfix]
-        static void RagdollGrabbableObjectPostStart(RagdollGrabbableObject __instance)
+        static void RagdollGrabbableObject_Post_Start(RagdollGrabbableObject __instance)
         {
             if (StartOfRound.Instance != null && !StartOfRound.Instance.isChallengeFile && StartOfRound.Instance.currentLevel.name != "CompanyBuildingLevel")
                 __instance.scrapValue = 0;
         }
 
-        [HarmonyPatch(typeof(DeadBodyInfo), nameof(DeadBodyInfo.SetRagdollPositionSafely))]
+        [HarmonyPatch(nameof(DeadBodyInfo.SetRagdollPositionSafely))]
         [HarmonyPostfix]
         static void PostSetRagdollPositionSafely(DeadBodyInfo __instance, Vector3 newPosition)
         {

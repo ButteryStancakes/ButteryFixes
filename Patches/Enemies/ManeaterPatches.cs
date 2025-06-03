@@ -8,12 +8,12 @@ using Unity.Netcode;
 
 namespace ButteryFixes.Patches.Enemies
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(CaveDwellerAI))]
     internal class ManeaterPatches
     {
-        [HarmonyPatch(typeof(CaveDwellerAI), "DoBabyAIInterval")]
+        [HarmonyPatch(nameof(CaveDwellerAI.DoBabyAIInterval))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> TransDoBabyAIInterval(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> CaveDwellerAI_Trans_DoBabyAIInterval(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 

@@ -2,10 +2,10 @@
 
 namespace ButteryFixes.Patches.Enemies
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(BaboonBirdAI))]
     class BaboonPatches
     {
-        [HarmonyPatch(typeof(BaboonBirdAI), nameof(BaboonBirdAI.DoAIInterval))]
+        [HarmonyPatch(nameof(BaboonBirdAI.DoAIInterval))]
         [HarmonyPrefix]
         static void BaboonBirdAI_Pre_DoAIInterval(BaboonBirdAI __instance)
         {

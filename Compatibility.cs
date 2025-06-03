@@ -7,7 +7,6 @@ namespace ButteryFixes
         internal const string GUID_FAST_CLIMBING = "inoyu.FastClimbing", GUID_BETTER_LADDERS = "e3s1.BetterLadders", GUID_BETTER_STAMINA = "FlipMods.BetterStamina";
         internal const string GUID_LETHAL_FIXES = "uk.1a3.lethalfixes";
         internal const string GUID_GENERAL_IMPROVEMENTS = "ShaosilGaming.GeneralImprovements";
-        internal const string GUID_MODEL_REPLACEMENT_API = "meow.ModelReplacementAPI";
         internal const string GUID_BETTER_SPRAY_PAINT = "taffyko.BetterSprayPaint";
         internal const string GUID_EVERYTHING_CAN_DIE = "nwnt.EverythingCanDie";
         internal const string GUID_LETHAL_QUANTITIES = "LethalQuantities";
@@ -18,9 +17,10 @@ namespace ButteryFixes
         internal const string GUID_TERMINAL_STUFF = "darmuh.TerminalStuff";
         internal const string GUID_LOBBY_COMPATIBILITY = "BMX.LobbyCompatibility";
         internal const string GUID_YES_FOX = "uk.1a3.yesfox";
+        internal const string GUID_OPEN_BODY_CAMS = "Zaggy1024.OpenBodyCams";
 
         internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_MORE_COMPANY, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES, INSTALLED_REBALANCED_MOONS;
-        internal static bool DISABLE_LADDER_PATCH, DISABLE_PLAYERMODEL_PATCHES, DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING, ENABLE_VAIN_SHROUDS;
+        internal static bool DISABLE_LADDER_PATCH, DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING, ENABLE_VAIN_SHROUDS, DISABLE_ROTATION_PATCH;
 
         internal static void Init()
         {
@@ -34,12 +34,6 @@ namespace ButteryFixes
             {
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Ladder patch will be disabled");
                 DISABLE_LADDER_PATCH = true;
-            }
-
-            if (Chainloader.PluginInfos.ContainsKey(GUID_MODEL_REPLACEMENT_API))
-            {
-                DISABLE_PLAYERMODEL_PATCHES = true;
-                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Playermodel patches will be disabled");
             }
 
             if (Chainloader.PluginInfos.ContainsKey(GUID_BETTER_SPRAY_PAINT))
@@ -94,6 +88,12 @@ namespace ButteryFixes
             {
                 ENABLE_VAIN_SHROUDS = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - YesFox detected");
+            }
+
+            if (Chainloader.PluginInfos.ContainsKey(GUID_OPEN_BODY_CAMS))
+            {
+                DISABLE_ROTATION_PATCH = true;
+                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - OpenBodyCams detected");
             }
         }
     }

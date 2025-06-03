@@ -3,10 +3,10 @@ using HarmonyLib;
 
 namespace ButteryFixes.Patches.General
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(FoliageDetailDistance))]
     internal class FoliageDetailDistancePatches
     {
-        [HarmonyPatch(typeof(FoliageDetailDistance), nameof(FoliageDetailDistance.Start))]
+        [HarmonyPatch(nameof(FoliageDetailDistance.Start))]
         [HarmonyPostfix]
         static void FoliageDetailDistance_Post_Start(FoliageDetailDistance __instance)
         {

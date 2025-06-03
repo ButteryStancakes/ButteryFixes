@@ -1,24 +1,23 @@
 ﻿using ButteryFixes.Utility;
-using GameNetcodeStuff;
 using HarmonyLib;
 
 namespace ButteryFixes.Patches.Objects
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(FlashlightItem))]
     internal class FlashlightPatches
     {
-        [HarmonyPatch(typeof(FlashlightItem), nameof(FlashlightItem.PocketItem))]
-        //[HarmonyPatch(typeof(FlashlightItem), nameof(FlashlightItem.PocketFlashlightClientRpc))]
-        [HarmonyPatch(typeof(FlashlightItem), nameof(FlashlightItem.DiscardItem))]
-        [HarmonyPatch(typeof(FlashlightItem), nameof(FlashlightItem.EquipItem))]
-        [HarmonyPatch(typeof(FlashlightItem), nameof(FlashlightItem.SwitchFlashlight))]
+        [HarmonyPatch(nameof(FlashlightItem.PocketItem))]
+        //[HarmonyPatch(nameof(FlashlightItem.PocketFlashlightClientRpc))]
+        [HarmonyPatch(nameof(FlashlightItem.DiscardItem))]
+        [HarmonyPatch(nameof(FlashlightItem.EquipItem))]
+        [HarmonyPatch(nameof(FlashlightItem.SwitchFlashlight))]
         [HarmonyPostfix]
-        static void FlashlightItemPost(PlayerControllerB ___previousPlayerHeldBy)
+        static void FlashlightItem_Post(FlashlightItem __instance)
         {
-            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || ___previousPlayerHeldBy /*== null*/ != GameNetworkManager.Instance.localPlayerController)
+            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || __instance.previousPlayerHeldBy /*== null*/ != GameNetworkManager.Instance.localPlayerController)
                 return;
 
-            NonPatchFunctions.ForceRefreshAllHelmetLights(___previousPlayerHeldBy);
+            NonPatchFunctions.ForceRefreshAllHelmetLights(__instance.previousPlayerHeldBy);
         }
     }
 }

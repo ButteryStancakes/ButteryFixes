@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using ButteryFixes.Utility;
+using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -7,12 +8,12 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.General
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(ManualCameraRenderer))]
     class ManualCameraRendererPatches
     {
-        [HarmonyPatch(typeof(ManualCameraRenderer), "Update")]
+        [HarmonyPatch(nameof(ManualCameraRenderer.Update))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> ManualCameraRendererTransUpdate(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> ManualCameraRenderer_Trans_Update(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
@@ -45,6 +46,71 @@ namespace ButteryFixes.Patches.General
 
             Plugin.Logger.LogError("Radar transpiler failed");
             return instructions;
+        }
+
+        [HarmonyPatch(nameof(ManualCameraRenderer.LateUpdate))]
+        [HarmonyPostfix]
+        static void ManualCameraRenderer_Post_LateUpdate(ManualCameraRenderer __instance)
+        {
+            // fix screen toggling on a delay (unlike the head mounted cams)
+            if (__instance.LostSignalUI != null)
+                __instance.LostSignalUI.SetActive(__instance.playerIsInCaves);
+        }
+
+        // vanilla logic is too susceptible to problems... needs to be replaced
+        [HarmonyPatch(nameof(ManualCameraRenderer.CheckIfPlayerIsInCaves))]
+        [HarmonyPrefix]
+        static bool ManualCameraRenderer_Pre_CheckIfPlayerIsInCaves(ManualCameraRenderer __instance, Vector3 targetPosition)
+        {
+            // fallback, in case my system is broken
+            if (RoundManager.Instance.currentDungeonType == 4 && GlobalReferences.caveTiles.Count < 1)
+                return true;
+
+            if (!__instance.screenEnabledOnLocalClient && !__instance.overrideRadarCameraOnAlways)
+                return false;
+
+            if (RoundManager.Instance.currentDungeonType != 4 || __instance.targetedPlayer == null || !__instance.targetedPlayer.isInsideFactory || GlobalReferences.caveTiles.Count < 1)
+            {
+                __instance.playerIsInCaves = false;
+                __instance.checkCaveInterval = 1f;
+                __instance.checkingCaveNode = -1;
+                return false;
+            }
+
+            if (__instance.checkingCaveNode == -1)
+            {
+                if (__instance.checkCaveInterval <= 0f)
+                {
+                    __instance.checkingCaveNode = 0;
+                    __instance.checkCaveInterval = 1f;
+                }
+                else
+                    __instance.checkCaveInterval -= Time.deltaTime;
+            }
+            else
+            {
+                if (__instance.checkingCaveNode >= GlobalReferences.caveTiles.Count)
+                {
+                    __instance.playerIsInCaves = false;
+                    __instance.checkingCaveNode = -1;
+                    //Plugin.Logger.LogDebug($"Player is not within bounds of any cave tile");
+                    return false;
+                }
+
+                //Plugin.Logger.LogDebug($"Checking tile #{__instance.checkingCaveNode}");
+
+                if (GlobalReferences.caveTiles[__instance.checkingCaveNode].Contains(targetPosition))
+                {
+                    //Plugin.Logger.LogDebug($"Player is in bounds of tile #{__instance.checkingCaveNode}");
+                    __instance.playerIsInCaves = true;
+                    __instance.checkingCaveNode = -1;
+                    return false;
+                }
+
+                __instance.checkingCaveNode++;
+            }
+
+            return false;
         }
     }
 }

@@ -1,27 +1,26 @@
 ﻿using ButteryFixes.Utility;
-using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
 
 namespace ButteryFixes.Patches.Objects
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(JetpackItem))]
     internal class JetpackPatches
     {
-        [HarmonyPatch(typeof(JetpackItem), nameof(JetpackItem.ExplodeJetpackClientRpc))]
+        [HarmonyPatch(nameof(JetpackItem.ExplodeJetpackClientRpc))]
         [HarmonyPostfix]
-        public static void PostExplodeJetpackClientRpc(JetpackItem __instance, PlayerControllerB ___previousPlayerHeldBy)
+        public static void JetpackItem_Post_ExplodeJetpackClientRpc(JetpackItem __instance)
         {
-            if (Compatibility.DISABLE_PLAYERMODEL_PATCHES)
+            if (!Configuration.playermodelPatches.Value)
                 return;
 
-            DeadBodyInfo playerBody = ___previousPlayerHeldBy.deadBody;
+            DeadBodyInfo playerBody = __instance.previousPlayerHeldBy.deadBody;
 
             if (playerBody == null)
             {
                 foreach (DeadBodyInfo deadBodyInfo in Object.FindObjectsByType<DeadBodyInfo>(FindObjectsSortMode.None))
                 {
-                    if (deadBodyInfo.playerScript == ___previousPlayerHeldBy)
+                    if (deadBodyInfo.playerScript == __instance.previousPlayerHeldBy)
                         playerBody = deadBodyInfo;
                 }
             }
@@ -43,7 +42,7 @@ namespace ButteryFixes.Patches.Objects
             else
             {
                 Plugin.Logger.LogWarning("Jetpack exploded but the player that crashed it didn't spawn a body");
-                if (___previousPlayerHeldBy == GameNetworkManager.Instance.localPlayerController)
+                if (__instance.previousPlayerHeldBy == GameNetworkManager.Instance.localPlayerController)
                 {
                     GlobalReferences.crashedJetpackAsLocalPlayer = true;
                     Plugin.Logger.LogInfo("Local player crashed, try to run other patch when corpse is spawned");

@@ -10,7 +10,6 @@ namespace ButteryFixes
     [BepInDependency(Compatibility.GUID_FAST_CLIMBING, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_BETTER_LADDERS, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_GENERAL_IMPROVEMENTS, BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency(Compatibility.GUID_MODEL_REPLACEMENT_API, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_LETHAL_QUANTITIES, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_MORE_COMPANY, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_EVERYTHING_CAN_DIE, BepInDependency.DependencyFlags.SoftDependency)]
@@ -20,9 +19,10 @@ namespace ButteryFixes
     [BepInDependency(Compatibility.GUID_LETHAL_FIXES, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_LOBBY_COMPATIBILITY, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_YES_FOX, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(Compatibility.GUID_OPEN_BODY_CAMS, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        internal const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.13.3";
+        internal const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.14.0";
         internal static new ManualLogSource Logger;
 
         void Awake()
@@ -38,6 +38,12 @@ namespace ButteryFixes
             new Harmony(PLUGIN_GUID).PatchAll();
 
             SceneManager.sceneLoaded += SceneOverrides.OnSceneLoaded;
+            SceneManager.sceneUnloaded += delegate
+            {
+                GlobalReferences.caveTiles.Clear();
+                if (StartOfRound.Instance?.mapScreen?.contourMap != null && StartOfRound.Instance.mapScreen.contourMap == GlobalReferences.fakeContour)
+                    StartOfRound.Instance.mapScreen.contourMap = null;
+            };
 
             Logger.LogInfo($"{PLUGIN_NAME} v{PLUGIN_VERSION} loaded");
         }

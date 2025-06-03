@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.General
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(ItemDropship))]
     internal class ItemDropshipPatches
     {
-        [HarmonyPatch(typeof(ItemDropship), "Start")]
+        [HarmonyPatch(nameof(ItemDropship.Start))]
         [HarmonyPostfix]
-        static void ItemDropshipPostStart(ItemDropship __instance)
+        static void ItemDropship_Post_Start(ItemDropship __instance)
         {
             // fix doppler level for dropship (both music sources)
             Transform music = __instance.transform.Find("Music");
@@ -21,7 +21,6 @@ namespace ButteryFixes.Patches.General
                     musicFar.dopplerLevel = 0.6f * GlobalReferences.dopplerLevelMult;
                 Plugin.Logger.LogDebug("Doppler level: Dropship");
             }
-            // honestly just leave the vehicle version as-is, it's funny
         }
     }
 }

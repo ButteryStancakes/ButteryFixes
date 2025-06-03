@@ -2,12 +2,12 @@
 
 namespace ButteryFixes.Patches.General
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(SoundManager))]
     internal class SoundManagerPatches
     {
-        [HarmonyPatch(typeof(SoundManager), "Start")]
+        [HarmonyPatch(nameof(SoundManager.Start))]
         [HarmonyPostfix]
-        static void SoundManagerPostStart(SoundManager __instance)
+        static void SoundManager_Post_Start(SoundManager __instance)
         {
             // fix persistent effects when you disconnect and re-enter the game
             // TZP

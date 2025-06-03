@@ -9,24 +9,24 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.Objects
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(VehicleController))]
     internal class CruiserPatches
     {
         static float radioPingTimestamp;
         static Transform keyHolder;
 
-        [HarmonyPatch(typeof(VehicleController), "DestroyCar")]
+        [HarmonyPatch(nameof(VehicleController.DestroyCar))]
         [HarmonyPostfix]
-        static void PostDestroyCar(VehicleController __instance)
+        static void VehicleController_Post_DestroyCar(VehicleController __instance)
         {
             __instance.hoodAudio.mute = true;
             __instance.healthMeter.GetComponentInChildren<Renderer>().forceRenderingOff = true;
             __instance.turboMeter.GetComponentInChildren<Renderer>().forceRenderingOff = true;
         }
 
-        [HarmonyPatch(typeof(VehicleController), "SetCarEffects")]
+        [HarmonyPatch(nameof(VehicleController.SetCarEffects))]
         [HarmonyTranspiler]
-        private static IEnumerable<CodeInstruction> TransSetCarEffects(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> VehicleController_Trans_SetCarEffects(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
@@ -51,9 +51,9 @@ namespace ButteryFixes.Patches.Objects
             return instructions;
         }
 
-        [HarmonyPatch(typeof(VehicleController), nameof(VehicleController.SetRadioValues))]
+        [HarmonyPatch(nameof(VehicleController.SetRadioValues))]
         [HarmonyPostfix]
-        static void PostSetRadioValues(VehicleController __instance)
+        static void VehicleController_Post_SetRadioValues(VehicleController __instance)
         {
             if (__instance.IsServer && __instance.radioAudio.isPlaying && Time.realtimeSinceStartup > radioPingTimestamp)
             {
@@ -62,9 +62,9 @@ namespace ButteryFixes.Patches.Objects
             }
         }
 
-        [HarmonyPatch(typeof(VehicleController), nameof(VehicleController.CollectItemsInTruck))]
+        [HarmonyPatch(nameof(VehicleController.CollectItemsInTruck))]
         [HarmonyTranspiler]
-        private static IEnumerable<CodeInstruction> TransCollectItemsInTruck(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> VehicleController_Trans_CollectItemsInTruck(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
@@ -85,9 +85,9 @@ namespace ButteryFixes.Patches.Objects
             return instructions;
         }
 
-        [HarmonyPatch(typeof(VehicleController), "Awake")]
+        [HarmonyPatch(typeof(VehicleController), nameof(VehicleController.Awake))]
         [HarmonyPostfix]
-        static void VehicleControllerPostAwake(VehicleController __instance)
+        static void VehicleController_Post_Awake(VehicleController __instance)
         {
             if (GlobalReferences.vehicleController == null)
                 GlobalReferences.vehicleController = __instance;
@@ -124,7 +124,7 @@ namespace ButteryFixes.Patches.Objects
             return codes;
         }
 
-        [HarmonyPatch(typeof(VehicleController), nameof(VehicleController.Update))]
+        [HarmonyPatch(nameof(VehicleController.Update))]
         [HarmonyPostfix]
         static void VehicleController_Post_Update(VehicleController __instance)
         {

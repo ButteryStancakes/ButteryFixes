@@ -9,21 +9,21 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.Enemies
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(NutcrackerEnemyAI))]
     internal class NutcrackerPatches
     {
-        [HarmonyPatch(typeof(NutcrackerEnemyAI), nameof(NutcrackerEnemyAI.Start))]
+        [HarmonyPatch(nameof(NutcrackerEnemyAI.Start))]
         [HarmonyPostfix]
-        static void NutcrackerEnemyAIPostStart(NutcrackerEnemyAI __instance, ref bool ___isLeaderScript)
+        static void NutcrackerEnemyAI_Post_Start(NutcrackerEnemyAI __instance)
         {
             // GlobalNutcrackerClock()'s logic naturally prevents it from ticking multiple times at once, so there's no issue just marking every nutcracker as a "leader"
             // this is more optimized than using reflection to ensure there is only 1 leader (even if it's less "proper")
-            ___isLeaderScript = true;
+            __instance.isLeaderScript = true;
         }
 
-        [HarmonyPatch(typeof(NutcrackerEnemyAI), nameof(NutcrackerEnemyAI.ReloadGunClientRpc))]
+        [HarmonyPatch(nameof(NutcrackerEnemyAI.ReloadGunClientRpc))]
         [HarmonyPostfix]
-        static void PostReloadGunClientRpc(NutcrackerEnemyAI __instance)
+        static void NutcrackerEnemyAI_Post_ReloadGunClientRpc(NutcrackerEnemyAI __instance)
         {
             if (__instance.gun.shotgunShellLeft.enabled)
             {
@@ -34,22 +34,22 @@ namespace ButteryFixes.Patches.Enemies
             }
         }
 
-        [HarmonyPatch(typeof(NutcrackerEnemyAI), nameof(NutcrackerEnemyAI.HitEnemy))]
+        [HarmonyPatch(nameof(NutcrackerEnemyAI.HitEnemy))]
         [HarmonyPostfix]
-        static void NutcrackerEnemyAIPostHitEnemy(NutcrackerEnemyAI __instance, PlayerControllerB playerWhoHit, bool ___aimingGun, bool ___reloadingGun, float ___timeSinceSeeingTarget)
+        static void NutcrackerEnemyAI_Post_HitEnemy(NutcrackerEnemyAI __instance, PlayerControllerB playerWhoHit)
         {
             if (playerWhoHit != null)
             {
                 int id = (int)playerWhoHit.playerClientId;
                 // "sense" the player hitting it, this allows turning while frozen in place
-                if (__instance.IsOwner && !__instance.isEnemyDead && __instance.currentBehaviourStateIndex == 2 && !___aimingGun && !___reloadingGun && (id == __instance.lastPlayerSeenMoving || ___timeSinceSeeingTarget > 0.5f))
+                if (__instance.IsOwner && !__instance.isEnemyDead && __instance.currentBehaviourStateIndex == 2 && !__instance.aimingGun && !__instance.reloadingGun && (id == __instance.lastPlayerSeenMoving || __instance.timeSinceSeeingTarget > 0.5f))
                     __instance.SwitchTargetServerRpc(id);
             }
         }
 
-        [HarmonyPatch(typeof(NutcrackerEnemyAI), nameof(NutcrackerEnemyAI.CheckLineOfSightForLocalPlayer))]
+        [HarmonyPatch(nameof(NutcrackerEnemyAI.CheckLineOfSightForLocalPlayer))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> TransCheckLineOfSightForLocalPlayer(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> NutcrackerEnemyAI_Trans_CheckLineOfSightForLocalPlayer(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 

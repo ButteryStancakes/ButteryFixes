@@ -20,7 +20,6 @@ namespace ButteryFixes
     {
         None = -1,
         MenusOnly,
-        NotRadar,
         Full
     }
 
@@ -30,7 +29,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, restoreShipIcon, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches;
         internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
@@ -98,7 +97,7 @@ namespace ButteryFixes
                 "Gameplay",
                 "FixHivePrices",
                 true,
-                "(Host only) Fixes some errors with the vanilla bee hive pricing logic. This will let different hives be worth different values on the same day, and also reduces the price of hives that spawn extremely close to the ship.");
+                "(Host only) Fixes individual bee hives not having separate prices from one another. (In vanilla, all hives fall into two price classes depending on distance from ship)");
 
             fixGiantSight = configFile.Bind(
                 "Gameplay",
@@ -121,13 +120,7 @@ namespace ButteryFixes
                 "Visual",
                 "RestoreFilmGrain",
                 FilmGrains.None,
-                "Restores film grain effects from pre-release versions of the game. WARNING: Be aware that this will cause white screens on certain hardware.");
-
-            restoreShipIcon = configFile.Bind(
-                "Visual",
-                "RestoreShipIcon",
-                true,
-                "Show the ship icon on the radar (next to the compass) when it is following an outside player. This doesn't display properly in vanilla (bug?)");
+                "Restores film grain effects from pre-release versions of the game. WARNING: Be aware that this might cause white screens on certain hardware.");
 
             showApparatusValue = configFile.Bind(
                 "Visual",
@@ -140,6 +133,12 @@ namespace ButteryFixes
                 "DisableLODFade",
                 true,
                 "Disables level-of-detail cross-fading, which is broken in vanilla. This does not prevent \"pop in\" (when moving towards/away from objects) from occurring, but makes it happen only once instead of twice.");
+
+            playermodelPatches = configFile.Bind(
+                "Visual",
+                "PlayermodelPatches",
+                true,
+                "Fixes some issues with dead bodies not displaying badges, using the wrong suit, not having attachments (bee and bunny), etc. Also burns corpses when killed by explosions.\nIf you use ModelReplacementAPI I would strongly suggest disabling this if you run into issues!");
         }
 
         static void AudioConfig()
@@ -170,7 +169,7 @@ namespace ButteryFixes
                 "Extra",
                 "LockInTerminal",
                 false,
-                "The camera will be frozen when you use the terminal, and typing should be more immediately responsive.\nThis will also lock the camera when charging items or pulling the lever.");
+                "The camera will be frozen when you use the terminal, and typing should be more immediately responsive.\nThis will also lock the camera when charging items, pulling the lever, or sitting in the sofa chair.");
 
             filterDecor = configFile.Bind(
                 "Extra",
@@ -201,6 +200,9 @@ namespace ButteryFixes
                     scanImprovements.Value = true;
                 configFile.Remove(configFile["Extra", "ScanOnShip"].Definition);
             }
+            // overlaps compass as of v70
+            configFile.Bind("Visual", "RestoreShipIcon", true, "Legacy setting, doesn't work");
+            configFile.Remove(configFile["Visual", "RestoreShipIcon"].Definition);
 
             configFile.Save();
         }

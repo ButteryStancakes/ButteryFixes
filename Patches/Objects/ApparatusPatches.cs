@@ -7,13 +7,13 @@ using System.Reflection.Emit;
 
 namespace ButteryFixes.Patches.Objects
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(LungProp))]
     internal class ApparatusPatches
     {
-        [HarmonyPatch(typeof(LungProp), nameof(LungProp.Start))]
+        [HarmonyPatch(nameof(LungProp.Start))]
         [HarmonyPostfix]
         [HarmonyPriority(Priority.Last)]
-        static void LungPropPostStart(LungProp __instance)
+        static void LungProp_Post_Start(LungProp __instance)
         {
             ScanNodeProperties scanNodeProperties = __instance.GetComponentInChildren<ScanNodeProperties>();
             if (scanNodeProperties != null)
@@ -29,9 +29,9 @@ namespace ButteryFixes.Patches.Objects
             }
         }
 
-        [HarmonyPatch(typeof(LungProp), "DisconnectFromMachinery", MethodType.Enumerator)]
+        [HarmonyPatch(nameof(LungProp.DisconnectFromMachinery), MethodType.Enumerator)]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> TransDisconnectFromMachinery(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> LungProp_Trans_DisconnectFromMachinery(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 

@@ -2,14 +2,14 @@
 
 namespace ButteryFixes.Patches.Objects
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(SpikeRoofTrap))]
     internal class SpikeTrapPatches
     {
-        [HarmonyPatch(typeof(SpikeRoofTrap), "StickBodyToSpikes")]
+        [HarmonyPatch(nameof(SpikeRoofTrap.StickBodyToSpikes))]
         [HarmonyPostfix]
         static void PostStickBodyToSpikes(DeadBodyInfo body)
         {
-            if (!Compatibility.DISABLE_PLAYERMODEL_PATCHES)
+            if (Configuration.playermodelPatches.Value)
                 body.MakeCorpseBloody();
         }
     }

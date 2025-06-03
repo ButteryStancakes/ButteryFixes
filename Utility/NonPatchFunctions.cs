@@ -148,7 +148,7 @@ namespace ButteryFixes.Utility
             System.Random random = new(StartOfRound.Instance.randomMapSeed + 1314 + hives);
 
             int temp = random.Next(50, 150);
-            if (Vector3.Distance(pos, new(1.27146339f, 0.278438568f, -7.5f)) < 40f)
+            if (Vector3.Distance(pos, StartOfRound.Instance.shipLandingPosition.position) < 40f)
                 temp = random.Next(40, 100);
 
             Plugin.Logger.LogDebug($"Hive price recalculated: ${price} -> ${temp}");

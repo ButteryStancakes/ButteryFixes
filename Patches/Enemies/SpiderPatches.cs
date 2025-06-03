@@ -3,13 +3,13 @@ using HarmonyLib;
 
 namespace ButteryFixes.Patches.Enemies
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(SandSpiderAI))]
     internal class SpiderPatches
     {
         // prevents nullref if bunker spider is shot by nutcracker. bug originally described (and fixed) in NutcrackerFixes
-        [HarmonyPatch(typeof(SandSpiderAI), nameof(SandSpiderAI.TriggerChaseWithPlayer))]
+        [HarmonyPatch(nameof(SandSpiderAI.TriggerChaseWithPlayer))]
         [HarmonyPrefix]
-        static bool SandSpiderAIPreTriggerChaseWithPlayer(PlayerControllerB playerScript)
+        static bool SandSpiderAI_Pre_TriggerChaseWithPlayer(PlayerControllerB playerScript)
         {
             return playerScript != null;
         }

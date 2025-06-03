@@ -3,10 +3,10 @@ using HarmonyLib;
 
 namespace ButteryFixes.Patches.Objects
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(ItemCharger))]
     class ChargerCoilPatches
     {
-        [HarmonyPatch(typeof(ItemCharger), nameof(ItemCharger.ChargeItem))]
+        [HarmonyPatch(nameof(ItemCharger.ChargeItem))]
         [HarmonyPostfix]
         static void ItemCharger_Post_ChargeItem(ItemCharger __instance)
         {

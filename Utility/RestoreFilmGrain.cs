@@ -35,7 +35,7 @@ namespace ButteryFixes.Utility
 
             foreach (Volume volume in Object.FindObjectsByType<Volume>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
-                if (volume.sharedProfile.name != "UIEffects" && Configuration.restoreFilmGrain.Value < FilmGrains.NotRadar)
+                if (volume.sharedProfile.name != "UIEffects" && Configuration.restoreFilmGrain.Value == FilmGrains.MenusOnly)
                     continue;
 
                 switch (volume.sharedProfile.name)
@@ -58,11 +58,6 @@ namespace ButteryFixes.Utility
                         break;
                     case "InsanityVolume":
                         ApplyFilmGrain(volume.sharedProfile, 0.374f, 0.558f, type: FilmGrainLookup.Large02);
-                        break;
-                    case "RadarCameraVolume 1":
-                        //case "SecurityCameraVolume":
-                        if (Configuration.restoreFilmGrain.Value == FilmGrains.Full)
-                            ApplyFilmGrain(volume.sharedProfile, 0.125f, 1f, scanline);
                         break;
                     case "WakeUpVolume":
                         ApplyFilmGrain(volume.sharedProfile, 0.112f, 0.524f, scanline);

@@ -9,14 +9,14 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.Enemies
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(ForestGiantAI))]
     internal class ForestGiantPatches
     {
         static int lastGiantRange = 70;
 
-        [HarmonyPatch(typeof(ForestGiantAI), nameof(ForestGiantAI.AnimationEventA))]
+        [HarmonyPatch(nameof(ForestGiantAI.AnimationEventA))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> ForestGiantAITransAnimationEventA(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> ForestGiantAI_Trans_AnimationEventA(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
@@ -39,9 +39,9 @@ namespace ButteryFixes.Patches.Enemies
             return instructions;
         }
 
-        [HarmonyPatch(typeof(ForestGiantAI), "LookForPlayers")]
+        [HarmonyPatch(nameof(ForestGiantAI.LookForPlayers))]
         [HarmonyPostfix]
-        static void PostLookForPlayers(ForestGiantAI __instance)
+        static void ForestGiantAI_Post_LookForPlayers(ForestGiantAI __instance)
         {
             for (int i = 0; i < __instance.playerStealthMeters.Length; i++)
                 __instance.playerStealthMeters[i] = Mathf.Clamp01(__instance.playerStealthMeters[i]);
@@ -49,7 +49,7 @@ namespace ButteryFixes.Patches.Enemies
 
         [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.GetAllPlayersInLineOfSight))]
         [HarmonyPostfix]
-        static void ForestGiantAIPostGetAllPlayersInLineOfSight(EnemyAI __instance, PlayerControllerB[] __result, int range)
+        static void ForestGiantAI_Post_GetAllPlayersInLineOfSight(EnemyAI __instance, PlayerControllerB[] __result, int range)
         {
             if (__instance is ForestGiantAI forestGiantAI)
             {

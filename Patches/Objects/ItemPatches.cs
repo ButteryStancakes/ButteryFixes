@@ -8,7 +8,7 @@ namespace ButteryFixes.Patches.Objects
     {
         [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.ChargeBatteries))]
         [HarmonyPostfix]
-        static void PostChargeBatteries(GrabbableObject __instance)
+        static void GrabbableObject_Post_ChargeBatteries(GrabbableObject __instance)
         {
             BoomboxItem boomboxItem = __instance as BoomboxItem;
             if (boomboxItem != null)
@@ -23,9 +23,9 @@ namespace ButteryFixes.Patches.Objects
         }
 
         // for soccer ball (and also whoopee cushion)
-        [HarmonyPatch(typeof(GrabbableObjectPhysicsTrigger), "OnTriggerEnter")]
+        [HarmonyPatch(typeof(GrabbableObjectPhysicsTrigger), nameof(GrabbableObjectPhysicsTrigger.OnTriggerEnter))]
         [HarmonyPrefix]
-        static bool GrabbableObjectPhysicsTriggerPreOnTriggerEnter(GrabbableObjectPhysicsTrigger __instance, Collider other)
+        static bool GrabbableObjectPhysicsTrigger_Pre_OnTriggerEnter(GrabbableObjectPhysicsTrigger __instance, Collider other)
         {
             if (other.CompareTag("Enemy"))
             {
@@ -44,7 +44,7 @@ namespace ButteryFixes.Patches.Objects
 
         [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.PocketItem))]
         [HarmonyPostfix]
-        static void GrabbableObjectPostPocketItem(GrabbableObject __instance)
+        static void GrabbableObject_Post_PocketItem(GrabbableObject __instance)
         {
             if (__instance.playerHeldBy != null)
             {
@@ -73,6 +73,55 @@ namespace ButteryFixes.Patches.Objects
                 __instance.transform.SetParent(StartOfRound.Instance.propsContainer);
                 __instance.transform.localScale = __instance.originalScale;
             }
+        }
+
+        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.PlayDropSFX))]
+        [HarmonyPatch(typeof(SoccerBallProp), nameof(SoccerBallProp.PlayDropSFX))]
+        [HarmonyPostfix]
+        static void GrabbableObject_Post_PlayDropSFX(GrabbableObject __instance)
+        {
+            // emit noise alerts on all clients
+            if (__instance.itemProperties.dropSFX != null && !__instance.IsOwner)
+                RoundManager.Instance.PlayAudibleNoise(__instance.transform.position, 8f, 0.5f, 0, __instance.isInElevator && StartOfRound.Instance.hangarDoorsClosed, 941);
+        }
+
+        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.LateUpdate))]
+        [HarmonyPostfix]
+        static void GrabbableObject_Post_LateUpdate(GrabbableObject __instance)
+        {
+            // fix items spinning forever if you take them out of the microwave
+            if (__instance.rotateObject && (__instance.playerHeldBy != null || __instance.parentObject != null))
+                __instance.rotateObject = false;
+        }
+
+        [HarmonyPatch(typeof(GiftBoxItem), nameof(GiftBoxItem.Start))]
+        [HarmonyPrefix]
+        static void GiftBoxItem_Pre_Start(GiftBoxItem __instance, ref Vector3 __state)
+        {
+            // fix item not randomizing due to changes in v70
+            __state = __instance.targetFloorPosition;
+            if (!__instance.loadedItemFromSave && __instance.IsServer)
+            {
+                Vector3 origin = __instance.transform.TransformPoint(__instance.startFallingPosition);
+
+                // from GrabbableObject.FallToGround
+                if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, 80f, 268437760, QueryTriggerInteraction.Ignore))
+                {
+                    __instance.targetFloorPosition = hit.point + (__instance.itemProperties.verticalOffset * Vector3.up);
+                    if (__instance.transform.parent != null)
+                        __instance.targetFloorPosition = __instance.transform.parent.InverseTransformPoint(__instance.targetFloorPosition);
+                }
+                else
+                    __instance.targetFloorPosition = __instance.transform.localPosition;
+            }
+        }
+
+        [HarmonyPatch(typeof(GiftBoxItem), nameof(GiftBoxItem.Start))]
+        [HarmonyPostfix]
+        static void GiftBoxItem_Post_Start(GiftBoxItem __instance, Vector3 __state)
+        {
+            // just in case this causes undesired behavior elsewhere
+            __instance.targetFloorPosition = __state;
         }
     }
 }

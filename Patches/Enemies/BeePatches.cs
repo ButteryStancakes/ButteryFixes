@@ -7,12 +7,12 @@ using System.Reflection.Emit;
 
 namespace ButteryFixes.Patches.Enemies
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(RedLocustBees))]
     internal class BeePatches
     {
-        [HarmonyPatch(typeof(RedLocustBees), "SpawnHiveNearEnemy")]
+        [HarmonyPatch(nameof(RedLocustBees.SpawnHiveNearEnemy))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> RedLocustBeesTransSpawnHiveNearEnemy(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> RedLocustBees_Trans_SpawnHiveNearEnemy(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 

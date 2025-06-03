@@ -8,12 +8,12 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.General
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(HUDManager))]
     internal class HUDManagerPatches
     {
-        [HarmonyPatch(typeof(HUDManager), "UpdateScanNodes")]
+        [HarmonyPatch(nameof(HUDManager.UpdateScanNodes))]
         [HarmonyPostfix]
-        static void PostUpdateScanNodes(HUDManager __instance, Dictionary<RectTransform, ScanNodeProperties> ___scanNodes)
+        static void HUDManager_Post_UpdateScanNodes(HUDManager __instance)
         {
             if (!GlobalReferences.patchScanNodes || GameNetworkManager.Instance?.localPlayerController == null)
                 return;
@@ -21,7 +21,7 @@ namespace ButteryFixes.Patches.General
             Rect rect = __instance.playerScreenTexture.GetComponent<RectTransform>().rect;
             for (int i = 0; i < __instance.scanElements.Length; i++)
             {
-                if (___scanNodes.TryGetValue(__instance.scanElements[i], out ScanNodeProperties scanNodeProperties))
+                if (__instance.scanNodes.TryGetValue(__instance.scanElements[i], out ScanNodeProperties scanNodeProperties))
                 {
                     Vector3 viewportPos = GameNetworkManager.Instance.localPlayerController.gameplayCamera.WorldToViewportPoint(scanNodeProperties.transform.position);
                     // this places elements in the proper position regardless of resolution (rescaling causes awkward misalignments)
@@ -30,9 +30,9 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.ShowPlayersFiredScreen))]
+        [HarmonyPatch(nameof(HUDManager.ShowPlayersFiredScreen))]
         [HarmonyPostfix]
-        static void PostShowPlayersFiredScreen()
+        static void HUDManager_Post_ShowPlayersFiredScreen()
         {
             // reset TZP after firing sequence
             for (int i = 0; i < StartOfRound.Instance.allPlayerScripts.Length; i++)
@@ -42,16 +42,16 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.ApplyPenalty))]
+        [HarmonyPatch(nameof(HUDManager.ApplyPenalty))]
         [HarmonyPostfix]
-        static void ApplyPenalty(HUDManager __instance, int playersDead, int bodiesInsured)
+        static void HUDManager_Post_ApplyPenalty(HUDManager __instance, int playersDead, int bodiesInsured)
         {
             __instance.statsUIElements.penaltyAddition.SetText($"{playersDead} casualties: -{Mathf.Clamp((20 * (playersDead - bodiesInsured)) + (8 * bodiesInsured), 0, 100)}%\n({bodiesInsured} bodies recovered)");
         }
 
-        [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.UpdateHealthUI))]
+        [HarmonyPatch(nameof(HUDManager.UpdateHealthUI))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> TransUpdateHealthUI(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> HUDManager_Trans_UpdateHealthUI(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
@@ -69,9 +69,9 @@ namespace ButteryFixes.Patches.General
             return instructions;
         }
 
-        [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.GetNewStoryLogClientRpc))]
+        [HarmonyPatch(nameof(HUDManager.GetNewStoryLogClientRpc))]
         [HarmonyPostfix]
-        static void PostGetNewStoryLogClientRpc(int logID)
+        static void HUDManager_Post_GetNewStoryLogClientRpc(int logID)
         {
             foreach (StoryLog storyLog in Object.FindObjectsByType<StoryLog>(FindObjectsSortMode.None))
             {
@@ -84,9 +84,9 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.FillEndGameStats))]
+        [HarmonyPatch(nameof(HUDManager.FillEndGameStats))]
         [HarmonyPostfix]
-        static void PostFillEndGameStats(HUDManager __instance, int scrapCollected = 0)
+        static void HUDManager_Post_FillEndGameStats(HUDManager __instance, int scrapCollected = 0)
         {
             if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || StartOfRound.Instance.allPlayersDead || GlobalReferences.scrapNotCollected < 0)
             {
@@ -131,29 +131,42 @@ namespace ButteryFixes.Patches.General
             __instance.statsUIElements.gradeLetter.SetText(grades[Mathf.Clamp(grade + 1, 0, grades.Length)]);
         }
 
-        [HarmonyPatch(typeof(HUDManager), "SetPlayerLevelSmoothly")]
+        [HarmonyPatch(nameof(HUDManager.SetPlayerLevelSmoothly))]
         [HarmonyPrefix]
-        static void PreSetPlayerLevelSmoothly(ref int XPGain)
+        static void HUDManager_Pre_SetPlayerLevelSmoothly(ref int XPGain)
         {
             // prevent NaN from decreasing XP all the way to 0
             if (XPGain < -8)
                 XPGain = -8;
         }
 
-        [HarmonyPatch(typeof(HUDManager), "HelmetCondensationDrops")]
+        [HarmonyPatch(nameof(HUDManager.HelmetCondensationDrops))]
         [HarmonyPostfix]
-        static void PostHelmetCondensationDrops(HUDManager __instance)
+        static void HUDManager_Post_HelmetCondensationDrops(HUDManager __instance)
         {
             if (!__instance.increaseHelmetCondensation && !TimeOfDay.Instance.insideLighting && TimeOfDay.Instance.effects[(int)LevelWeatherType.Flooded].effectEnabled && Vector3.Angle(GameNetworkManager.Instance.localPlayerController.gameplayCamera.transform.forward, Vector3.up) < 45f)
                 __instance.increaseHelmetCondensation = true;
         }
 
-        [HarmonyPatch(typeof(HUDManager), "CanPlayerScan")]
+        [HarmonyPatch(nameof(HUDManager.CanPlayerScan))]
         [HarmonyPostfix]
-        static void Post_CanPlayerScan(ref bool __result)
+        static void HUDManager_Post_CanPlayerScan(ref bool __result)
         {
             if (!__result && GameNetworkManager.Instance.localPlayerController.inVehicleAnimation && !GameNetworkManager.Instance.localPlayerController.isPlayerDead)
                 __result = true;
+        }
+
+        [HarmonyPatch(nameof(HUDManager.CreateToolAdModel))]
+        [HarmonyPostfix]
+        static void HUDManager_Post_CreateToolAdModel(HUDManager __instance, Item item)
+        {
+            // fix giant blue circle on radar booster advertisement
+            if (item.name == "RadarBooster")
+            {
+                Renderer dot = __instance.advertItem.GetComponentsInChildren<Renderer>().FirstOrDefault(rend => rend.name == "RadarBoosterDot");
+                if (dot != null)
+                    dot.forceRenderingOff = true;
+            }
         }
     }
 }

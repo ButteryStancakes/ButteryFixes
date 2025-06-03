@@ -12,11 +12,8 @@ namespace ButteryFixes.Patches.Player
 
         [HarmonyPatch(typeof(UnlockableSuit), nameof(UnlockableSuit.ChangePlayerCostumeElement))]
         [HarmonyPrefix]
-        static void PreChangePlayerCostumeElement(ref Transform costumeContainer, GameObject newCostume)
+        static void UnlockableSuit_Pre_ChangePlayerCostumeElement(ref Transform costumeContainer, GameObject newCostume)
         {
-            if (Compatibility.DISABLE_PLAYERMODEL_PATCHES)
-                return;
-
             if (GameNetworkManager.Instance?.localPlayerController == null)
                 return;
 
@@ -40,7 +37,7 @@ namespace ButteryFixes.Patches.Player
 
         [HarmonyPatch(typeof(UnlockableSuit), nameof(UnlockableSuit.ChangePlayerCostumeElement))]
         [HarmonyPostfix]
-        static void PostChangePlayerCostumeElement(ref Transform costumeContainer)
+        static void UnlockableSuit_Post_ChangePlayerCostumeElement(ref Transform costumeContainer)
         {
             if (localCostumeChanged)
             {
@@ -53,7 +50,7 @@ namespace ButteryFixes.Patches.Player
 
         [HarmonyPatch(typeof(UnlockableSuit), nameof(UnlockableSuit.SwitchSuitForPlayer))]
         [HarmonyPostfix]
-        static void PostSwitchSuitForPlayer(PlayerControllerB player, int suitID)
+        static void UnlockableSuit_Post_SwitchSuitForPlayer(PlayerControllerB player, int suitID)
         {
             // to draw bunny tail in shadow
             if (GameNetworkManager.Instance.localPlayerController == player)

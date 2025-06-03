@@ -6,12 +6,12 @@ using System.Reflection.Emit;
 
 namespace ButteryFixes.Patches.Enemies
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(RadMechAI))]
     internal class OldBirdPatches
     {
-        [HarmonyPatch(typeof(RadMechAI), "Stomp")]
+        [HarmonyPatch(nameof(RadMechAI.Stomp))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> RadMechAITransStomp(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+        static IEnumerable<CodeInstruction> RadMechAI_Trans_Stomp(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
@@ -42,9 +42,9 @@ namespace ButteryFixes.Patches.Enemies
             return instructions;
         }
 
-        [HarmonyPatch(typeof(RadMechAI), nameof(RadMechAI.DoAIInterval))]
+        [HarmonyPatch(nameof(RadMechAI.DoAIInterval))]
         [HarmonyPostfix]
-        static void RadMechAIPostDoAIInterval(RadMechAI __instance)
+        static void RadMechAI_Post_DoAIInterval(RadMechAI __instance)
         {
             // avoid sliding in game over cutscene
             if (__instance.IsOwner && StartOfRound.Instance.allPlayersDead)

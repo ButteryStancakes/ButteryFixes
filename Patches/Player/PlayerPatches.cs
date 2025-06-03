@@ -3,6 +3,8 @@ using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -10,7 +12,7 @@ using UnityEngine.Rendering.HighDefinition;
 
 namespace ButteryFixes.Patches.Player
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(PlayerControllerB))]
     internal class PlayerPatches
     {
         static readonly string[] qeBugItems = [
@@ -26,16 +28,16 @@ namespace ButteryFixes.Patches.Player
 
         static float safeTimer = 0, safeTimer2 = 0;
 
-        [HarmonyPatch(typeof(PlayerControllerB), "Update")]
+        [HarmonyPatch(nameof(PlayerControllerB.Update))]
         [HarmonyPostfix]
-        static void PlayerControllerBPostUpdate(PlayerControllerB __instance, bool ___isWalking)
+        static void PlayerControllerB_Post_Update(PlayerControllerB __instance)
         {
             // ladder patches are disabled for Fast Climbing & BetterLadders compatibility
             if (__instance.isClimbingLadder && !Compatibility.DISABLE_LADDER_PATCH)
             {
                 __instance.isSprinting = false;
                 // fixes residual slope speed
-                if (___isWalking)
+                if (__instance.isWalking)
                     __instance.playerBodyAnimator.SetFloat("animationSpeed", 1f);
             }
 
@@ -67,9 +69,9 @@ namespace ButteryFixes.Patches.Player
             }
         }
 
-        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.ConnectClientToPlayerObject))]
+        [HarmonyPatch(nameof(PlayerControllerB.ConnectClientToPlayerObject))]
         [HarmonyPostfix]
-        static void PostConnectClientToPlayerObject(PlayerControllerB __instance)
+        static void PlayerControllerB_Post_ConnectClientToPlayerObject(PlayerControllerB __instance)
         {
             if (Configuration.gameResolution.Value != GameResolution.DontChange)
             {
@@ -96,30 +98,16 @@ namespace ButteryFixes.Patches.Player
             }
 
             // fix some oddities with local player rendering
-            if (!Compatibility.DISABLE_PLAYERMODEL_PATCHES)
+            Renderer scavengerHelmet = __instance.localVisor.Find("ScavengerHelmet")?.GetComponent<Renderer>();
+            if (scavengerHelmet != null)
             {
-                Renderer scavengerHelmet = __instance.localVisor.Find("ScavengerHelmet")?.GetComponent<Renderer>();
-                if (scavengerHelmet != null)
-                {
-                    scavengerHelmet.shadowCastingMode = ShadowCastingMode.Off;
-                    Plugin.Logger.LogDebug("\"Fake helmet\" no longer casts a shadow");
-                }
-            }
-            try
-            {
-                __instance.playerBadgeMesh.GetComponent<Renderer>().forceRenderingOff = true;
-                __instance.playerBetaBadgeMesh.forceRenderingOff = true;
-                Plugin.Logger.LogDebug("Hide badges on local player");
-            }
-            catch (System.Exception e)
-            {
-                Plugin.Logger.LogWarning("Ran into error fetching local player's badges");
-                Plugin.Logger.LogWarning(e);
+                scavengerHelmet.shadowCastingMode = ShadowCastingMode.Off;
+                Plugin.Logger.LogDebug("\"Fake helmet\" no longer casts a shadow");
             }
 
-            if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && __instance.playersManager.mapScreenPlayerName.text == "MONITORING: Player")
+            if (__instance.playersManager.mapScreenPlayerName.text == "Player")
             {
-                __instance.playersManager.mapScreenPlayerName.SetText($"MONITORING: {__instance.playersManager.mapScreen.radarTargets[__instance.playersManager.mapScreen.targetTransformIndex].name}");
+                __instance.playersManager.mapScreenPlayerName.SetText(__instance.playersManager.mapScreen.radarTargets[__instance.playersManager.mapScreen.targetTransformIndex].name ?? "Player");
                 Plugin.Logger.LogDebug("Fix \"MONITORING: Player\"");
             }
 
@@ -135,16 +123,6 @@ namespace ButteryFixes.Patches.Player
                 }
             }
 
-            if (Configuration.restoreShipIcon.Value)
-            {
-                Transform shipIcon = __instance.playersManager.mapScreen.shipArrowUI.transform.Find("ShipIcon");
-                if (shipIcon != null)
-                {
-                    shipIcon.localPosition = new Vector3(shipIcon.localPosition.x, shipIcon.localPosition.y, 0f);
-                    Plugin.Logger.LogDebug("Fix ship icon on radar");
-                }
-            }
-
             // in case the default suit has an attached costume object
             if (__instance.currentSuitID >= 0 && __instance.currentSuitID < __instance.playersManager.unlockablesList.unlockables.Count)
             {
@@ -153,9 +131,9 @@ namespace ButteryFixes.Patches.Player
             }
         }
 
-        [HarmonyPatch(typeof(PlayerControllerB), "PlayJumpAudio")]
+        [HarmonyPatch(nameof(PlayerControllerB.PlayJumpAudio))]
         [HarmonyPostfix]
-        static void PostPlayJumpAudio(PlayerControllerB __instance, bool ___isWalking)
+        static void PlayerControllerB_Post_PlayJumpAudio(PlayerControllerB __instance)
         {
             if (!Configuration.fixJumpCheese.Value || !__instance.IsServer || StartOfRound.Instance.inShipPhase)
             {
@@ -175,7 +153,7 @@ namespace ButteryFixes.Patches.Player
 
             bool moving = false;
             if (__instance.IsOwner)
-                moving = ___isWalking;
+                moving = __instance.isWalking;
             else if (__instance.timeSincePlayerMoving < 0.25f)
             {
                 Vector3 deltaDist = __instance.serverPlayerPosition - __instance.oldPlayerPosition;
@@ -193,9 +171,9 @@ namespace ButteryFixes.Patches.Player
             }
         }
 
-        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.LandFromJumpClientRpc))]
+        [HarmonyPatch(nameof(PlayerControllerB.LandFromJumpClientRpc))]
         [HarmonyPostfix]
-        static void PostLandFromJumpClientRpc(PlayerControllerB __instance)
+        static void PlayerControllerB_Post_LandFromJumpClientRpc(PlayerControllerB __instance)
         {
             if (!bunnyhoppingPlayers.Contains(__instance))
                 return;
@@ -211,19 +189,19 @@ namespace ButteryFixes.Patches.Player
             bunnyhoppingPlayers.Remove(__instance);
         }
 
-        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.PlayFootstepSound))]
+        [HarmonyPatch(nameof(PlayerControllerB.PlayFootstepSound))]
         [HarmonyPostfix]
-        static void PostPlayFootstepSound(PlayerControllerB __instance)
+        static void PlayerControllerB_Post_PlayFootstepSound(PlayerControllerB __instance)
         {
             if (__instance.IsServer && !__instance.IsOwner && (int)__instance.actualClientId < NonPatchFunctions.playerWasLastSprinting.Length)
                 NonPatchFunctions.playerWasLastSprinting[(int)__instance.actualClientId] = __instance.playerBodyAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Sprinting");
         }
 
-        [HarmonyPatch(typeof(PlayerControllerB), "QEItemInteract_performed")]
-        [HarmonyPatch(typeof(PlayerControllerB), "ItemSecondaryUse_performed")]
-        [HarmonyPatch(typeof(PlayerControllerB), "ItemTertiaryUse_performed")]
+        [HarmonyPatch(nameof(PlayerControllerB.QEItemInteract_performed))]
+        [HarmonyPatch(nameof(PlayerControllerB.ItemSecondaryUse_performed))]
+        [HarmonyPatch(nameof(PlayerControllerB.ItemTertiaryUse_performed))]
         [HarmonyPrefix]
-        static void PreItem_performed(PlayerControllerB __instance)
+        static void PlayerControllerB_Pre_Item_performed(PlayerControllerB __instance)
         {
             if (__instance.equippedUsableItemQE && __instance.currentlyHeldObjectServer != null && qeBugItems.Contains(__instance.currentlyHeldObjectServer.itemProperties.name))
             {
@@ -232,9 +210,9 @@ namespace ButteryFixes.Patches.Player
             }
         }
 
-        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.PlaceGrabbableObject))]
+        [HarmonyPatch(nameof(PlayerControllerB.PlaceGrabbableObject))]
         [HarmonyPostfix]
-        static void PostPlaceGrabbableObject(GrabbableObject placeObject)
+        static void PlayerControllerB_Post_PlaceGrabbableObject(GrabbableObject placeObject)
         {
             if (StartOfRound.Instance.isObjectAttachedToMagnet && StartOfRound.Instance.attachedVehicle != null && placeObject.transform.parent == StartOfRound.Instance.attachedVehicle.transform)
             {
@@ -248,28 +226,73 @@ namespace ButteryFixes.Patches.Player
             placeObject.transform.localScale = Vector3.Scale(placeObject.originalScale, scalar);
         }
 
-        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.PlayerLookInput))]
+        [HarmonyPatch(nameof(PlayerControllerB.PlayerLookInput))]
         [HarmonyPrefix]
         static void PlayerControllerB_Pre_PlayerLookInput(PlayerControllerB __instance, ref bool __state)
         {
             __state = __instance.disableLookInput;
-            if (!__state && GlobalReferences.lockingCamera > 0)
+            if (!__state && (GlobalReferences.lockingCamera > 0 || GlobalReferences.sittingInArmchair))
                 __instance.disableLookInput = true;
         }
 
-        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.PlayerLookInput))]
+        [HarmonyPatch(nameof(PlayerControllerB.PlayerLookInput))]
         [HarmonyPostfix]
         static void PlayerControllerB_Post_PlayerLookInput(PlayerControllerB __instance, bool __state)
         {
             __instance.disableLookInput = __state;
         }
 
-        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.DiscardHeldObject))]
+        [HarmonyPatch(nameof(PlayerControllerB.DiscardHeldObject))]
         [HarmonyPrefix]
         static void PlayerControllerB_Pre_DiscardHeldObject(PlayerControllerB __instance, bool placeObject, NetworkObject parentObjectTo)
         {
             if (!Compatibility.DISABLE_INTERACT_FIX && __instance.IsOwner && placeObject && parentObjectTo != null)
                 __instance.throwingObject = true;
+        }
+
+        [HarmonyPatch(nameof(PlayerControllerB.SpawnDeadBody))]
+        [HarmonyPrefix]
+        static void PlayerControllerB_Pre_SpawnDeadBody(int playerId, int deathAnimation)
+        {
+            if (deathAnimation == 9)
+            {
+                if (GlobalReferences.gibbedPlayer != null)
+                    Plugin.Logger.LogDebug("Two sets of Sapsucker gibs spawned simultaneously, this will likely cause them to look incorrect");
+
+                GlobalReferences.gibbedPlayer = StartOfRound.Instance.allPlayerScripts[playerId];
+            }
+        }
+
+        [HarmonyPatch(nameof(PlayerControllerB.ThrowObjectClientRpc))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> PlayerControllerB_Trans_ThrowObjectClientRpc(IEnumerable<CodeInstruction> instructions)
+        {
+            if (Compatibility.DISABLE_ROTATION_PATCH)
+                return instructions;
+
+            List<CodeInstruction> codes = instructions.ToList();
+
+            MethodInfo setObjectAsNoLongerHeld = AccessTools.Method(typeof(PlayerControllerB), nameof(PlayerControllerB.SetObjectAsNoLongerHeld));
+            for (int i = 1; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Call && codes[i].operand as MethodInfo == setObjectAsNoLongerHeld && codes[i - 1].opcode == OpCodes.Ldc_I4_M1)
+                {
+                    codes[i - 1].opcode = OpCodes.Ldarg_S;
+                    codes[i - 1].operand = (sbyte)5;
+                    Plugin.Logger.LogDebug("Transpiler (Player drop): Preserve rotation");
+                    return codes;
+                }
+            }
+
+            Plugin.Logger.LogError("Player drop transpiler failed");
+            return instructions;
+        }
+
+        [HarmonyPatch(nameof(PlayerControllerB.SetObjectAsNoLongerHeld))]
+        [HarmonyPostfix]
+        static void PlayerControllerB_Post_SetObjectAsNoLongerHeld(PlayerControllerB __instance, int floorYRot)
+        {
+            Plugin.Logger.LogDebug($"Item dropped: {floorYRot}");
         }
     }
 }

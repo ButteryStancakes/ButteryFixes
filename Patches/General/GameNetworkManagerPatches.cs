@@ -3,12 +3,12 @@ using HarmonyLib;
 
 namespace ButteryFixes.Patches.General
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(GameNetworkManager))]
     internal class GameNetworkManagerPatches
     {
-        [HarmonyPatch(typeof(GameNetworkManager), nameof(GameNetworkManager.SaveGame))]
+        [HarmonyPatch(nameof(GameNetworkManager.SaveGame))]
         [HarmonyPostfix]
-        static void PostSaveGame(GameNetworkManager __instance)
+        static void GameNetworkManager_Post_SaveGame(GameNetworkManager __instance)
         {
             if (!__instance.isHostingGame || StartOfRound.Instance.isChallengeFile || !StartOfRound.Instance.inShipPhase)
                 return;
@@ -38,12 +38,13 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(GameNetworkManager), nameof(GameNetworkManager.Disconnect))]
+        [HarmonyPatch(nameof(GameNetworkManager.Disconnect))]
         [HarmonyPostfix]
-        static void GameNetworkManagerPostDisconnect()
+        static void GameNetworkManager_Post_Disconnect()
         {
             GlobalReferences.allEnemiesList.Clear();
             GlobalReferences.lockingCamera = 0;
+            GlobalReferences.sittingInArmchair = false;
             ButlerRadar.ClearAllButlers();
         }
     }

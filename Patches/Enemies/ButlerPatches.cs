@@ -3,10 +3,10 @@ using HarmonyLib;
 
 namespace ButteryFixes.Patches.Enemies
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(ButlerEnemyAI))]
     internal class ButlerPatches
     {
-        [HarmonyPatch(typeof(ButlerEnemyAI), nameof(ButlerEnemyAI.Start))]
+        [HarmonyPatch(nameof(ButlerEnemyAI.Start))]
         [HarmonyPostfix]
         static void ButlerEnemyAI_Post_Start(ButlerEnemyAI __instance)
         {

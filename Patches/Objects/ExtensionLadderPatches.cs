@@ -2,23 +2,23 @@
 
 namespace ButteryFixes.Patches.Objects
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(ExtensionLadderItem))]
     internal class ExtensionLadderPatches
     {
-        [HarmonyPatch(typeof(ExtensionLadderItem), "StartLadderAnimation")]
+        [HarmonyPatch(nameof(ExtensionLadderItem.StartLadderAnimation))]
         [HarmonyPostfix]
-        static void PostStartLadderAnimation(ref bool ___ladderBlinkWarning)
+        static void ExtensionLadderItem_Post_StartLadderAnimation(ExtensionLadderItem __instance)
         {
-            if (___ladderBlinkWarning)
+            if (__instance.ladderBlinkWarning)
             {
-                ___ladderBlinkWarning = false;
+                __instance.ladderBlinkWarning = false;
                 Plugin.Logger.LogDebug("Fixed broken extension ladder warning");
             }
         }
 
-        [HarmonyPatch(typeof(ExtensionLadderItem), nameof(ExtensionLadderItem.Update))]
+        [HarmonyPatch(nameof(ExtensionLadderItem.Update))]
         [HarmonyPostfix]
-        static void ExtensionLadderItemPostUpdate(ExtensionLadderItem __instance)
+        static void ExtensionLadderItem_Post_Update(ExtensionLadderItem __instance)
         {
             if (StartOfRound.Instance != null && StartOfRound.Instance.suckingPlayersOutOfShip && !__instance.itemUsedUp)
             {

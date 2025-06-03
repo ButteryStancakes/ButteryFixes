@@ -4,10 +4,10 @@ using System.Collections.Generic;
 
 namespace ButteryFixes.Patches.General
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(QuickMenuManager))]
     internal class QuickMenuManagerPatches
     {
-        [HarmonyPatch(typeof(QuickMenuManager), "Start")]
+        [HarmonyPatch(nameof(QuickMenuManager.Start))]
         [HarmonyPostfix]
         static void QuickMenuManagerPostStart(QuickMenuManager __instance)
         {

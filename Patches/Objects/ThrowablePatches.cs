@@ -3,14 +3,14 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.Objects
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(StunGrenadeItem))]
     internal class ThrowablePatches
     {
-        [HarmonyPatch(typeof(StunGrenadeItem), nameof(StunGrenadeItem.Start))]
+        [HarmonyPatch(nameof(StunGrenadeItem.Start))]
         [HarmonyPostfix]
-        static void StunGrenadeItemPostStartStart(ref int ___stunGrenadeMask)
+        static void StunGrenadeItem_Post_Start(StunGrenadeItem __instance)
         {
-            ___stunGrenadeMask |= 1 << LayerMask.NameToLayer("Catwalk");
+            __instance.stunGrenadeMask |= 1 << LayerMask.NameToLayer("Catwalk");
         }
     }
 }

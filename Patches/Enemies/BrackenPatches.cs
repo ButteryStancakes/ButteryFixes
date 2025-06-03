@@ -7,16 +7,16 @@ using System.Reflection.Emit;
 
 namespace ButteryFixes.Patches.Enemies
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(FlowermanAI))]
     internal class BrackenPatches
     {
-        [HarmonyPatch(typeof(FlowermanAI), nameof(FlowermanAI.HitEnemy))]
+        [HarmonyPatch(nameof(FlowermanAI.HitEnemy))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> FlowermanAITransHitEnemy(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> FlowermanAI_Trans_HitEnemy(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
-            FieldInfo angerMeter = AccessTools.Field(typeof(FlowermanAI), "angerMeter");
+            FieldInfo angerMeter = AccessTools.Field(typeof(FlowermanAI), nameof(FlowermanAI.angerMeter));
             for (int i = 2; i < codes.Count; i++)
             {
                 if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == angerMeter)
@@ -37,9 +37,9 @@ namespace ButteryFixes.Patches.Enemies
             return instructions;
         }
 
-        [HarmonyPatch(typeof(FlowermanAI), nameof(FlowermanAI.HitEnemy))]
+        [HarmonyPatch(nameof(FlowermanAI.HitEnemy))]
         [HarmonyPostfix]
-        static void FlowermanAIPostHitEnemy(FlowermanAI __instance, PlayerControllerB playerWhoHit)
+        static void FlowermanAI_Post_HitEnemy(FlowermanAI __instance, PlayerControllerB playerWhoHit)
         {
             if (playerWhoHit != null)
             {

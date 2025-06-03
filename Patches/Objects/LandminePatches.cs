@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace ButteryFixes.Patches.Objects
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(Landmine))]
     internal class LandminePatches
     {
-        [HarmonyPatch(typeof(Landmine), nameof(Landmine.Detonate))]
+        [HarmonyPatch(nameof(Landmine.Detonate))]
         [HarmonyPostfix]
-        static void LandminePostDetonate(Landmine __instance)
+        static void Landmine_Post_Detonate(Landmine __instance)
         {
             Renderer scanSphere = __instance.transform.parent?.Find("ScanSphere")?.GetComponent<Renderer>();
             if (scanSphere != null)
@@ -32,9 +32,9 @@ namespace ButteryFixes.Patches.Objects
             }
         }
 
-        [HarmonyPatch(typeof(Landmine), nameof(Landmine.SetOffMineAnimation))]
+        [HarmonyPatch(nameof(Landmine.SetOffMineAnimation))]
         [HarmonyPrefix]
-        static bool PreSetOffMineAnimation(Landmine __instance)
+        static bool Landmine_Pre_SetOffMineAnimation(Landmine __instance)
         {
             Renderer rend = __instance.GetComponent<Renderer>();
             return !__instance.hasExploded || rend == null || rend.enabled;

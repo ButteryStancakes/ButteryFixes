@@ -2,19 +2,19 @@
 
 namespace ButteryFixes.Patches.Objects
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(BreakerBox))]
     internal class BreakerBoxPatches
     {
-        [HarmonyPatch(typeof(BreakerBox), nameof(BreakerBox.SetSwitchesOff))]
+        [HarmonyPatch(nameof(BreakerBox.SetSwitchesOff))]
         [HarmonyPostfix]
-        static void PostSetSwitchesOff(BreakerBox __instance)
+        static void BreakerBox_Post_SetSwitchesOff(BreakerBox __instance)
         {
             __instance.breakerBoxHum.Stop();
         }
 
-        [HarmonyPatch(typeof(BreakerBox), nameof(BreakerBox.SwitchBreaker))]
+        [HarmonyPatch(nameof(BreakerBox.SwitchBreaker))]
         [HarmonyPostfix]
-        static void PostSwitchBreaker(BreakerBox __instance)
+        static void BreakerBox_Post_SwitchBreaker(BreakerBox __instance)
         {
             if (__instance.breakerBoxHum.isPlaying && RoundManager.Instance.powerOffPermanently)
                 __instance.breakerBoxHum.Stop();

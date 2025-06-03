@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace ButteryFixes.Patches.General
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(Terminal))]
     internal class TerminalPatches
     {
         static int groupCreditsLastFrame = -1;
@@ -21,11 +21,12 @@ namespace ButteryFixes.Patches.General
             { "RedLocustHive", (40, 150) },
             { "Shotgun", (25, 90) }, // 25 from v50 beta
             { "LungApparatus", (40, 131) }, // 130 from v9
+            { "BabyKiwiEgg", (30, 200) },
         };
 
-        [HarmonyPatch(typeof(Terminal), "Start")]
+        [HarmonyPatch(nameof(Terminal.Start))]
         [HarmonyPostfix]
-        static void TerminalPostStart(Terminal __instance)
+        static void Terminal_Post_Start(Terminal __instance)
         {
             if (!Compatibility.ENABLE_VAIN_SHROUDS)
             {
@@ -66,16 +67,8 @@ namespace ButteryFixes.Patches.General
                         enemyFile.creatureName = enemyFile.creatureName[0].ToString().ToUpper() + enemyFile.creatureName[1..];
                         Plugin.Logger.LogDebug("Bestiary: Mask hornets");
                         break;
-                    case "HygrodereFile":
-                        enemyFile.displayText = enemyFile.displayText.Replace("Hydrogere", "Hygrodere").Replace("Prostita", "Protista");
-                        Plugin.Logger.LogDebug("Bestiary: Hygrodere");
-                        break;
                 }
             }
-
-            TerminalNode logFile3 = __instance.logEntryFiles.FirstOrDefault(logEntryFile => logEntryFile.name == "LogFile3");
-            if (logFile3 != null && !logFile3.displayText.Contains("fuckng"))
-                logFile3.displayText = logFile3.displayText.Replace("PYSCHOTIC", "fuckng PYSCHOTIC");
 
             TerminalKeyword buy = __instance.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.name == "Buy");
 
@@ -197,38 +190,11 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(Terminal), "TextPostProcess")]
-        [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> TransTextPostProcess(IEnumerable<CodeInstruction> instructions)
-        {
-            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
-                return instructions;
-
-            List<CodeInstruction> codes = instructions.ToList();
-
-            for (int i = codes.Count - 1; i >= 0; i--)
-            {
-                if (codes[i].opcode == OpCodes.Ldstr)
-                {
-                    string str = (string)codes[i].operand;
-                    if (str.Contains("\nn"))
-                    {
-                        codes[i].operand = str.Replace("\nn", "\n");
-                        Plugin.Logger.LogDebug("Transpiler (Terminal text): Fix \"n\" on terminal when viewing monitor");
-                        return codes;
-                    }
-                }
-            }
-
-            Plugin.Logger.LogError("Terminal text transpiler failed");
-            return instructions;
-        }
-
-        [HarmonyPatch(typeof(Terminal), "TextPostProcess")]
+        [HarmonyPatch(nameof(Terminal.TextPostProcess))]
         [HarmonyPrefix]
-        [HarmonyPriority(Priority.First - 1)]
+        [HarmonyPriority(Priority.VeryHigh)]
         [HarmonyBefore(Compatibility.GUID_LETHAL_FIXES)]
-        static void TerminalPreTextPostProcess(Terminal __instance, ref string modifiedDisplayText)
+        static void Terminal_Pre_TextPostProcess(Terminal __instance, ref string modifiedDisplayText)
         {
             if (Configuration.scanImprovements.Value && modifiedDisplayText.Contains("[scanForItems]"))
             {
@@ -307,9 +273,9 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(Terminal), "ParsePlayerSentence")]
+        [HarmonyPatch(nameof(Terminal.ParsePlayerSentence))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> TransParsePlayerSentence(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> Terminal_Trans_ParsePlayerSentence(IEnumerable<CodeInstruction> instructions)
         {
             if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
                 return instructions;
@@ -322,7 +288,7 @@ namespace ButteryFixes.Patches.General
             {
                 if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == playerDefinedAmount && codes[i - 1].opcode == OpCodes.Call && (MethodInfo)codes[i - 1].operand == clamp && codes[i - 2].opcode == OpCodes.Ldc_I4_S)
                 {
-                    codes[i - 2].operand = 12;
+                    codes[i - 2].operand = (sbyte)12;
                     Plugin.Logger.LogDebug("Transpiler (Order capacity): Allow bulk purchases of 12");
                     return codes;
                 }
@@ -332,14 +298,14 @@ namespace ButteryFixes.Patches.General
             return instructions;
         }
 
-        [HarmonyPatch(typeof(Terminal), "LoadNewNodeIfAffordable")]
+        [HarmonyPatch(nameof(Terminal.LoadNewNodeIfAffordable))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> TransLoadNewNodeIfAffordable(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> Terminal_Trans_LoadNewNodeIfAffordable(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
             //FieldInfo buyItemIndex = AccessTools.Field(typeof(TerminalNode), nameof(TerminalNode.buyItemIndex));
-            //FieldInfo numberOfItemsInDropship = AccessTools.Field(typeof(Terminal), nameof(Terminal.numberOfItemsInDropship));
+            //FieldInfo numberOfItemsInDropship = AccessTools.Field(nameof(Terminal.numberOfItemsInDropship));
             bool /*inSurvivalKit = false,*/ walkies = false, shovel = false;
             for (int i = 1; i < codes.Count - 1; i++)
             {
@@ -381,7 +347,7 @@ namespace ButteryFixes.Patches.General
             return instructions;
         }
 
-        [HarmonyPatch(typeof(Terminal), nameof(Terminal.BeginUsingTerminal))]
+        [HarmonyPatch(nameof(Terminal.BeginUsingTerminal))]
         [HarmonyPostfix]
         static void Terminal_Post_BeginUsingTerminal(Terminal __instance)
         {
@@ -396,7 +362,7 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(typeof(Terminal), nameof(Terminal.QuitTerminal))]
+        [HarmonyPatch(nameof(Terminal.QuitTerminal))]
         [HarmonyPrefix]
         static void Terminal_Pre_QuitTerminal(Terminal __instance)
         {
@@ -404,7 +370,7 @@ namespace ButteryFixes.Patches.General
                 GlobalReferences.lockingCamera--;
         }
 
-        [HarmonyPatch(typeof(Terminal), nameof(Terminal.Update))]
+        [HarmonyPatch(nameof(Terminal.Update))]
         [HarmonyPostfix]
         static void Terminal_Post_Update(Terminal __instance)
         {

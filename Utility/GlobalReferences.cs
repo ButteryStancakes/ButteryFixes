@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using DunGen;
+using GameNetcodeStuff;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ButteryFixes.Utility
@@ -6,7 +8,7 @@ namespace ButteryFixes.Utility
     internal static class GlobalReferences
     {
         // Experimentation, Assurance, Vow, Gordion, March, Adamance, Rend, Dine, Offense, Titan, Artifice, Liquidation, Embrion
-        internal const int NUM_LEVELS = 13;
+        internal const int NUM_LEVELS = 13, ZED_DOG_ID = 12232001;
 
         static Terminal _terminal;
         internal static Terminal Terminal
@@ -61,5 +63,14 @@ namespace ButteryFixes.Utility
 
         // lock in terminal
         internal static int lockingCamera;
+        internal static bool sittingInArmchair;
+
+        // new deaths from v70
+        internal static PlayerControllerB friedPlayer, gibbedPlayer;
+
+        // signal loss
+        internal static List<Bounds> caveTiles = [];
+
+        internal static GameObject fakeContour;
     }
 }

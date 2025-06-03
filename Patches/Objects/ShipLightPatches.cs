@@ -6,16 +6,16 @@ namespace ButteryFixes.Patches.Objects
     [HarmonyPatch]
     internal class ShipLightPatches
     {
-        [HarmonyPatch(typeof(CozyLights), "Update")]
+        [HarmonyPatch(typeof(CozyLights), nameof(CozyLights.Update))]
         [HarmonyPrefix]
-        static bool CozyLightsPreUpdate(CozyLights __instance, ref bool ___cozyLightsOn)
+        static bool CozyLights_Pre_Update(CozyLights __instance)
         {
             if (StartOfRound.Instance != null && StartOfRound.Instance.firingPlayersCutsceneRunning && GlobalReferences.shipAnimator != null && GlobalReferences.shipAnimator.GetBool("AlarmRinging"))
             {
-                if (___cozyLightsOn)
+                if (__instance.cozyLightsOn)
                 {
                     __instance.cozyLightsAnimator.SetBool("on", false);
-                    ___cozyLightsOn = false;
+                    __instance.cozyLightsOn = false;
                 }
 
                 if (__instance.turnOnAudio != null)
