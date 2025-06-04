@@ -21,7 +21,7 @@ namespace ButteryFixes.Patches.Enemies
             MethodInfo despawn = AccessTools.Method(typeof(NetworkObject), nameof(NetworkObject.Despawn));
             for (int i = 4; i < codes.Count; i++)
             {
-                if (codes[i].opcode == OpCodes.Callvirt && (MethodInfo)codes[i].operand == despawn && codes[i - 3].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 3].operand == observingScrap)
+                if (codes[i].opcode == OpCodes.Callvirt && codes[i].operand as MethodInfo == despawn && codes[i - 3].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 3].operand == observingScrap)
                 {
                     codes.InsertRange(i - 4, [
                         new(OpCodes.Ldarg_0),

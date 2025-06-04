@@ -71,7 +71,7 @@ namespace ButteryFixes.Patches.Objects
             MethodInfo overlapSphere = AccessTools.Method(typeof(Physics), nameof(Physics.OverlapSphere), [typeof(Vector3), typeof(float), typeof(int), typeof(QueryTriggerInteraction)]);
             for (int i = 1; i < codes.Count; i++)
             {
-                if (codes[i].opcode == OpCodes.Call && (MethodInfo)codes[i].operand == overlapSphere && codes[i - 1].opcode == OpCodes.Ldc_I4_1)
+                if (codes[i].opcode == OpCodes.Call && codes[i].operand as MethodInfo == overlapSphere && codes[i - 1].opcode == OpCodes.Ldc_I4_1)
                 {
                     codes[i - 1].opcode = OpCodes.Ldc_I4_2;
                     Plugin.Logger.LogDebug("Transpiler (Cruiser collect): Auto-collect trigger colliders, for Teeth");

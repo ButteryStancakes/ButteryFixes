@@ -18,7 +18,7 @@ namespace ButteryFixes.Patches.Objects
 
             bool stopDone = false, playDone = false;
             MethodInfo stop = AccessTools.Method(typeof(AudioSource), nameof(AudioSource.Stop));
-            MethodInfo playOneShot = AccessTools.Method(typeof(AudioSource), nameof(AudioSource.PlayOneShot), [ typeof(AudioClip) ]);
+            MethodInfo playOneShot = AccessTools.Method(typeof(AudioSource), nameof(AudioSource.PlayOneShot), [typeof(AudioClip)]);
             FieldInfo doorLockSFX = AccessTools.Field(typeof(DoorLock), nameof(DoorLock.doorLockSFX));
             for (int i = 2; i < codes.Count; i++)
             {

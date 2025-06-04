@@ -297,16 +297,6 @@ namespace ButteryFixes.Utility
                 if (GlobalReferences.shipNode != null)
                     GlobalReferences.shipNodeOffset = GlobalReferences.shipNode.position - GlobalReferences.shipDefaultPos;
             }
-
-            if (StartOfRound.Instance.currentLevelID < GlobalReferences.NUM_LEVELS && GameObject.FindGameObjectWithTag("TerrainContourMap") == null)
-            {
-                Plugin.Logger.LogDebug($"Moon \"{scene.name}\" is missing a contour map");
-                if (GlobalReferences.fakeContour != null)
-                {
-                    StartOfRound.Instance.mapScreen.contourMap = GlobalReferences.fakeContour;
-                    Plugin.Logger.LogDebug("Assigning fake transform to reduce lag");
-                }
-            }
         }
     }
 }

@@ -187,6 +187,9 @@ namespace ButteryFixes.Patches.General
 
             NonPatchFunctions.TestForVainShrouds();
 
+            EntranceTeleport mainEntrance = Object.FindObjectsByType<EntranceTeleport>(FindObjectsSortMode.None).FirstOrDefault(teleport => teleport.entranceId == 0 && !teleport.isEntranceToBuilding);
+            GlobalReferences.mainEntrancePos = mainEntrance != null ? mainEntrance.entrancePoint.position : Vector3.zero;
+
             GlobalReferences.caveTiles.Clear();
             if (__instance.currentDungeonType == 4)
             {
@@ -205,6 +208,42 @@ namespace ButteryFixes.Patches.General
                     {
                         GlobalReferences.caveTiles.Add(tile.OverrideAutomaticTileBounds ? tile.transform.TransformBounds(tile.TileBoundsOverride) : tile.Bounds);
                         Plugin.Logger.LogDebug($"Cached bounds of tile {tile.name}");
+                    }
+                    else if (tile.name.StartsWith("MineshaftStartTile"))
+                    {
+                        // reused and adapted from Mask Fixes
+                        // https://github.com/ButteryStancakes/MaskFixes/blob/165601d81827d368c119f12ced2bf8fdaffbeec8/Patches.cs#L621
+
+                        // calculate the bounds of the elevator start room
+                        // center:  ( -1,   51.37,  3.2 )
+                        // size:    ( 30,      20,   15 )
+                        Vector3[] corners =
+                        [
+                            new(-16f, 41.37f, -4.3f),
+                            new(14f, 41.37f, -4.3f),
+                            new(-16f, 61.37f, -4.3f),
+                            new(14f, 61.37f, -4.3f),
+                            new(-16f, 41.37f, 10.7f),
+                            new(14f, 41.37f, 10.7f),
+                            new(-16f, 61.37f, 10.7f),
+                            new(14f, 61.37f, 10.7f),
+                        ];
+                        tile.transform.TransformPoints(corners);
+
+                        // thanks Zaggy
+                        Vector3 min = corners[0], max = corners[0];
+                        for (int i = 1; i < corners.Length; i++)
+                        {
+                            min = Vector3.Min(min, corners[i]);
+                            max = Vector3.Max(max, corners[i]);
+                        }
+
+                        GlobalReferences.mineStartBounds = new()
+                        {
+                            min = min,
+                            max = max
+                        };
+                        Plugin.Logger.LogDebug("Calculated bounds for mineshaft elevator's start room");
                     }
                 }
             }

@@ -155,18 +155,5 @@ namespace ButteryFixes.Patches.General
             if (!__result && GameNetworkManager.Instance.localPlayerController.inVehicleAnimation && !GameNetworkManager.Instance.localPlayerController.isPlayerDead)
                 __result = true;
         }
-
-        [HarmonyPatch(nameof(HUDManager.CreateToolAdModel))]
-        [HarmonyPostfix]
-        static void HUDManager_Post_CreateToolAdModel(HUDManager __instance, Item item)
-        {
-            // fix giant blue circle on radar booster advertisement
-            if (item.name == "RadarBooster")
-            {
-                Renderer dot = __instance.advertItem.GetComponentsInChildren<Renderer>().FirstOrDefault(rend => rend.name == "RadarBoosterDot");
-                if (dot != null)
-                    dot.forceRenderingOff = true;
-            }
-        }
     }
 }

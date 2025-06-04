@@ -54,7 +54,19 @@ namespace ButteryFixes.Patches.General
         {
             // fix screen toggling on a delay (unlike the head mounted cams)
             if (__instance.LostSignalUI != null)
+            {
+                if (__instance.playerIsInCaves && (StartOfRound.Instance.inShipPhase || __instance.overrideCameraForOtherUse || RoundManager.Instance.currentDungeonType != 4 || __instance.targetedPlayer == null || !__instance.targetedPlayer.isInsideFactory))
+                {
+                    __instance.playerIsInCaves = false;
+                    if (__instance.checkingCaveNode >= 0)
+                    {
+                        __instance.checkCaveInterval = 1f;
+                        __instance.checkingCaveNode = -1;
+                    }
+                }
+
                 __instance.LostSignalUI.SetActive(__instance.playerIsInCaves);
+            }
         }
 
         // vanilla logic is too susceptible to problems... needs to be replaced
@@ -111,6 +123,27 @@ namespace ButteryFixes.Patches.General
             }
 
             return false;
+        }
+
+        [HarmonyPatch(nameof(ManualCameraRenderer.SetLineToExitFromRadarTarget))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> ManualCameraRenderer_Trans_SetLineToExitFromRadarTarget(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            MethodInfo findMainEntrancePosition = AccessTools.Method(typeof(RoundManager), nameof(RoundManager.FindMainEntrancePosition));
+            for (int i = 0; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Call && codes[i].operand as MethodInfo == findMainEntrancePosition)
+                {
+                    codes[i].operand = AccessTools.Method(typeof(NonPatchFunctions), nameof(NonPatchFunctions.GetTrueExitPoint));
+                    Plugin.Logger.LogDebug("Transpiler (Radar line): Optimize and support elevator");
+                    return codes;
+                }
+            }
+
+            Plugin.Logger.LogError("Radar line transpiler failed");
+            return instructions;
         }
     }
 }

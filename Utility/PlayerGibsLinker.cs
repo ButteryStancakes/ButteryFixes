@@ -8,7 +8,7 @@ namespace ButteryFixes.Utility
         {
             if (GlobalReferences.gibbedPlayer != null)
             {
-                if (Configuration.playermodelPatches.Value && GlobalReferences.gibbedPlayer.currentSuitID != 0)
+                if (Configuration.playermodelPatches.Value /*&& GlobalReferences.gibbedPlayer.currentSuitID != 0*/)
                 {
                     UnlockableItem suit = StartOfRound.Instance.unlockablesList.unlockables[GlobalReferences.gibbedPlayer.currentSuitID];
                     foreach (Renderer rend in GetComponentsInChildren<Renderer>())

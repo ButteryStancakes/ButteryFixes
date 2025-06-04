@@ -88,11 +88,6 @@ namespace ButteryFixes.Patches.General
             GameObject ragdollPieces = __instance.playerRagdolls.FirstOrDefault(ragdoll => ragdoll.name.StartsWith("RagdollPieces"));
             if (ragdollPieces != null && !ragdollPieces.GetComponent<PlayerGibsLinker>())
                 ragdollPieces.AddComponent<PlayerGibsLinker>();
-
-            // performance improvement on some maps
-            if (GlobalReferences.fakeContour != null)
-                Object.Destroy(GlobalReferences.fakeContour);
-            GlobalReferences.fakeContour = new("ButteryFixes_FakeContour");
         }
 
         [HarmonyPatch(nameof(StartOfRound.ResetStats))]
@@ -350,6 +345,15 @@ namespace ButteryFixes.Patches.General
         static void StartOfRound_Post_PlanetsMold(StartOfRound __instance)
         {
             NonPatchFunctions.TestForVainShrouds();
+        }
+
+        [HarmonyPatch(nameof(StartOfRound.SetMapScreenInfoToCurrentLevel))]
+        [HarmonyPostfix]
+        static void StartOfRound_Post_SetMapScreenInfoToCurrentLevel(StartOfRound __instance)
+        {
+            // fix Embrion challenge moons displaying the wrong name
+            if (__instance.isChallengeFile && __instance.currentLevel.LevelDescription.Contains("Embrion"))
+                __instance.screenLevelDescription.SetText(__instance.screenLevelDescription.text.Replace("Embrion is devoid", "Devoid"));
         }
     }
 }

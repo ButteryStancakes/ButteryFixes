@@ -143,12 +143,13 @@ namespace ButteryFixes.Utility
             };
             Dictionary<string, bool> inspectable = new()
             {
+                { "BabyKiwiEgg", false },
                 { "ExtensionLadder", false },
                 { "MagnifyingGlass", true },
                 { "PillBottle", true },
                 { "RadarBooster", false },
                 { "SprayPaint", true },
-                { "WeedKillerBottle", true }
+                { "WeedKillerBottle", true },
             };
             ScanNodeProperties scanNodeProperties;
 
@@ -167,6 +168,10 @@ namespace ButteryFixes.Utility
 
                 switch (item.name)
                 {
+                    case "BabyKiwiEgg":
+                        item.spawnPrefab.GetComponent<KiwiBabyItem>().isInFactory = false;
+                        Plugin.Logger.LogDebug("Factory: Egg");
+                        break;
                     case "Boombox":
                         item.spawnPrefab.GetComponent<BoomboxItem>().boomboxAudio.dopplerLevel = 0.3f * GlobalReferences.dopplerLevelMult;
                         Plugin.Logger.LogDebug("Doppler level: Boombox");
@@ -275,10 +280,6 @@ namespace ButteryFixes.Utility
                         break;
                     case "TragedyMask":
                         grabCardboardBox = item.grabSFX;
-                        break;
-                    case "WeedKillerBottle":
-                        item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Logarithmic;
-                        Plugin.Logger.LogDebug("Audio rolloff: Weed killer");
                         break;
                     case "Zeddog":
                         if (item.itemId == 0)

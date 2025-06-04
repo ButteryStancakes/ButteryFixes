@@ -1,5 +1,4 @@
-﻿using DunGen;
-using GameNetcodeStuff;
+﻿using GameNetcodeStuff;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -68,9 +67,9 @@ namespace ButteryFixes.Utility
         // new deaths from v70
         internal static PlayerControllerB friedPlayer, gibbedPlayer;
 
-        // signal loss
+        // radar
         internal static List<Bounds> caveTiles = [];
-
-        internal static GameObject fakeContour;
+        internal static Vector3 mainEntrancePos;
+        internal static Bounds mineStartBounds;
     }
 }

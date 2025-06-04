@@ -286,7 +286,7 @@ namespace ButteryFixes.Patches.General
             MethodInfo clamp = AccessTools.Method(typeof(Mathf), nameof(Mathf.Clamp), [typeof(int), typeof(int), typeof(int)]);
             for (int i = 2; i < codes.Count; i++)
             {
-                if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == playerDefinedAmount && codes[i - 1].opcode == OpCodes.Call && (MethodInfo)codes[i - 1].operand == clamp && codes[i - 2].opcode == OpCodes.Ldc_I4_S)
+                if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == playerDefinedAmount && codes[i - 1].opcode == OpCodes.Call && codes[i - 1].operand as MethodInfo == clamp && codes[i - 2].opcode == OpCodes.Ldc_I4_S)
                 {
                     codes[i - 2].operand = (sbyte)12;
                     Plugin.Logger.LogDebug("Transpiler (Order capacity): Allow bulk purchases of 12");

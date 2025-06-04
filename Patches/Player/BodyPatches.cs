@@ -144,12 +144,19 @@ namespace ButteryFixes.Patches.Player
                     // badges
                     if (chest != null && __instance.setMaterialToPlayerSuit && !burnt)
                     {
-                        Transform badge = Object.Instantiate(__instance.playerScript.playerBadgeMesh.transform, chest);
-                        Transform betaBadge = Object.Instantiate(__instance.playerScript.playerBetaBadgeMesh.transform, chest);
-                        if (__instance.playerScript == GameNetworkManager.Instance.localPlayerController)
+                        if (__instance.playerScript != GameNetworkManager.Instance.localPlayerController || (__instance.playerScript.playerLevelNumber >= 0 && __instance.playerScript.playerLevelNumber < HUDManager.Instance.playerLevels.Length))
                         {
-                            badge.GetComponent<Renderer>().forceRenderingOff = false;
-                            betaBadge.GetComponent<Renderer>().forceRenderingOff = false;
+                            Transform badge = Object.Instantiate(__instance.playerScript.playerBadgeMesh.transform, chest);
+                            if (__instance.playerScript == GameNetworkManager.Instance.localPlayerController)
+                            {
+                                badge.GetComponent<MeshFilter>().mesh = HUDManager.Instance.playerLevels[__instance.playerScript.playerLevelNumber].badgeMesh;
+                                badge.GetComponent<Renderer>().enabled = true;
+                            }
+                        }
+                        if (__instance.playerScript.playerBetaBadgeMesh.GetComponent<Renderer>().enabled || (__instance.playerScript == GameNetworkManager.Instance.localPlayerController && ES3.Load("playedDuringBeta", "LCGeneralSaveData", true)))
+                        {
+                            Transform betaBadge = Object.Instantiate(__instance.playerScript.playerBetaBadgeMesh.transform, chest);
+                            betaBadge.GetComponent<Renderer>().enabled = true;
                         }
                         Plugin.Logger.LogDebug("Badges added to player corpse");
                     }
