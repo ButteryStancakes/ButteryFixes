@@ -77,17 +77,43 @@ namespace ButteryFixes.Patches.General
             __instance.mapScreen.mapCameraAnimator.transform.localPosition = new(0f, 0f, -0.95f);
             Plugin.Logger.LogDebug("Orbit visuals: Camera flash");
 
-            Camera shipCam = __instance.elevatorTransform.Find("Cameras/ShipCamera")?.GetComponent<Camera>();
-            if (shipCam != null)
-            {
-                shipCam.cullingMask |= (1 << LayerMask.NameToLayer("DecalStickableSurface"));
-                Plugin.Logger.LogDebug("Orbit visuals: Terminal on CCTV");
-            }
-
             // for suit matching
             GameObject ragdollPieces = __instance.playerRagdolls.FirstOrDefault(ragdoll => ragdoll.name.StartsWith("RagdollPieces"));
-            if (ragdollPieces != null && !ragdollPieces.GetComponent<PlayerGibsLinker>())
-                ragdollPieces.AddComponent<PlayerGibsLinker>();
+            if (ragdollPieces != null)
+            {
+                if (!ragdollPieces.GetComponent<PlayerGibsLinker>())
+                    ragdollPieces.AddComponent<PlayerGibsLinker>();
+
+                // don't apply extra force to these 2 meat chunks
+                PhysicsExplosionForce[] physicsExplosionForces = ragdollPieces.GetComponentsInChildren<PhysicsExplosionForce>();
+                foreach (PhysicsExplosionForce physicsExplosionForce in physicsExplosionForces)
+                {
+                    if (physicsExplosionForce.gameObject != ragdollPieces)
+                        physicsExplosionForce.enabled = false;
+                }
+
+                Plugin.Logger.LogDebug("Ragdoll: Sapsucker pieces");
+            }
+
+            ManualCameraRenderer[] manualCameraRenderers = __instance.elevatorTransform.GetComponentsInChildren<ManualCameraRenderer>();
+            foreach (ManualCameraRenderer manualCameraRenderer in manualCameraRenderers)
+            {
+                switch (manualCameraRenderer.name)
+                {
+                    case "ShipCamera":
+                        GlobalReferences.shipCamera = manualCameraRenderer.GetComponent<Camera>();
+                        break;
+                    case "SecurityCamera":
+                        GlobalReferences.securityCamera = manualCameraRenderer.GetComponent<Camera>();
+                        break;
+                }
+            }
+
+            if (GlobalReferences.shipCamera)
+            {
+                GlobalReferences.shipCamera.cullingMask |= (1 << LayerMask.NameToLayer("DecalStickableSurface"));
+                Plugin.Logger.LogDebug("Orbit visuals: Terminal on CCTV");
+            }
         }
 
         [HarmonyPatch(nameof(StartOfRound.ResetStats))]

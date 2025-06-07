@@ -2,6 +2,7 @@
 using BepInEx.Logging;
 using ButteryFixes.Utility;
 using HarmonyLib;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 
 namespace ButteryFixes
@@ -22,7 +23,7 @@ namespace ButteryFixes
     [BepInDependency(Compatibility.GUID_OPEN_BODY_CAMS, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        internal const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.14.1";
+        internal const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.14.3";
         internal static new ManualLogSource Logger;
 
         void Awake()
@@ -42,6 +43,9 @@ namespace ButteryFixes
             {
                 GlobalReferences.caveTiles.Clear();
             };
+
+            RenderPipelineManager.beginCameraRendering += NonPatchFunctions.OnBeginCameraRendering;
+            RenderPipelineManager.endCameraRendering += NonPatchFunctions.OnEndCameraRendering;
 
             Logger.LogInfo($"{PLUGIN_NAME} v{PLUGIN_VERSION} loaded");
         }

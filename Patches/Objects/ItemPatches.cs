@@ -93,35 +93,5 @@ namespace ButteryFixes.Patches.Objects
             if (__instance.rotateObject && (__instance.playerHeldBy != null || __instance.parentObject != null))
                 __instance.rotateObject = false;
         }
-
-        [HarmonyPatch(typeof(GiftBoxItem), nameof(GiftBoxItem.Start))]
-        [HarmonyPrefix]
-        static void GiftBoxItem_Pre_Start(GiftBoxItem __instance, ref Vector3 __state)
-        {
-            // fix item not randomizing due to changes in v70
-            __state = __instance.targetFloorPosition;
-            if (!__instance.loadedItemFromSave && __instance.IsServer)
-            {
-                Vector3 origin = __instance.transform.TransformPoint(__instance.startFallingPosition);
-
-                // from GrabbableObject.FallToGround
-                if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, 80f, 268437760, QueryTriggerInteraction.Ignore))
-                {
-                    __instance.targetFloorPosition = hit.point + (__instance.itemProperties.verticalOffset * Vector3.up);
-                    if (__instance.transform.parent != null)
-                        __instance.targetFloorPosition = __instance.transform.parent.InverseTransformPoint(__instance.targetFloorPosition);
-                }
-                else
-                    __instance.targetFloorPosition = __instance.transform.localPosition;
-            }
-        }
-
-        [HarmonyPatch(typeof(GiftBoxItem), nameof(GiftBoxItem.Start))]
-        [HarmonyPostfix]
-        static void GiftBoxItem_Post_Start(GiftBoxItem __instance, Vector3 __state)
-        {
-            // just in case this causes undesired behavior elsewhere
-            __instance.targetFloorPosition = __state;
-        }
     }
 }

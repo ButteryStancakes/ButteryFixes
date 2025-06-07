@@ -363,14 +363,15 @@ namespace ButteryFixes.Utility
                     Plugin.Logger.LogDebug($"Hold before ship has landed: {item.itemName} ({item.canBeGrabbedBeforeGameStart})");
                 }
 
-                for (int i = item.spawnPositionTypes.Count - 1; i >= 0; i--)
+                // refactor this in the future, to be more flexible and less hardcoded
+                /*for (int i = item.spawnPositionTypes.Count - 1; i >= 0; i--)
                 {
                     if (item.spawnPositionTypes[i] != null && item.spawnPositionTypes[i].name == "TestItem")
                     {
                         Plugin.Logger.LogDebug($"\"{item.name}\" includes a broken spawngroup which will block it from spawning in normal gameplay. This has been fixed");
                         item.spawnPositionTypes.RemoveAt(i);
                     }
-                }
+                }*/
             }
 
             if (shovelPickUp != null)

@@ -111,6 +111,8 @@ namespace ButteryFixes.Patches.Player
                 Plugin.Logger.LogDebug("Fix \"MONITORING: Player\"");
             }
 
+            GlobalReferences.viewmodelArms = __instance.thisPlayerModelArms;
+
             GlobalReferences.crashedJetpackAsLocalPlayer = false;
 
             // fix laser pointer shining through walls when pocketed

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace ButteryFixes.Utility
 {
@@ -202,6 +203,21 @@ namespace ButteryFixes.Utility
                 return RoundManager.Instance.currentMineshaftElevator.elevatorBottomPoint.position;
 
             return GlobalReferences.mainEntrancePos;
+        }
+
+        public static void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
+        {
+            if (GlobalReferences.viewmodelArms == null)
+                return;
+
+            if (camera == GlobalReferences.shipCamera || camera == GlobalReferences.securityCamera)
+                GlobalReferences.viewmodelArms.forceRenderingOff = true;
+        }
+
+        public static void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
+        {
+            if (GlobalReferences.viewmodelArms != null)
+                GlobalReferences.viewmodelArms.forceRenderingOff = false;
         }
     }
 }

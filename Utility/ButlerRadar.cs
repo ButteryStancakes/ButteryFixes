@@ -34,7 +34,7 @@ namespace ButteryFixes.Utility
             for (int i = allButlers.Count - 1; i >= 0; i--)
             {
                 if (allButlers[i]?.radarIcon != null)
-                    Object.Destroy(allButlers[i].radarIcon);
+                    Object.Destroy(allButlers[i].radarIcon.gameObject);
             }
             allButlers.Clear();
 

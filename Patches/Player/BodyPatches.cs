@@ -53,7 +53,7 @@ namespace ButteryFixes.Patches.Player
                         }
                     }
 
-                    if (burnt)
+                    if (burnt && GlobalReferences.scavengerSuitBurnt != null)
                     {
                         // for landmines, old bird missiles, etc.
                         if (suitMaterial != GlobalReferences.scavengerSuitBurnt)

@@ -297,6 +297,9 @@ namespace ButteryFixes.Utility
                 if (GlobalReferences.shipNode != null)
                     GlobalReferences.shipNodeOffset = GlobalReferences.shipNode.position - GlobalReferences.shipDefaultPos;
             }
+
+            // fix contour map not always appearing
+            StartOfRound.Instance.mapScreen.checkedForContourMap = false;
         }
     }
 }

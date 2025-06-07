@@ -71,5 +71,9 @@ namespace ButteryFixes.Utility
         internal static List<Bounds> caveTiles = [];
         internal static Vector3 mainEntrancePos;
         internal static Bounds mineStartBounds;
+
+        // arms visibility fix
+        internal static Renderer viewmodelArms;
+        internal static Camera shipCamera, securityCamera;
     }
 }

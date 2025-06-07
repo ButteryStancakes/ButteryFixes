@@ -27,17 +27,20 @@ namespace ButteryFixes.Patches.Objects
 
             if (playerBody != null)
             {
-                playerBody.setMaterialToPlayerSuit = false;
-                foreach (Renderer rend in playerBody.GetComponentsInChildren<Renderer>())
+                if (GlobalReferences.scavengerSuitBurnt != null)
                 {
-                    if (rend.gameObject.layer == 0 && (rend.name.StartsWith("BetaBadge") || rend.name.StartsWith("LevelSticker") || rend.name.StartsWith("BirthdayHat")))
-                        rend.forceRenderingOff = true;
-                    // don't change ParticleSystem renderers
-                    else if (rend.gameObject.layer == 20 && (rend is SkinnedMeshRenderer || rend is MeshRenderer))
-                        rend.sharedMaterial = GlobalReferences.scavengerSuitBurnt;
+                    playerBody.setMaterialToPlayerSuit = false;
+                    foreach (Renderer rend in playerBody.GetComponentsInChildren<Renderer>())
+                    {
+                        if (rend.gameObject.layer == 0 && (rend.name.StartsWith("BetaBadge") || rend.name.StartsWith("LevelSticker") || rend.name.StartsWith("BirthdayHat")))
+                            rend.forceRenderingOff = true;
+                        // don't change ParticleSystem renderers
+                        else if (rend.gameObject.layer == 20 && (rend is SkinnedMeshRenderer || rend is MeshRenderer))
+                            rend.sharedMaterial = GlobalReferences.scavengerSuitBurnt;
+                    }
+                    NonPatchFunctions.SmokingHotCorpse(playerBody.transform);
+                    Plugin.Logger.LogDebug("Jetpack exploded and burned player corpse");
                 }
-                NonPatchFunctions.SmokingHotCorpse(playerBody.transform);
-                Plugin.Logger.LogDebug("Jetpack exploded and burned player corpse");
             }
             else
             {
