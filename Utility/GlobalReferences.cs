@@ -1,4 +1,5 @@
-﻿using GameNetcodeStuff;
+﻿using DunGen;
+using GameNetcodeStuff;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,7 +8,9 @@ namespace ButteryFixes.Utility
     internal static class GlobalReferences
     {
         // Experimentation, Assurance, Vow, Gordion, March, Adamance, Rend, Dine, Offense, Titan, Artifice, Liquidation, Embrion
-        internal const int NUM_LEVELS = 13, ZED_DOG_ID = 12232001;
+        internal const int NUM_LEVELS = 13;
+        // for v70's intended increase to Zed Dog spawn rates
+        internal const int ZED_DOG_ID = 12232001;
 
         static Terminal _terminal;
         internal static Terminal Terminal
@@ -30,6 +33,18 @@ namespace ButteryFixes.Utility
                     hangarShipDoor = Object.FindAnyObjectByType<HangarShipDoor>();
 
                 return hangarShipDoor;
+            }
+        }
+
+        static StartMatchLever startMatchLever;
+        internal static StartMatchLever StartMatchLever
+        {
+            get
+            {
+                if (startMatchLever == null)
+                    startMatchLever = Object.FindAnyObjectByType<StartMatchLever>();
+
+                return startMatchLever;
             }
         }
 
@@ -75,5 +90,8 @@ namespace ButteryFixes.Utility
         // arms visibility fix
         internal static Renderer viewmodelArms;
         internal static Camera shipCamera, securityCamera;
+
+        // microwave rework
+        internal static List<GrabbableObject> microwavedItems = [];
     }
 }

@@ -205,19 +205,17 @@ namespace ButteryFixes.Utility
             return GlobalReferences.mainEntrancePos;
         }
 
-        public static void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
+        internal static void ClearMicrowave()
         {
-            if (GlobalReferences.viewmodelArms == null)
-                return;
+            for (int i = 0; i < GlobalReferences.microwavedItems.Count; i++)
+            {
+                if (GlobalReferences.microwavedItems[i] == null)
+                    continue;
 
-            if (camera == GlobalReferences.shipCamera || camera == GlobalReferences.securityCamera)
-                GlobalReferences.viewmodelArms.forceRenderingOff = true;
-        }
+                GlobalReferences.microwavedItems[i].rotateObject = false;
+            }
 
-        public static void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
-        {
-            if (GlobalReferences.viewmodelArms != null)
-                GlobalReferences.viewmodelArms.forceRenderingOff = false;
+            GlobalReferences.microwavedItems.Clear();
         }
     }
 }

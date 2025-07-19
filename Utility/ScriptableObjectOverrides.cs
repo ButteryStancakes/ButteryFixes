@@ -113,7 +113,7 @@ namespace ButteryFixes.Utility
             {
                 //{ "Airhorn", true },
                 //{ "Clock", false },
-                //{ "ControlPad", false },
+                { "ControlPad", false },
                 { "DustPan", true },
                 { "FancyCup", true },
                 //{ "Flask", false },
@@ -443,6 +443,21 @@ namespace ButteryFixes.Utility
                             buttonTrigger.hoverTip = buttonTrigger.hoverTip.Replace("Beam up", "Beam out");
                             Plugin.Logger.LogDebug("Text: Inverse teleporter");
                         }
+                        break;
+                    case "Microwave":
+                        unlockableItem.prefabObject.transform.Find("MicrowaveBody").gameObject.layer = 8;
+                        Plugin.Logger.LogDebug("Collision: Microwave");
+                        break;
+                    case "Fridge":
+                        Transform[] fridgeColliders = unlockableItem.prefabObject.GetComponentsInChildren<Transform>();
+                        foreach (Transform fridgeCollider in fridgeColliders)
+                        {
+                            if (fridgeCollider.name == "FridgeBody" || fridgeCollider.gameObject.layer == 6)
+                                fridgeCollider.gameObject.layer = 8;
+                            else if (fridgeCollider.GetComponent<PlaceableObjectsSurface>() != null)
+                                fridgeCollider.GetComponent<Collider>().isTrigger = false; // so the raycasts connect
+                        }
+                        Plugin.Logger.LogDebug("Collision: Fridge");
                         break;
                 }
 

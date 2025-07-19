@@ -37,7 +37,7 @@ namespace ButteryFixes.Patches.General
                                 new(OpCodes.Brfalse, codes[i].operand),
                             ]);
                             codes.InsertRange(i + 1, clone);
-                            Plugin.Logger.LogDebug("Transpiler (Radar): Hide compass icon when players are out of bounds");
+                            Plugin.Logger.LogDebug("Transpiler (Radar): Hide arrow when players are out of bounds");
                             return codes;
                         }
                     }
@@ -74,6 +74,9 @@ namespace ButteryFixes.Patches.General
         [HarmonyPrefix]
         static bool ManualCameraRenderer_Pre_CheckIfPlayerIsInCaves(ManualCameraRenderer __instance, Vector3 targetPosition)
         {
+            if (Compatibility.DISABLE_SIGNAL_PATCH)
+                return true;
+
             // fallback, in case my system is broken
             if (RoundManager.Instance.currentDungeonType == 4 && GlobalReferences.caveTiles.Count < 1)
                 return true;
@@ -144,6 +147,20 @@ namespace ButteryFixes.Patches.General
 
             Plugin.Logger.LogError("Radar line transpiler failed");
             return instructions;
+        }
+
+        [HarmonyPatch(nameof(ManualCameraRenderer.SetLineToExitFromRadarTarget))]
+        [HarmonyPrefix]
+        static bool ManualCameraRenderer_Pre_SetLineToExitFromRadarTarget(ManualCameraRenderer __instance)
+        {
+            // fix teleported/missing bodies still showing radar lines
+            if (__instance.overrideCameraForOtherUse || __instance.targetedPlayer == null || __instance.mapCamera.transform.position.y >= -80f || ((__instance.targetedPlayer.isPlayerDead || !__instance.targetedPlayer.isPlayerControlled) && __instance.targetedPlayer.deadBody == null && __instance.targetedPlayer.redirectToEnemy == null))
+            {
+                __instance.lineFromRadarTargetToExit.enabled = false;
+                return false;
+            }
+
+            return true;
         }
     }
 }

@@ -43,25 +43,42 @@ namespace ButteryFixes.Utility
 
                     // kitchen
                     case "KitchenTile":
-                        string[] coffeeTablePaths =
-                        [
-                            "TablesMisc/ArrangementA/coffeeTable",
-                            "TablesMisc/ArrangementB/coffeeTable (1)",
-                        ];
-                        foreach (string coffeeTablePath in coffeeTablePaths)
+                        Transform tablesMisc = tile.transform.Find("TablesMisc");
+                        if (tablesMisc != null)
                         {
-                            BoxCollider coffeeTable = tile.transform.Find(coffeeTablePath)?.GetComponent<BoxCollider>();
-                            // allow items under the coffee table to be grabbed
-                            if (coffeeTable != null)
+                            BoxCollider coffeeTableA = tablesMisc.Find("ArrangementA/coffeeTable")?.GetComponent<BoxCollider>();
+                            BoxCollider coffeeTableB = tablesMisc.Find("ArrangementB/coffeeTable (1)")?.GetComponent<BoxCollider>();
+                            if (coffeeTableA != null && coffeeTableB != null)
                             {
-                                coffeeTable.center = new Vector3(coffeeTable.center.x, coffeeTable.center.y, 3.48f);
-                                coffeeTable.size = new Vector3(coffeeTable.size.x, coffeeTable.size.y, 4f);
-                                Plugin.Logger.LogDebug($"{tile.name}: Adjusted collider on prop \"{coffeeTable.name}\"");
+                                coffeeTableA.center = coffeeTableB.center;
+                                coffeeTableA.size = coffeeTableB.size;
+                                Plugin.Logger.LogDebug($"{tile.name}: Adjusted collider on prop \"{coffeeTableA.name}\"");
                             }
                         }
                         break;
 
-                        // --- MINESHAFT ---
+                    // greenhouse
+                    case "GreenhouseTile":
+                        string[] sinkColliderPaths =
+                        [
+                            "Colliders/Cube (4)",
+                            "Colliders/Cube (6)",
+                            "Colliders/Cube (7)",
+                            "Colliders/Cube (5)",
+                        ];
+                        foreach (string sinkColliderPath in sinkColliderPaths)
+                        {
+                            GameObject sinkCollider = tile.transform.Find(sinkColliderPath)?.gameObject;
+                            // remove colliders for old unused sink prop
+                            if (sinkCollider != null)
+                            {
+                                sinkCollider.SetActive(false);
+                                Plugin.Logger.LogDebug($"{tile.name}: Removed unused collider \"{sinkCollider.name}\"");
+                            }
+                        }
+                        break;
+
+                    // --- MINESHAFT ---
                 }
 
                 if (tile.name.StartsWith("Cave") || tile.name.Contains("Tunnel"))
@@ -86,16 +103,12 @@ namespace ButteryFixes.Utility
             foreach (IndoorMapType indoorMapType in indoorMapTypes)
             {
                 foreach (GraphNode node in indoorMapType.dungeonFlow.Nodes)
-                {
                     tileSets.AddRange(node.TileSets);
-                }
 
                 foreach (GraphLine line in indoorMapType.dungeonFlow.Lines)
                 {
                     foreach (DungeonArchetype dungeonArchetype in line.DungeonArchetypes)
-                    {
                         tileSets.AddRange(dungeonArchetype.TileSets);
-                    }
                 }
 
                 foreach (TileSet tileSet in tileSets)

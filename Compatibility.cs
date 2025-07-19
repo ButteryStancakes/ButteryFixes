@@ -18,9 +18,10 @@ namespace ButteryFixes
         internal const string GUID_LOBBY_COMPATIBILITY = "BMX.LobbyCompatibility";
         internal const string GUID_YES_FOX = "uk.1a3.yesfox";
         internal const string GUID_OPEN_BODY_CAMS = "Zaggy1024.OpenBodyCams";
+        internal const string GUID_NO_LOST_SIGNAL = "Tomatobird.NoLostSignal";
 
         internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_MORE_COMPANY, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES, INSTALLED_REBALANCED_MOONS;
-        internal static bool DISABLE_LADDER_PATCH, DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING, ENABLE_VAIN_SHROUDS, DISABLE_ROTATION_PATCH;
+        internal static bool DISABLE_LADDER_PATCH, DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING, ENABLE_VAIN_SHROUDS, DISABLE_ROTATION_PATCH, DISABLE_SIGNAL_PATCH;
 
         internal static void Init()
         {
@@ -94,6 +95,12 @@ namespace ButteryFixes
             {
                 DISABLE_ROTATION_PATCH = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - OpenBodyCams detected");
+            }
+
+            if (Chainloader.PluginInfos.ContainsKey(GUID_NO_LOST_SIGNAL))
+            {
+                DISABLE_SIGNAL_PATCH = true;
+                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - NoLostSignal detected");
             }
         }
     }

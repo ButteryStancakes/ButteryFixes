@@ -6,6 +6,18 @@ namespace ButteryFixes.Patches.Objects
     [HarmonyPatch(typeof(Landmine))]
     internal class LandminePatches
     {
+        [HarmonyPatch(nameof(Landmine.Start))]
+        [HarmonyPostfix]
+        static void Landmine_Post_Start(Landmine __instance)
+        {
+            Transform mapDot = __instance.transform.parent?.Find("ScanSphere");
+            if (mapDot != null)
+            {
+                mapDot.position += Vector3.up;
+                Plugin.Logger.LogDebug($"Landmine #{__instance.GetInstanceID()}: Nudged radar dot upwards");
+            }
+        }
+
         [HarmonyPatch(nameof(Landmine.Detonate))]
         [HarmonyPostfix]
         static void Landmine_Post_Detonate(Landmine __instance)

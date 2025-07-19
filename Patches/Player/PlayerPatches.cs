@@ -289,12 +289,5 @@ namespace ButteryFixes.Patches.Player
             Plugin.Logger.LogError("Player drop transpiler failed");
             return instructions;
         }
-
-        [HarmonyPatch(nameof(PlayerControllerB.SetObjectAsNoLongerHeld))]
-        [HarmonyPostfix]
-        static void PlayerControllerB_Post_SetObjectAsNoLongerHeld(PlayerControllerB __instance, int floorYRot)
-        {
-            Plugin.Logger.LogDebug($"Item dropped: {floorYRot}");
-        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using ButteryFixes.Utility;
+using HarmonyLib;
 using UnityEngine;
 
 namespace ButteryFixes.Patches.Objects
@@ -91,7 +92,11 @@ namespace ButteryFixes.Patches.Objects
         {
             // fix items spinning forever if you take them out of the microwave
             if (__instance.rotateObject && (__instance.playerHeldBy != null || __instance.parentObject != null))
+            {
                 __instance.rotateObject = false;
+                if (GlobalReferences.microwavedItems.Contains(__instance))
+                    GlobalReferences.microwavedItems.Remove(__instance);
+            }
         }
     }
 }

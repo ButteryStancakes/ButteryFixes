@@ -258,7 +258,8 @@ namespace ButteryFixes.Patches.General
                 return;
             }
 
-            foreach (SpikeRoofTrap spikeRoofTrap in Object.FindObjectsByType<SpikeRoofTrap>(FindObjectsSortMode.None))
+            SpikeRoofTrap[] spikeRoofTraps = Object.FindObjectsByType<SpikeRoofTrap>(FindObjectsSortMode.None);
+            foreach (SpikeRoofTrap spikeRoofTrap in spikeRoofTraps)
             {
                 if (Vector3.Distance(spikeRoofTrap.spikeTrapAudio.transform.position, mineshaftElevatorController.elevatorBottomPoint.position) < 7f)
                 {

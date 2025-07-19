@@ -62,6 +62,12 @@ namespace ButteryFixes.Utility
                         cube1.enabled = false;
                         Plugin.Logger.LogDebug("Experimentation - Hide untextured geometry");
                     }
+                    GameObject buttresses = GameObject.Find("/Environment/Map/ModelsIntroScene/Cube.007/Buttresses.001");
+                    if (buttresses != null)
+                    {
+                        buttresses.AddComponent<MeshCollider>();
+                        Plugin.Logger.LogDebug("Experimentation - Fix buttress collision");
+                    }
                     modelsIntroScene.AddRange([
                         "BendingPipe",
                         "Bolt",
@@ -299,7 +305,8 @@ namespace ButteryFixes.Utility
             }
 
             // fix contour map not always appearing
-            StartOfRound.Instance.mapScreen.checkedForContourMap = false;
+            if (StartOfRound.Instance != null)
+                StartOfRound.Instance.mapScreen.checkedForContourMap = false;
         }
     }
 }

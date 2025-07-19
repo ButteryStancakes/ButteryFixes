@@ -11,6 +11,8 @@ namespace ButteryFixes.Patches.General
     [HarmonyPatch(typeof(HUDManager))]
     internal class HUDManagerPatches
     {
+        internal static GameObject dummyAccessory;
+
         [HarmonyPatch(nameof(HUDManager.UpdateScanNodes))]
         [HarmonyPostfix]
         static void HUDManager_Post_UpdateScanNodes(HUDManager __instance)
@@ -154,6 +156,68 @@ namespace ButteryFixes.Patches.General
         {
             if (!__result && GameNetworkManager.Instance.localPlayerController.inVehicleAnimation && !GameNetworkManager.Instance.localPlayerController.isPlayerDead)
                 __result = true;
+        }
+
+        [HarmonyPatch(nameof(HUDManager.CreateToolAdModelAndDisplayAdClientRpc))]
+        [HarmonyPrefix]
+        static void HUDManager_Pre_CreateToolAdModelAndDisplayAdClientRpc(HUDManager __instance, ref int steepestSale)
+        {
+            if (!__instance.IsServer)
+                steepestSale = 100 - steepestSale;
+        }
+
+        [HarmonyPatch(nameof(HUDManager.CreateFurnitureAdModel))]
+        [HarmonyPrefix]
+        static void HUDManager_Pre_CreateFurnitureAdModel(UnlockableItem unlockable)
+        {
+            if (unlockable.unlockableType == 0)
+            {
+                if (unlockable.headCostumeObject != null && unlockable.lowerTorsoCostumeObject != null)
+                    return;
+
+                if (dummyAccessory == null)
+                {
+                    dummyAccessory = new("ButteryFixes_DummyAccessory")
+                    {
+                        layer = 5
+                    };
+                    dummyAccessory.AddComponent<MeshRenderer>();
+                    Plugin.Logger.LogDebug("Created dummy accessory for suit ads");
+                }
+
+                if (unlockable.headCostumeObject == null)
+                {
+                    unlockable.headCostumeObject = dummyAccessory;
+                    Plugin.Logger.LogDebug($"Temp: Assigned dummy hat for {unlockable.unlockableName}");
+                }
+                if (unlockable.lowerTorsoCostumeObject == null)
+                {
+                    unlockable.lowerTorsoCostumeObject = dummyAccessory;
+                    Plugin.Logger.LogDebug($"Temp: Assigned dummy tail for {unlockable.unlockableName}");
+                }
+            }
+        }
+
+        [HarmonyPatch(nameof(HUDManager.CreateFurnitureAdModel))]
+        [HarmonyFinalizer]
+        static void HUDManager_Final_CreateFurnitureAdModel(UnlockableItem unlockable, System.Exception __exception)
+        {
+            if (unlockable != null && unlockable.unlockableType == 0 && dummyAccessory != null)
+            {
+                if (unlockable.headCostumeObject == dummyAccessory)
+                {
+                    unlockable.headCostumeObject = null;
+                    Plugin.Logger.LogDebug($"Cleaned dummy hat from {unlockable.unlockableName}");
+                }
+                if (unlockable.lowerTorsoCostumeObject == dummyAccessory)
+                {
+                    unlockable.lowerTorsoCostumeObject = null;
+                    Plugin.Logger.LogDebug($"Cleaned dummy tail from {unlockable.unlockableName}");
+                }
+            }
+
+            if (__exception != null)
+                throw __exception;
         }
     }
 }

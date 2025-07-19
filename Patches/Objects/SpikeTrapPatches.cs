@@ -7,7 +7,7 @@ namespace ButteryFixes.Patches.Objects
     {
         [HarmonyPatch(nameof(SpikeRoofTrap.StickBodyToSpikes))]
         [HarmonyPostfix]
-        static void PostStickBodyToSpikes(DeadBodyInfo body)
+        static void SpikeRoofTrap_Post_StickBodyToSpikes(DeadBodyInfo body)
         {
             if (Configuration.playermodelPatches.Value)
                 body.MakeCorpseBloody();

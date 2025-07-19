@@ -21,9 +21,10 @@ namespace ButteryFixes
     [BepInDependency(Compatibility.GUID_LOBBY_COMPATIBILITY, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_YES_FOX, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_OPEN_BODY_CAMS, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(Compatibility.GUID_NO_LOST_SIGNAL, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        internal const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.14.3";
+        internal const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.14.4";
         internal static new ManualLogSource Logger;
 
         void Awake()
@@ -44,8 +45,8 @@ namespace ButteryFixes
                 GlobalReferences.caveTiles.Clear();
             };
 
-            RenderPipelineManager.beginCameraRendering += NonPatchFunctions.OnBeginCameraRendering;
-            RenderPipelineManager.endCameraRendering += NonPatchFunctions.OnEndCameraRendering;
+            RenderPipelineManager.beginCameraRendering += RenderingOverrides.OnBeginCameraRendering;
+            RenderPipelineManager.endCameraRendering += RenderingOverrides.OnEndCameraRendering;
 
             Logger.LogInfo($"{PLUGIN_NAME} v{PLUGIN_VERSION} loaded");
         }
