@@ -4,7 +4,6 @@ namespace ButteryFixes
 {
     internal class Compatibility
     {
-        internal const string GUID_FAST_CLIMBING = "inoyu.FastClimbing", GUID_BETTER_LADDERS = "e3s1.BetterLadders", GUID_BETTER_STAMINA = "FlipMods.BetterStamina";
         internal const string GUID_LETHAL_FIXES = "uk.1a3.lethalfixes";
         internal const string GUID_GENERAL_IMPROVEMENTS = "ShaosilGaming.GeneralImprovements";
         internal const string GUID_BETTER_SPRAY_PAINT = "taffyko.BetterSprayPaint";
@@ -21,7 +20,7 @@ namespace ButteryFixes
         internal const string GUID_NO_LOST_SIGNAL = "Tomatobird.NoLostSignal";
 
         internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_MORE_COMPANY, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES, INSTALLED_REBALANCED_MOONS;
-        internal static bool DISABLE_LADDER_PATCH, DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING, ENABLE_VAIN_SHROUDS, DISABLE_ROTATION_PATCH, DISABLE_SIGNAL_PATCH;
+        internal static bool DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING, ENABLE_VAIN_SHROUDS, DISABLE_ROTATION_PATCH, DISABLE_SIGNAL_PATCH;
 
         internal static void Init()
         {
@@ -29,12 +28,6 @@ namespace ButteryFixes
             {
                 INSTALLED_GENERAL_IMPROVEMENTS = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - GeneralImprovements detected");
-            }
-
-            if (INSTALLED_GENERAL_IMPROVEMENTS || Chainloader.PluginInfos.ContainsKey(GUID_FAST_CLIMBING) || Chainloader.PluginInfos.ContainsKey(GUID_BETTER_LADDERS) || Chainloader.PluginInfos.ContainsKey(GUID_BETTER_STAMINA))
-            {
-                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Ladder patch will be disabled");
-                DISABLE_LADDER_PATCH = true;
             }
 
             if (Chainloader.PluginInfos.ContainsKey(GUID_BETTER_SPRAY_PAINT))

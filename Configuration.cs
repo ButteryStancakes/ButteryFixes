@@ -29,18 +29,28 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches, patchLadders;
         internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
         {
             configFile = cfg;
 
+            CompatibilityConfig();
             GameplayConfig();
             VisualConfig();
             AudioConfig();
             ExtraConfig();
             MigrateLegacyConfigs();
+        }
+
+        static void CompatibilityConfig()
+        {
+            patchLadders = configFile.Bind(
+                "Compatibility",
+                "PatchLadders",
+                true,
+                "Fixes stamina being wasted if you hold the sprint button on ladders. This will prevent other mods (Better Ladders, Fast Climbing, Better Stamina, General Improvements, etc.) from allowing ladder sprint as a feature.");
         }
 
         static void GameplayConfig()

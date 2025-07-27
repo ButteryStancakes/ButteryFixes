@@ -32,8 +32,7 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPostfix]
         static void PlayerControllerB_Post_Update(PlayerControllerB __instance)
         {
-            // ladder patches are disabled for Fast Climbing & BetterLadders compatibility
-            if (__instance.isClimbingLadder && !Compatibility.DISABLE_LADDER_PATCH)
+            if (__instance.isClimbingLadder && Configuration.patchLadders.Value)
             {
                 __instance.isSprinting = false;
                 // fixes residual slope speed

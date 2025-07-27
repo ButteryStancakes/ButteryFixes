@@ -215,7 +215,9 @@ namespace ButteryFixes.Utility
                         AudioSource nightTimeSilenceBass = GameObject.Find("/Systems/Audio/HighAndLowAltitudeBG/LowAudio")?.GetComponent<AudioSource>();
                         if (nightTimeSilenceBass != null)
                         {
-                            nightTimeSilenceBass.Play();
+                            nightTimeSilenceBass.playOnAwake = true;
+                            if (!nightTimeSilenceBass.isPlaying)
+                                nightTimeSilenceBass.Play();
                             Plugin.Logger.LogDebug("Artifice - Restored nighttime ambience");
                         }
                     }

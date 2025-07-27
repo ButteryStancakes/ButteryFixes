@@ -83,13 +83,24 @@ namespace ButteryFixes.Utility
 
                 if (tile.name.StartsWith("Cave") || tile.name.Contains("Tunnel"))
                 {
-                    foreach (ParticleSystemRenderer partSysRend in tile.GetComponentsInChildren<ParticleSystemRenderer>())
+                    ParticleSystemRenderer[] particleSystemRenderers = tile.GetComponentsInChildren<ParticleSystemRenderer>();
+                    foreach (ParticleSystemRenderer partSysRend in particleSystemRenderers)
                     {
                         if (partSysRend.sharedMaterial != null && partSysRend.sharedMaterial.name.StartsWith("RainParticle") && !partSysRend.name.StartsWith("RainHit"))
                         {
                             partSysRend.renderMode = ParticleSystemRenderMode.VerticalBillboard;
                             Plugin.Logger.LogDebug($"{tile.name}: Fix drip billboarding");
                         }
+                    }
+                }
+
+                Animator[] animators = tile.GetComponentsInChildren<Animator>();
+                foreach (Animator animator in animators)
+                {
+                    if (!animator.CompareTag("PoweredLight") && (animator.runtimeAnimatorController.name.StartsWith("MineshaftSpotlight") || animator.runtimeAnimatorController.name.StartsWith("LEDHangingLight")))
+                    {
+                        animator.tag = "PoweredLight";
+                        Plugin.Logger.LogDebug($"{tile.name}: Fix power state for \"{animator.name}\"");
                     }
                 }
             }

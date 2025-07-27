@@ -75,17 +75,6 @@ namespace ButteryFixes.Patches.General
             BuyableVehicle cruiser = __instance.buyableVehicles.FirstOrDefault(buyableVehicle => buyableVehicle.vehicleDisplayName == "Cruiser");
             if (cruiser != null)
             {
-                if (buy != null)
-                {
-                    TerminalNode buyCruiser = buy.compatibleNouns.FirstOrDefault(noun => noun.noun.name == "Cruiser")?.result;
-                    if (buyCruiser != null)
-                    {
-                        // fix cruiser price shown as $400 after price buff
-                        cruiser.creditsWorth = buyCruiser.itemCost;
-                        Plugin.Logger.LogDebug("Price: Cruiser");
-                    }
-                }
-
                 AudioSource clipboardCruiser = cruiser.secondaryPrefab?.transform.GetComponent<AudioSource>();
                 if (clipboardCruiser != null)
                 {
@@ -96,11 +85,15 @@ namespace ButteryFixes.Patches.General
 
             if (buy != null)
             {
-                TerminalNode buyWelcomeMat = buy.compatibleNouns.FirstOrDefault(noun => noun.noun?.name == "WelcomeMat")?.result?.terminalOptions?.FirstOrDefault(option => option.noun?.name == "Confirm")?.result;
-                if (buyWelcomeMat != null)
+                foreach (string furniture in new string[]{"WelcomeMat", "Fridge"})
                 {
-                    buyWelcomeMat.itemCost = 40;
-                    Plugin.Logger.LogDebug("Price: Welcome mat");
+                    TerminalNode buyFurniture = buy.compatibleNouns.FirstOrDefault(noun => noun.noun?.name == furniture)?.result;
+                    TerminalNode buyFurniture2 = buyFurniture?.terminalOptions?.FirstOrDefault(option => option.noun?.name == "Confirm")?.result;
+                    if (buyFurniture2 != null)
+                    {
+                        buyFurniture2.itemCost = buyFurniture.itemCost;
+                        Plugin.Logger.LogDebug($"Price: {StartOfRound.Instance.unlockablesList.unlockables[buyFurniture2.shipUnlockableID].unlockableName}");
+                    }
                 }
             }
 

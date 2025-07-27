@@ -445,8 +445,11 @@ namespace ButteryFixes.Utility
                         }
                         break;
                     case "Microwave":
-                        unlockableItem.prefabObject.transform.Find("MicrowaveBody").gameObject.layer = 8;
+                        Transform microwaveBody = unlockableItem.prefabObject.transform.Find("MicrowaveBody");
+                        microwaveBody.gameObject.layer = 8;
                         Plugin.Logger.LogDebug("Collision: Microwave");
+                        microwaveBody.GetComponent<AudioSource>().playOnAwake = true;
+                        Plugin.Logger.LogDebug("Audio: Microwave");
                         break;
                     case "Fridge":
                         Transform[] fridgeColliders = unlockableItem.prefabObject.GetComponentsInChildren<Transform>();
