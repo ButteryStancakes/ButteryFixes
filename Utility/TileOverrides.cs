@@ -95,12 +95,15 @@ namespace ButteryFixes.Utility
                 }
 
                 Animator[] animators = tile.GetComponentsInChildren<Animator>();
-                foreach (Animator animator in animators)
+                if (animators != null && animators.Length > 0)
                 {
-                    if (!animator.CompareTag("PoweredLight") && (animator.runtimeAnimatorController.name.StartsWith("MineshaftSpotlight") || animator.runtimeAnimatorController.name.StartsWith("LEDHangingLight")))
+                    foreach (Animator animator in animators)
                     {
-                        animator.tag = "PoweredLight";
-                        Plugin.Logger.LogDebug($"{tile.name}: Fix power state for \"{animator.name}\"");
+                        if (!animator.CompareTag("PoweredLight") && animator.runtimeAnimatorController != null && (animator.runtimeAnimatorController.name.StartsWith("MineshaftSpotlight") || animator.runtimeAnimatorController.name.StartsWith("LEDHangingLight")))
+                        {
+                            animator.tag = "PoweredLight";
+                            Plugin.Logger.LogDebug($"{tile.name}: Fix power state for \"{animator.name}\"");
+                        }
                     }
                 }
             }

@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>ButteryFixes</AssemblyName>
     <Description>Bundle of miscellaneous vanilla-compatible fixes</Description>
-    <Version>1.14.6</Version>
+    <Version>1.14.7</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>
