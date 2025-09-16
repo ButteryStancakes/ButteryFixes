@@ -93,5 +93,8 @@ namespace ButteryFixes.Utility
 
         // microwave rework
         internal static List<GrabbableObject> microwavedItems = [];
+
+        // profitability
+        internal static PlayerControllerB lastDriver;
     }
 }

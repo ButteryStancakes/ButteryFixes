@@ -281,6 +281,21 @@ namespace ButteryFixes.Patches.General
             if (SoundManager.Instance != null && SoundManager.Instance.echoEnabled && GameNetworkManager.Instance.localPlayerController != null && GameNetworkManager.Instance.localPlayerController.isPlayerDead && GameNetworkManager.Instance.localPlayerController.spectatedPlayerScript != null && !GameNetworkManager.Instance.localPlayerController.spectatedPlayerScript.isInsideFactory)
                 SoundManager.Instance.SetEchoFilter(false);
 
+            if (!__instance.inShipPhase && __instance.shipDoorsEnabled && !__instance.suckingPlayersOutOfShip && GameNetworkManager.Instance?.localPlayerController != null && GameNetworkManager.Instance.localPlayerController.isInElevator && GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom && Configuration.autoCollect.Value)
+            {
+                for (int i = 0; i < GameNetworkManager.Instance.localPlayerController.ItemSlots.Length; i++)
+                {
+                    if (GameNetworkManager.Instance.localPlayerController.ItemSlots[i] == null)
+                        continue;
+
+                    if (!GameNetworkManager.Instance.localPlayerController.ItemSlots[i].isInShipRoom)
+                    {
+                        GameNetworkManager.Instance.localPlayerController.SetAllItemsInElevator(true, true);
+                        break;
+                    }
+                }
+            }
+
             ButlerRadar.UpdateButlers();
         }
 

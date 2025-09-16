@@ -113,7 +113,7 @@ namespace ButteryFixes.Utility
             {
                 //{ "Airhorn", true },
                 //{ "Clock", false },
-                { "ControlPad", false },
+                //{ "ControlPad", false },
                 { "DustPan", true },
                 { "FancyCup", true },
                 //{ "Flask", false },
@@ -193,12 +193,18 @@ namespace ButteryFixes.Utility
                         plasticSFXItems.Add(item);
                         break;
                     case "CashRegister":
-                        item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 2.35f;
-                        Plugin.Logger.LogDebug("Cooldown: Clown horn");
+                        if (Configuration.adjustCooldowns.Value)
+                        {
+                            item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 2.35f;
+                            Plugin.Logger.LogDebug("Cooldown: Cash register");
+                        }
                         break;
                     case "ClownHorn":
-                        item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 0.35f;
-                        Plugin.Logger.LogDebug("Cooldown: Clown horn");
+                        if (Configuration.adjustCooldowns.Value)
+                        {
+                            item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 0.35f;
+                            Plugin.Logger.LogDebug("Cooldown: Clown horn");
+                        }
                         break;
                     case "Cog1":
                     case "EasterEgg":
@@ -233,8 +239,11 @@ namespace ButteryFixes.Utility
                         grabBottle = item.grabSFX;
                         break;
                     case "Hairdryer":
-                        item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 1.35f;
-                        Plugin.Logger.LogDebug("Cooldown: Hairdryer");
+                        if (Configuration.adjustCooldowns.Value)
+                        {
+                            item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 1.35f;
+                            Plugin.Logger.LogDebug("Cooldown: Hairdryer");
+                        }
                         break;
                     case "Key":
                         if (Configuration.keysAreScrap.Value)
@@ -429,12 +438,18 @@ namespace ButteryFixes.Utility
                         Plugin.Logger.LogDebug("Doppler level: Disco ball");
                         break;
                     case "JackOLantern":
-                        unlockableItem.prefabObject.GetComponentInChildren<InteractTrigger>().cooldownTime = 0.45f;
-                        Plugin.Logger.LogDebug("Cooldown: Jack o' Lantern");
+                        if (Configuration.adjustCooldowns.Value)
+                        {
+                            unlockableItem.prefabObject.GetComponentInChildren<InteractTrigger>().cooldownTime = 0.45f;
+                            Plugin.Logger.LogDebug("Cooldown: Jack o' Lantern");
+                        }
                         break;
                     case "Plushie pajama man":
-                        unlockableItem.prefabObject.GetComponentInChildren<InteractTrigger>().cooldownTime = 0.2f;
-                        Plugin.Logger.LogDebug("Cooldown: Plushie pajama man");
+                        if (Configuration.adjustCooldowns.Value)
+                        {
+                            unlockableItem.prefabObject.GetComponentInChildren<InteractTrigger>().cooldownTime = 0.2f;
+                            Plugin.Logger.LogDebug("Cooldown: Plushie pajama man");
+                        }
                         break;
                     case "Inverse Teleporter":
                         if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
@@ -450,6 +465,9 @@ namespace ButteryFixes.Utility
                         Plugin.Logger.LogDebug("Collision: Microwave");
                         microwaveBody.GetComponent<AudioSource>().playOnAwake = true;
                         Plugin.Logger.LogDebug("Audio: Microwave");
+                        InteractTrigger microwaveTrigger = microwaveBody.Find("MicrowaveDoor/DoorButtonClose").GetComponent<InteractTrigger>();
+                        microwaveTrigger.hoverTip = microwaveTrigger.hoverTip.Replace("Store item", "Use microwave");
+                        Plugin.Logger.LogDebug("Text: Microwave");
                         break;
                     case "Fridge":
                         Transform[] fridgeColliders = unlockableItem.prefabObject.GetComponentsInChildren<Transform>();

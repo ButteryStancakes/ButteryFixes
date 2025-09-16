@@ -1,5 +1,6 @@
 ﻿using BepInEx.Bootstrap;
 using ButteryFixes.Utility;
+using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,21 +69,36 @@ namespace ButteryFixes.Patches.Objects
         {
             List<CodeInstruction> codes = instructions.ToList();
 
+            bool patchedTriggerInteraction = Chainloader.PluginInfos.ContainsKey(Compatibility.GUID_CRUISER_ADDITIONS), creditLastDriver = false;
             MethodInfo overlapSphere = AccessTools.Method(typeof(Physics), nameof(Physics.OverlapSphere), [typeof(Vector3), typeof(float), typeof(int), typeof(QueryTriggerInteraction)]);
-            for (int i = 1; i < codes.Count; i++)
+            MethodInfo gameNetworkManagerInstance = AccessTools.DeclaredPropertyGetter(typeof(GameNetworkManager), nameof(GameNetworkManager.Instance));
+            MethodInfo setItemInElevator = AccessTools.Method(typeof(PlayerControllerB), nameof(PlayerControllerB.SetItemInElevator));
+            FieldInfo localPlayerController = AccessTools.Field(typeof(GameNetworkManager), nameof(GameNetworkManager.localPlayerController));
+            for (int i = 1; i < codes.Count - 7; i++)
             {
-                if (codes[i].opcode == OpCodes.Call && codes[i].operand as MethodInfo == overlapSphere && codes[i - 1].opcode == OpCodes.Ldc_I4_1)
+                if (codes[i].opcode == OpCodes.Call)
                 {
-                    codes[i - 1].opcode = OpCodes.Ldc_I4_2;
-                    Plugin.Logger.LogDebug("Transpiler (Cruiser collect): Auto-collect trigger colliders, for Teeth");
-                    return codes;
+                    MethodInfo methodInfo = codes[i].operand as MethodInfo;
+                    if (!patchedTriggerInteraction && methodInfo == overlapSphere && codes[i - 1].opcode == OpCodes.Ldc_I4_1)
+                    {
+                        codes[i - 1].opcode = OpCodes.Ldc_I4_2;
+                        Plugin.Logger.LogDebug("Transpiler (Cruiser collect): Auto-collect trigger colliders, for Teeth");
+                        patchedTriggerInteraction = true;
+                    }
+                    else if (!creditLastDriver && methodInfo == gameNetworkManagerInstance && codes[i + 1].opcode == OpCodes.Ldfld && (FieldInfo)codes[i + 1].operand == localPlayerController && codes[i + 7].opcode == OpCodes.Callvirt && codes[i + 7].operand as MethodInfo == setItemInElevator)
+                    {
+                        codes[i].operand = AccessTools.Method(typeof(NonPatchFunctions), nameof(NonPatchFunctions.CruiserCreditsPlayer));
+                        codes[i + 1].opcode = OpCodes.Nop;
+                        Plugin.Logger.LogDebug("Transpiler (Cruiser collect): Credit last driver for collected scrap");
+                        creditLastDriver = true;
+                    }
                 }
             }
 
-            // reduce to a warning, because HighQuotaFixes includes a different solution for this issue, and Cruiser Additions patches it the exact same way as I do
-            if (!Chainloader.PluginInfos.ContainsKey(Compatibility.GUID_CRUISER_ADDITIONS))
+            // reduce to a warning, because HighQuotaFixes includes a different solution for the teeth issue
+            if (!patchedTriggerInteraction || !creditLastDriver)
                 Plugin.Logger.LogWarning("Cruiser collect transpiler failed");
-            return instructions;
+            return codes;
         }
 
         [HarmonyPatch(typeof(VehicleController), nameof(VehicleController.Awake))]
@@ -140,6 +156,14 @@ namespace ButteryFixes.Patches.Objects
                 else
                     __instance.keyObject.transform.SetPositionAndRotation(keyHolder.position, keyHolder.rotation);
             }
+        }
+
+        [HarmonyPatch(nameof(VehicleController.LateUpdate))]
+        [HarmonyPostfix]
+        static void VehicleController_Post_LateUpdate(VehicleController __instance)
+        {
+            if (__instance.currentDriver != null && GlobalReferences.lastDriver != __instance.currentDriver && !__instance.magnetedToShip)
+                GlobalReferences.lastDriver = __instance.currentDriver;
         }
     }
 }

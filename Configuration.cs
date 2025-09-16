@@ -29,7 +29,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches, patchLadders;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches, patchLadders, alterBestiary, adjustCooldowns, autoCollect;
         internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
@@ -51,6 +51,12 @@ namespace ButteryFixes
                 "PatchLadders",
                 true,
                 "Fixes stamina being wasted if you hold the sprint button on ladders. This will prevent other mods (Better Ladders, Fast Climbing, Better Stamina, General Improvements, etc.) from allowing ladder sprint as a feature.");
+
+            autoCollect = configFile.Bind(
+                "Compatibility",
+                "AutoCollect",
+                true,
+                "[EXPERIMENTAL] When you board the ship, all scrap in your inventory should immediately display as collected on the HUD. If you encounter problems with inventory or item collection, see if turning this off helps.");
         }
 
         static void GameplayConfig()
@@ -77,7 +83,7 @@ namespace ButteryFixes
                 "Gameplay",
                 "KeysAreScrap",
                 false,
-                "(Host only) Enabling this will allow you to sell keys for $3 as listed, but will also cause them to be lost if all players die. If this is disabled, they will no longer show \"Value: $3\" on the scanner, instead.");
+                "(Host only) Enabling this will allow you to sell keys for $3 as listed, but will also cause them to be lost if all players die, and block belt bags from grabbing them. If this is disabled, they will no longer show \"Value: $3\" on the scanner, instead.");
 
             limitSpawnChance = configFile.Bind(
                 "Gameplay",
@@ -192,6 +198,18 @@ namespace ButteryFixes
                 "TypeGordion",
                 false,
                 "You can type \"Gordion\" into the terminal (in place of \"company\") when using the route/info commands.");
+
+            alterBestiary = configFile.Bind(
+                "Extra",
+                "AlterBestiary",
+                true,
+                "Restores some removed text and corrects certain typographical errors in bestiary entries.");
+
+            adjustCooldowns = configFile.Bind(
+                "Extra",
+                "AdjustCooldowns",
+                true,
+                "Changes the cooldown on some items and interactable furniture to prevent sounds overlapping in strange ways.");
         }
 
         static void MigrateLegacyConfigs()

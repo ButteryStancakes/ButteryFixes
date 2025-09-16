@@ -1,5 +1,9 @@
 ﻿using ButteryFixes.Utility;
 using HarmonyLib;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using UnityEngine;
 
 namespace ButteryFixes.Patches.Objects
@@ -97,6 +101,34 @@ namespace ButteryFixes.Patches.Objects
                 if (GlobalReferences.microwavedItems.Contains(__instance))
                     GlobalReferences.microwavedItems.Remove(__instance);
             }
+        }
+
+        [HarmonyPatch(typeof(RedLocustBees), nameof(RedLocustBees.SpawnHiveClientRpc))]
+        [HarmonyPatch(typeof(GiantKiwiAI), nameof(GiantKiwiAI.SpawnEggsClientRpc))]
+        [HarmonyTranspiler]
+        private static IEnumerable<CodeInstruction> Trans_SpawnItemClientRpc(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            FieldInfo subText = AccessTools.Field(typeof(ScanNodeProperties), nameof(ScanNodeProperties.subText));
+            int index = -1;
+            for (int i = 0; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Ldstr)
+                    index = i;
+                else if (index >= 0 && codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == subText)
+                {
+                    if (((string)codes[index].operand).StartsWith("VALUE"))
+                    {
+                        codes[index].operand = ((string)codes[index].operand).Replace("VALUE", "Value");
+                        Plugin.Logger.LogDebug($"Transpiler ({__originalMethod.DeclaringType}.{__originalMethod.Name}): Fix \"VALUE\"");
+                        return codes;
+                    }
+                }
+            }
+
+            Plugin.Logger.LogWarning($"{__originalMethod.Name} transpiler failed");
+            return instructions;
         }
     }
 }

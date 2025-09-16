@@ -217,5 +217,13 @@ namespace ButteryFixes.Utility
 
             GlobalReferences.microwavedItems.Clear();
         }
+
+        public static PlayerControllerB CruiserCreditsPlayer()
+        {
+            if (GlobalReferences.lastDriver != null)
+                return GlobalReferences.lastDriver;
+
+            return GameNetworkManager.Instance.localPlayerController;
+        }
     }
 }
