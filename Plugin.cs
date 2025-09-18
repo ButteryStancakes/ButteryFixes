@@ -19,9 +19,10 @@ namespace ButteryFixes
     [BepInDependency(Compatibility.GUID_YES_FOX, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_OPEN_BODY_CAMS, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(Compatibility.GUID_NO_LOST_SIGNAL, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(Compatibility.GUID_DROP_SHIP_DELIVERY_CAP_MODIFIER, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        internal const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.15.0";
+        internal const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.15.1";
         internal static new ManualLogSource Logger;
 
         void Awake()

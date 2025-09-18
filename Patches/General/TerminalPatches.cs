@@ -273,7 +273,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> Terminal_Trans_ParsePlayerSentence(IEnumerable<CodeInstruction> instructions)
         {
-            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS)
+            if (Compatibility.DISABLE_PURCHASE_CAP_PATCH)
                 return instructions;
 
             List<CodeInstruction> codes = instructions.ToList();
