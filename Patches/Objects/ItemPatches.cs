@@ -130,5 +130,17 @@ namespace ButteryFixes.Patches.Objects
             Plugin.Logger.LogWarning($"{__originalMethod.Name} transpiler failed");
             return instructions;
         }
+
+        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.Start))]
+        [HarmonyPostfix]
+        static void GrabbableObject_Post_Start(GrabbableObject __instance)
+        {
+            // keys - override with special icon always
+            if (__instance.itemProperties.itemId == 14 && Configuration.keysAreScrap.Value && __instance.radarIcon != null && RoundManager.Instance.mapPropsContainer != null)
+            {
+                Object.Destroy(__instance.radarIcon.gameObject);
+                __instance.radarIcon = Object.Instantiate(StartOfRound.Instance.keyRadarIconPrefab, RoundManager.Instance.mapPropsContainer.transform).transform;
+            }
+        }
     }
 }

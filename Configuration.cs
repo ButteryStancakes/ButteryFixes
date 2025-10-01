@@ -29,7 +29,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches, patchLadders, alterBestiary, adjustCooldowns, autoCollect;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches, patchLadders, alterBestiary, adjustCooldowns, autoCollect, endOrbitEarly;
         internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
@@ -56,7 +56,13 @@ namespace ButteryFixes
                 "Compatibility",
                 "AutoCollect",
                 true,
-                "[EXPERIMENTAL] When you board the ship, all scrap in your inventory should immediately display as collected on the HUD. If you encounter problems with inventory or item collection, see if turning this off helps.");
+                "When you board the ship, all scrap in your inventory should immediately display as collected on the HUD. If you encounter problems with inventory or item collection, see if turning this off helps.");
+
+            endOrbitEarly = configFile.Bind(
+                "Compatibility",
+                "EndOrbitEarly",
+                true,
+                "[EXPERIMENTAL] Vanilla has a bug where orbit phase only ends for clients after the ship doors open, instead of after the lever is pulled, like for the host. This causes certain objects and enemies to desync, most notably the Giant Sapsucker (which becomes unable to damage clients) and its eggs (which hatch instantly).\nEnabling this setting will fix this core problem, but might cause unexpected behavior with other mods, if they assume vanilla's behavior.");
         }
 
         static void GameplayConfig()

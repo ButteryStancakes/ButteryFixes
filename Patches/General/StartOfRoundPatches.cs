@@ -396,5 +396,13 @@ namespace ButteryFixes.Patches.General
             if (__instance.isChallengeFile && __instance.currentLevel.LevelDescription.Contains("Embrion"))
                 __instance.screenLevelDescription.SetText(__instance.screenLevelDescription.text.Replace("Embrion is devoid", "Devoid"));
         }
+
+        [HarmonyPatch(nameof(StartOfRound.ResetPlayersLoadedValueClientRpc))]
+        [HarmonyPostfix]
+        static void StartOfRound_Post_ResetPlayersLoadedValueClientRpc(StartOfRound __instance, bool landingShip)
+        {
+            if (!__instance.IsServer && landingShip && Configuration.endOrbitEarly.Value)
+                __instance.inShipPhase = false;
+        }
     }
 }
