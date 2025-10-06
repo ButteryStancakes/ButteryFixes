@@ -142,5 +142,18 @@ namespace ButteryFixes.Patches.Objects
                 __instance.radarIcon = Object.Instantiate(StartOfRound.Instance.keyRadarIconPrefab, RoundManager.Instance.mapPropsContainer.transform).transform;
             }
         }
+
+        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.EnableItemMeshes))]
+        [HarmonyPostfix]
+        static void GrabbableObject_Post_EnableItemMeshes(GrabbableObject __instance, bool enable)
+        {
+            RandomFlyParticle randomFlyParticle = __instance as RandomFlyParticle;
+            if (randomFlyParticle == null || randomFlyParticle.flyAudio == null)
+                return;
+
+            ParticleSystemRenderer[] psrs = randomFlyParticle.flyAudio.GetComponentsInChildren<ParticleSystemRenderer>();
+            foreach (ParticleSystemRenderer psr in psrs)
+                psr.enabled = enable;
+        }
     }
 }

@@ -282,17 +282,42 @@ namespace ButteryFixes.Patches.General
             List<CodeInstruction> codes = instructions.ToList();
 
             FieldInfo itemId = AccessTools.Field(typeof(Item), nameof(Item.itemId));
+            MethodInfo min = AccessTools.Method(typeof(Mathf), nameof(Mathf.Min), [typeof(int), typeof(int)]);
             for (int i = 0; i < codes.Count - 1; i++)
             {
                 if (codes[i].opcode == OpCodes.Ldfld && (FieldInfo)codes[i].operand == itemId && codes[i + 1].opcode == OpCodes.Ldc_I4 && (int)codes[i + 1].operand == 152767)
                 {
-                    /*codes[i].opcode = OpCodes.Call;
-                    codes[i].operand = AccessTools.DeclaredPropertyGetter(typeof(Object), nameof(Object.name));
-                    codes[i + 1].opcode = OpCodes.Ldstr;
-                    codes[i + 1].operand = "Zeddog";*/
-                    codes[i + 1].operand = GlobalReferences.ZED_DOG_ID;
-                    Plugin.Logger.LogDebug("Transpiler (Scrap spawn): Boost Zed Dog instead of gift box");
-                    return codes;
+                    for (int j = i + 2; j < codes.Count; j++)
+                    {
+                        if (codes[j].opcode == OpCodes.Call && (codes[j].operand as MethodInfo) == min)
+                        {
+                            bool patch30 = false, patch99 = false;
+                            for (int k = i + 2; k < j; k++)
+                            {
+                                if (codes[k].opcode == OpCodes.Ldc_I4_S)
+                                {
+                                    sbyte operand = (sbyte)codes[k].operand;
+                                    if (operand == 30)
+                                    {
+                                        codes[k].operand = (sbyte)0;
+                                        patch30 = true;
+                                    }
+                                    else if (operand == 99)
+                                    {
+                                        codes[k].opcode = OpCodes.Ldc_I4;
+                                        codes[k].operand = int.MaxValue;
+                                        patch99 = true;
+                                    }
+
+                                    if (patch30 && patch99)
+                                    {
+                                        Plugin.Logger.LogDebug("Transpiler (Scrap spawn): Don't boost gift box");
+                                        return codes;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 

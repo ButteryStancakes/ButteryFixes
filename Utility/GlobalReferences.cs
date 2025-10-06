@@ -9,8 +9,6 @@ namespace ButteryFixes.Utility
     {
         // Experimentation, Assurance, Vow, Gordion, March, Adamance, Rend, Dine, Offense, Titan, Artifice, Liquidation, Embrion
         internal const int NUM_LEVELS = 13;
-        // for v70's intended increase to Zed Dog spawn rates
-        internal const int ZED_DOG_ID = 12232001;
 
         static Terminal _terminal;
         internal static Terminal Terminal

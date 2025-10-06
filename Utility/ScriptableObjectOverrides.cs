@@ -290,10 +290,6 @@ namespace ButteryFixes.Utility
                     case "TragedyMask":
                         grabCardboardBox = item.grabSFX;
                         break;
-                    case "Zeddog":
-                        if (item.itemId == 0)
-                            item.itemId = GlobalReferences.ZED_DOG_ID;
-                        break;
                 }
 
                 if (linearRolloff)
