@@ -10,7 +10,7 @@ namespace ButteryFixes.Patches.General
         static void ShipBuildModeManager_Post_StoreShipObjectClientRpc(ShipBuildModeManager __instance, int playerWhoStored)
         {
             // same tip, but this will force it to run for the host (who normally skips this code)
-            if (__instance.IsServer && playerWhoStored == (int)GameNetworkManager.Instance.localPlayerController.playerClientId)
+            if (GameNetworkManager.Instance != null && GameNetworkManager.Instance.localPlayerController != null && HUDManager.Instance != null && __instance.IsServer && playerWhoStored == (int)GameNetworkManager.Instance.localPlayerController.playerClientId)
                 HUDManager.Instance.DisplayTip("Item stored!", "You can see stored items in the terminal by using command 'STORAGE'", false, true, "LC_StorageTip");
         }
     }
