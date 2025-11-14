@@ -196,7 +196,7 @@ namespace ButteryFixes.Utility
             }
         }
 
-        public static Vector3 GetTrueExitPoint(bool ignore, bool ignore2)
+        public static Vector3 GetTrueExitPoint(bool ignore = true, bool ignore2 = false)
         {
             // in mineshaft, point to the bottom of the elevator instead
             if (RoundManager.Instance.currentDungeonType == 4 && RoundManager.Instance.currentMineshaftElevator != null && !GlobalReferences.mineStartBounds.Contains(StartOfRound.Instance.mapScreen.mapCamera.transform.position - (Vector3.up * 3.75f)))

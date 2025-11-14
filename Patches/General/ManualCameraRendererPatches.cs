@@ -5,12 +5,15 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace ButteryFixes.Patches.General
 {
     [HarmonyPatch(typeof(ManualCameraRenderer))]
     class ManualCameraRendererPatches
     {
+        static Vector3[] points = new Vector3[20];
+
         [HarmonyPatch(nameof(ManualCameraRenderer.Update))]
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> ManualCameraRenderer_Trans_Update(IEnumerable<CodeInstruction> instructions)
@@ -55,6 +58,13 @@ namespace ButteryFixes.Patches.General
             // fix screen toggling on a delay (unlike the head mounted cams)
             if (__instance.LostSignalUI != null)
             {
+                // lose signal of dead bodies
+                if (Configuration.noBodyNoSignal.Value && !__instance.enableHeadMountedCam && __instance.targetedPlayer != null && __instance.targetedPlayer.isPlayerDead && __instance.targetedPlayer.deadBody == null && __instance.targetedPlayer.redirectToEnemy == null)
+                {
+                    __instance.LostSignalUI.SetActive(true);
+                    return;
+                }
+
                 if (__instance.playerIsInCaves && (StartOfRound.Instance.inShipPhase || __instance.overrideCameraForOtherUse || RoundManager.Instance.currentDungeonType != 4 || __instance.targetedPlayer == null || !__instance.targetedPlayer.isInsideFactory))
                 {
                     __instance.playerIsInCaves = false;
@@ -128,6 +138,7 @@ namespace ButteryFixes.Patches.General
             return false;
         }
 
+        /*
         [HarmonyPatch(nameof(ManualCameraRenderer.SetLineToExitFromRadarTarget))]
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> ManualCameraRenderer_Trans_SetLineToExitFromRadarTarget(IEnumerable<CodeInstruction> instructions)
@@ -148,19 +159,82 @@ namespace ButteryFixes.Patches.General
             Plugin.Logger.LogError("Radar line transpiler failed");
             return instructions;
         }
+        */
 
         [HarmonyPatch(nameof(ManualCameraRenderer.SetLineToExitFromRadarTarget))]
         [HarmonyPrefix]
         static bool ManualCameraRenderer_Pre_SetLineToExitFromRadarTarget(ManualCameraRenderer __instance)
         {
-            // fix teleported/missing bodies still showing radar lines
-            if (__instance.overrideCameraForOtherUse || __instance.targetedPlayer == null || __instance.mapCamera.transform.position.y >= -80f || ((__instance.targetedPlayer.isPlayerDead || !__instance.targetedPlayer.isPlayerControlled) && __instance.targetedPlayer.deadBody == null && __instance.targetedPlayer.redirectToEnemy == null))
+            // radar is not active
+            if (__instance.overrideCameraForOtherUse || !__instance.screenEnabledOnLocalClient || __instance.playerIsInCaves || __instance.LostSignalUI.activeSelf)
             {
                 __instance.lineFromRadarTargetToExit.enabled = false;
                 return false;
             }
 
-            return true;
+            // radar is not targeting a valid player
+            if (__instance.targetedPlayer == null || (!__instance.targetedPlayer.isPlayerControlled && !__instance.targetedPlayer.isPlayerDead))
+            {
+                __instance.lineFromRadarTargetToExit.enabled = false;
+                return false;
+            }
+
+            // targeted player is not inside the building
+            if ((!__instance.targetedPlayer.isInsideFactory && !__instance.targetedPlayer.isPlayerDead) || __instance.mapCamera.transform.position.y >= -80f || (__instance.targetedPlayer.isPlayerDead && __instance.targetedPlayer.redirectToEnemy != null && __instance.targetedPlayer.redirectToEnemy.isOutside))
+            {
+                __instance.lineFromRadarTargetToExit.enabled = false;
+                return false;
+            }
+
+            // player's body is missing
+            if ((__instance.targetedPlayer.isPlayerDead || !__instance.targetedPlayer.isPlayerControlled) && __instance.targetedPlayer.deadBody == null && __instance.targetedPlayer.redirectToEnemy == null)
+            {
+                __instance.lineFromRadarTargetToExit.enabled = false;
+                return false;
+            }
+
+            __instance.lineFromRadarTargetToExit.enabled = true;
+
+            if (__instance.updateLineInterval > 0f)
+            {
+                __instance.updateLineInterval -= Time.deltaTime;
+
+                __instance.dottedLineOffset -= Time.deltaTime;
+                Material dottedLineMat = __instance.lineFromRadarTargetToExit.material;
+                Vector2 offset = new(__instance.dottedLineOffset, 0f);
+                dottedLineMat.SetTextureOffset("_UnlitColorMap", offset); // proper texture map
+                dottedLineMat.SetTextureOffset("_MainTex", offset); // in case of fallback shader
+
+                // if path has <50 corners, vanilla makes line start from the target, but this can also cause ugly contortions
+                /*if (__instance.setLineIntervalTo < 1f)
+                    __instance.lineFromRadarTargetToExit.SetPosition(0, __instance.mapCamera.transform.position + (2.5f * Vector3.down));*/
+            }
+            else
+            {
+                Vector3 lineTarget = NonPatchFunctions.GetTrueExitPoint();
+
+                // exit path can't be calculated
+                if (lineTarget == Vector3.zero || !NavMesh.CalculatePath(__instance.mapCamera.transform.position + (3.75f * Vector3.down), lineTarget, NavMesh.AllAreas, __instance.path1))
+                    return false;
+
+                // dynamic refresh rate, based on path complexity
+                if (__instance.path1.corners.Length > 50)
+                    __instance.setLineIntervalTo = 2f;
+                else if (__instance.path1.corners.Length < 36)
+                    __instance.setLineIntervalTo = 0.4f;
+
+                // update path vertices
+                __instance.lineFromRadarTargetToExit.positionCount = Mathf.Clamp(__instance.path1.corners.Length, 1, 20);
+                points[0] = __instance.mapCamera.transform.position + (2.5f * Vector3.down);
+                for (int i = 1; i < __instance.lineFromRadarTargetToExit.positionCount; i++)
+                    points[i] = __instance.path1.corners[i] + (1.25f * Vector3.up);
+                __instance.lineFromRadarTargetToExit.SetPositions(points);
+
+                // cooldown
+                __instance.updateLineInterval = __instance.setLineIntervalTo;
+            }
+
+            return false;
         }
     }
 }

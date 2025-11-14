@@ -29,7 +29,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches, patchLadders, alterBestiary, adjustCooldowns, autoCollect, endOrbitEarly;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches, patchLadders, alterBestiary, adjustCooldowns, autoCollect, endOrbitEarly, noBodyNoSignal;
         internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
@@ -216,6 +216,12 @@ namespace ButteryFixes
                 "AdjustCooldowns",
                 true,
                 "Changes the cooldown on some items and interactable furniture to prevent sounds overlapping in strange ways.");
+
+            noBodyNoSignal = configFile.Bind(
+                "Extra",
+                "NoBodyNoSignal",
+                false,
+                "When a player's corpse is completely destroyed (eaten by a Forest Keeper, suffocated by quicksand, etc.) the radar will display the \"No signal!\" screen instead of spectating the location where they died.");
         }
 
         static void MigrateLegacyConfigs()
