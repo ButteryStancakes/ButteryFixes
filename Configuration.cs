@@ -29,7 +29,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches, patchLadders, alterBestiary, adjustCooldowns, autoCollect, endOrbitEarly, noBodyNoSignal;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches, patchLadders, alterBestiary, adjustCooldowns, autoCollect, endOrbitEarly, noBodyNoSignal, theGoldenGoblet;
         internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
@@ -222,6 +222,12 @@ namespace ButteryFixes
                 "NoBodyNoSignal",
                 false,
                 "When a player's corpse is completely destroyed (eaten by a Forest Keeper, suffocated by quicksand, etc.) the radar will display the \"No signal!\" screen instead of spectating the location where they died.");
+
+            theGoldenGoblet = configFile.Bind(
+                "Extra",
+                "TheGoldenGoblet",
+                false,
+                "Fixes Zeekerss' blatant typo when spelling \"Golden goblet\" (which, for reasons unknown, mistakenly became \"Golden cup\")");
         }
 
         static void MigrateLegacyConfigs()

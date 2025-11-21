@@ -214,5 +214,16 @@ namespace ButteryFixes.Patches.Player
                 RoundManager.Instance.CollectNewScrapForThisRound(__instance.grabBodyObject);*/
             }
         }
+
+        [HarmonyPatch(typeof(RagdollGrabbableObject), nameof(RagdollGrabbableObject.Update))]
+        [HarmonyPostfix]
+        static void RagdollGrabbableObject_Post_Update(RagdollGrabbableObject __instance)
+        {
+            if (__instance.ragdoll == null || __instance.ragdoll.deactivated || __instance.ragdoll.causeOfDeath != CauseOfDeath.Drowning || __instance.ragdoll.playerScript == null)
+                return;
+
+            if ((__instance.heldByEnemy || __instance.playerHeldBy != null) && __instance.ragdoll.playerScript.underwaterCollider != null)
+                __instance.ragdoll.StopFloatingBody();
+        }
     }
 }

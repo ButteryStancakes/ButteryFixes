@@ -213,8 +213,13 @@ namespace ButteryFixes.Utility
                         linearRolloff = true;
                         break;
                     case "FancyCup":
-                    case "GarbageLid":
-                    case "MetalSheet":
+                        if (Configuration.theGoldenGoblet.Value)
+                        {
+                            if (scanNodeProperties != null)
+                                scanNodeProperties.headerText = scanNodeProperties.headerText.Replace("Golden cup", "Golden goblet");
+
+                            item.itemName = item.itemName.Replace("Golden cup", "Golden goblet");
+                        }
                         metalSFXItems.Add(item);
                         break;
                     case "FancyLamp":
@@ -237,6 +242,10 @@ namespace ButteryFixes.Utility
                         break;
                     case "Flask":
                         grabBottle = item.grabSFX;
+                        break;
+                    case "GarbageLid":
+                    case "MetalSheet":
+                        metalSFXItems.Add(item);
                         break;
                     case "Hairdryer":
                         if (Configuration.adjustCooldowns.Value)

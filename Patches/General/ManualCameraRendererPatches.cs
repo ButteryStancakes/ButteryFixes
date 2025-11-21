@@ -58,11 +58,24 @@ namespace ButteryFixes.Patches.General
             // fix screen toggling on a delay (unlike the head mounted cams)
             if (__instance.LostSignalUI != null)
             {
-                // lose signal of dead bodies
-                if (Configuration.noBodyNoSignal.Value && !__instance.enableHeadMountedCam && __instance.targetedPlayer != null && __instance.targetedPlayer.isPlayerDead && __instance.targetedPlayer.deadBody == null && __instance.targetedPlayer.redirectToEnemy == null)
+                if (__instance.targetedPlayer != null && __instance.targetedPlayer.isPlayerDead && __instance.headMountedCamUI != null)
                 {
-                    __instance.LostSignalUI.SetActive(true);
-                    return;
+                    bool bodyMissing = __instance.targetedPlayer.deadBody == null || !__instance.targetedPlayer.deadBody.gameObject.activeSelf;
+
+                    // fixes headcam not disappearing when eaten by company monster
+                    if (bodyMissing)
+                    {
+                        __instance.headMountedCamUI.enabled = false;
+                        if (__instance.headMountedCam != null)
+                            __instance.headMountedCam.enabled = false;
+                    }
+
+                    // lose signal of dead bodies
+                    if (Configuration.noBodyNoSignal.Value && !__instance.headMountedCamUI.enabled && bodyMissing && __instance.targetedPlayer.redirectToEnemy == null)
+                    {
+                        __instance.LostSignalUI.SetActive(true);
+                        return;
+                    }
                 }
 
                 if (__instance.playerIsInCaves && (StartOfRound.Instance.inShipPhase || __instance.overrideCameraForOtherUse || RoundManager.Instance.currentDungeonType != 4 || __instance.targetedPlayer == null || !__instance.targetedPlayer.isInsideFactory))
@@ -187,7 +200,7 @@ namespace ButteryFixes.Patches.General
             }
 
             // player's body is missing
-            if ((__instance.targetedPlayer.isPlayerDead || !__instance.targetedPlayer.isPlayerControlled) && __instance.targetedPlayer.deadBody == null && __instance.targetedPlayer.redirectToEnemy == null)
+            if ((__instance.targetedPlayer.isPlayerDead || !__instance.targetedPlayer.isPlayerControlled) && (__instance.targetedPlayer.deadBody == null || !__instance.targetedPlayer.deadBody.gameObject.activeSelf) && __instance.targetedPlayer.redirectToEnemy == null)
             {
                 __instance.lineFromRadarTargetToExit.enabled = false;
                 return false;
