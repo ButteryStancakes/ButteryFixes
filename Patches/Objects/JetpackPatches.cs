@@ -11,7 +11,7 @@ namespace ButteryFixes.Patches.Objects
         [HarmonyPostfix]
         public static void JetpackItem_Post_ExplodeJetpackClientRpc(JetpackItem __instance)
         {
-            if (!Configuration.playermodelPatches.Value)
+            if (!Configuration.playermodelPatches.Value || !Configuration.charredBodies.Value)
                 return;
 
             DeadBodyInfo playerBody = __instance.previousPlayerHeldBy.deadBody;

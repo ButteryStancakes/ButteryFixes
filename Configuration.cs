@@ -29,7 +29,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches, patchLadders, alterBestiary, adjustCooldowns, autoCollect, endOrbitEarly, noBodyNoSignal, theGoldenGoblet;
+        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches, patchLadders, alterBestiary, adjustCooldowns, autoCollect, endOrbitEarly, noBodyNoSignal, theGoldenGoblet, charredBodies, patchPocketLights;
         internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
@@ -63,6 +63,12 @@ namespace ButteryFixes
                 "EndOrbitEarly",
                 true,
                 "[EXPERIMENTAL] Vanilla has a bug where orbit phase only ends for clients after the ship doors open, instead of after the lever is pulled, like for the host. This causes certain objects and enemies to desync, most notably the Giant Sapsucker (which becomes unable to damage clients) and its eggs (which hatch instantly).\nEnabling this setting will fix this core problem, but might cause unexpected behavior with other mods, if they assume vanilla's behavior.");
+
+            patchPocketLights = configFile.Bind(
+                "Compatibility",
+                "PatchPocketLights",
+                true,
+                "Patches some logic with the \"helmet lights\", from pocketed light sources. This fixes a vanilla bug where turning on two different types of lights (ex: a pro-flashlight and a laser pointer) and putting both in your pockets would result in only one displaying, while both continue to drain battery. (As a side effect, this also prevents the exploit where you can play with a permanent helmet light, from a flashlight that's not in your inventory)");
         }
 
         static void GameplayConfig()
@@ -160,7 +166,7 @@ namespace ButteryFixes
                 "Visual",
                 "PlayermodelPatches",
                 true,
-                "Fixes some issues with dead bodies not displaying badges, using the wrong suit, not having attachments (bee and bunny), etc. Also burns corpses when killed by explosions.\nIf you use ModelReplacementAPI I would strongly suggest disabling this if you run into issues!");
+                "Fixes some issues with dead bodies not displaying badges, using the wrong suit, not having attachments (bee and bunny), etc.\nIf you use ModelReplacementAPI I would strongly suggest disabling this if you run into issues!");
         }
 
         static void AudioConfig()
@@ -181,6 +187,12 @@ namespace ButteryFixes
 
         static void ExtraConfig()
         {
+            charredBodies = configFile.Bind(
+                "Extra",
+                "CharredBodies",
+                true,
+                "When a player dies to any sort of explosion, their corpse will appear burnt, much like Cruiser explosions. (This also applies to electrocution from the electric chair.) \"PlayermodelPatches\" is *required* for this to work!");
+
             scanImprovements = configFile.Bind(
                 "Extra",
                 "ScanImprovements",
@@ -208,7 +220,7 @@ namespace ButteryFixes
             alterBestiary = configFile.Bind(
                 "Extra",
                 "AlterBestiary",
-                true,
+                false,
                 "Restores some removed text and corrects certain typographical errors in bestiary entries.");
 
             adjustCooldowns = configFile.Bind(

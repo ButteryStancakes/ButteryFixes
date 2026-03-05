@@ -78,6 +78,17 @@ namespace ButteryFixes.Utility
                         }
                         break;
 
+                    // garage
+                    case "GarageTile":
+                        Transform hangingLEDBarLight4 = tile.transform.Find("HangingLEDBarLight (4)");
+                        Transform indirectLight1 = hangingLEDBarLight4.Find("IndirectLight (1)");
+                        if (indirectLight1 != null && hangingLEDBarLight4.Find("IndirectLight") == null)
+                        {
+                            indirectLight1.name = "IndirectLight";
+                            Plugin.Logger.LogDebug($"{tile.name}: Corrected child reference for \"{hangingLEDBarLight4.name}\"");
+                        }
+                        break;
+
                     // --- MINESHAFT ---
                 }
 

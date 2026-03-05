@@ -33,42 +33,46 @@ namespace ButteryFixes.Patches.Player
                 {
                     Material suitMaterial = mesh.sharedMaterials[0];
 
-                    // special handling for explosions
-                    bool burnt = __instance.causeOfDeath == CauseOfDeath.Blast;
-                    if (!burnt)
+                    bool burnt = false;
+                    if (Configuration.charredBodies.Value)
                     {
-                        if (GlobalReferences.crashedJetpackAsLocalPlayer && __instance.playerScript == GameNetworkManager.Instance.localPlayerController)
+                        // special handling for explosions
+                        burnt = __instance.causeOfDeath == CauseOfDeath.Blast;
+                        if (!burnt)
                         {
-                            burnt = true;
-                            GlobalReferences.crashedJetpackAsLocalPlayer = false;
-                            __instance.setMaterialToPlayerSuit = false;
-                            Plugin.Logger.LogInfo("Local player spawned a body after a jetpack crashed, caught in time to burn it");
+                            if (GlobalReferences.crashedJetpackAsLocalPlayer && __instance.playerScript == GameNetworkManager.Instance.localPlayerController)
+                            {
+                                burnt = true;
+                                GlobalReferences.crashedJetpackAsLocalPlayer = false;
+                                __instance.setMaterialToPlayerSuit = false;
+                                Plugin.Logger.LogInfo("Local player spawned a body after a jetpack crashed, caught in time to burn it");
+                            }
+                            else if (__instance.causeOfDeath == CauseOfDeath.Electrocution && __instance.playerScript == GlobalReferences.friedPlayer)
+                            {
+                                burnt = true;
+                                GlobalReferences.friedPlayer = null;
+                                __instance.setMaterialToPlayerSuit = false;
+                                Plugin.Logger.LogInfo("A player was just fried in electric chair, burn baby burn");
+                            }
                         }
-                        else if (__instance.causeOfDeath == CauseOfDeath.Electrocution && __instance.playerScript == GlobalReferences.friedPlayer)
-                        {
-                            burnt = true;
-                            GlobalReferences.friedPlayer = null;
-                            __instance.setMaterialToPlayerSuit = false;
-                            Plugin.Logger.LogInfo("A player was just fried in electric chair, burn baby burn");
-                        }
-                    }
 
-                    if (burnt && GlobalReferences.scavengerSuitBurnt != null)
-                    {
-                        // for landmines, old bird missiles, etc.
-                        if (suitMaterial != GlobalReferences.scavengerSuitBurnt)
+                        if (burnt && GlobalReferences.scavengerSuitBurnt != null)
                         {
-                            suitMaterial = GlobalReferences.scavengerSuitBurnt;
-                            mesh.sharedMaterial = suitMaterial;
+                            // for landmines, old bird missiles, etc.
+                            if (suitMaterial != GlobalReferences.scavengerSuitBurnt)
+                            {
+                                suitMaterial = GlobalReferences.scavengerSuitBurnt;
+                                mesh.sharedMaterial = suitMaterial;
 
-                            NonPatchFunctions.SmokingHotCorpse(__instance.transform);
-                        }
-                        // blowing up the cruiser probably shouldn't spawn the "melted" player corpse, instead use the normal model
-                        else
-                        {
-                            dontCheckRenderers = true;
-                            __instance.ChangeMesh(GlobalReferences.playerBody);
-                            //dontCheckRenderers = false;
+                                NonPatchFunctions.SmokingHotCorpse(__instance.transform);
+                            }
+                            // blowing up the cruiser probably shouldn't spawn the "melted" player corpse, instead use the normal model
+                            else
+                            {
+                                dontCheckRenderers = true;
+                                __instance.ChangeMesh(GlobalReferences.playerBody);
+                                //dontCheckRenderers = false;
+                            }
                         }
                     }
 
@@ -222,7 +226,7 @@ namespace ButteryFixes.Patches.Player
             if (__instance.ragdoll == null || __instance.ragdoll.deactivated || __instance.ragdoll.causeOfDeath != CauseOfDeath.Drowning || __instance.ragdoll.playerScript == null)
                 return;
 
-            if ((__instance.heldByEnemy || __instance.playerHeldBy != null) && __instance.ragdoll.playerScript.underwaterCollider != null)
+            if ((__instance.isHeldByEnemy || __instance.heldByEnemy || __instance.playerHeldBy != null) && __instance.ragdoll.playerScript.underwaterCollider != null)
                 __instance.ragdoll.StopFloatingBody();
         }
     }

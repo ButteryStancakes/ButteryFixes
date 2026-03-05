@@ -1,6 +1,8 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,6 +10,8 @@ namespace ButteryFixes.Utility
 {
     internal static class ScriptableObjectOverrides
     {
+        static Mesh ear, severedHandLOD0, severedThighLOD0;
+
         internal static void OverrideEnemyTypes()
         {
             foreach (KeyValuePair<string, EnemyType> enemy in GlobalReferences.allEnemiesList)
@@ -109,6 +113,22 @@ namespace ButteryFixes.Utility
 
         internal static void OverrideItems()
         {
+            if (ear == null || severedHandLOD0 == null || severedThighLOD0 == null)
+            {
+                try
+                {
+                    AssetBundle meshes = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "severedmesh"));
+                    ear = meshes.LoadAsset<Mesh>("Ear");
+                    severedHandLOD0 = meshes.LoadAsset<Mesh>("SeveredHandLOD0");
+                    severedThighLOD0 = meshes.LoadAsset<Mesh>("SeveredThighLOD0");
+                    meshes.Unload(false);
+                }
+                catch
+                {
+                    Plugin.Logger.LogError("Encountered some error loading assets from bundle \"severedmesh\". Did you install the plugin correctly?");
+                }
+            }
+
             Dictionary<string, bool> conductiveItems = new()
             {
                 //{ "Airhorn", true },
@@ -149,7 +169,13 @@ namespace ButteryFixes.Utility
                 { "PillBottle", true },
                 { "RadarBooster", false },
                 { "SprayPaint", true },
-                { "WeedKillerBottle", true },
+                { "WeedKillerBottle", true }
+            };
+            Dictionary<string, Mesh> severedItems = new()
+            {
+                { "SeveredEar", ear },
+                { "SeveredHand", severedHandLOD0 },
+                { "SeveredThigh", severedThighLOD0 }
             };
             ScanNodeProperties scanNodeProperties;
 
@@ -216,9 +242,13 @@ namespace ButteryFixes.Utility
                         if (Configuration.theGoldenGoblet.Value)
                         {
                             if (scanNodeProperties != null)
+                            {
                                 scanNodeProperties.headerText = scanNodeProperties.headerText.Replace("Golden cup", "Golden goblet");
+                                Plugin.Logger.LogDebug("Scan node: Golden cup");
+                            }
 
                             item.itemName = item.itemName.Replace("Golden cup", "Golden goblet");
+                            Plugin.Logger.LogDebug("Name: Golden cup");
                         }
                         metalSFXItems.Add(item);
                         break;
@@ -292,6 +322,30 @@ namespace ButteryFixes.Utility
                         linearRolloff = true;
                         item.spawnPrefab.GetComponent<PhysicsProp>().isInFactory = false;
                         Plugin.Logger.LogDebug("Factory: Hive");
+                        break;
+                    case "SeveredHeart":
+                        LoopShapeKey[] loopShapeKeys = item.spawnPrefab.GetComponentsInChildren<LoopShapeKey>();
+                        if (loopShapeKeys != null && loopShapeKeys.Length > 0)
+                        {
+                            foreach (LoopShapeKey loopShapeKey in loopShapeKeys)
+                            {
+                                if (loopShapeKey.GetComponent<HeartHack>() == null)
+                                    loopShapeKey.gameObject.AddComponent<HeartHack>().loopShapeKey = loopShapeKey;
+                            }
+
+                            Plugin.Logger.LogDebug("Animation: Heart");
+                        }
+                        break;
+                    case "SeveredThigh":
+                        LODGroup lodGroup = item.spawnPrefab.GetComponent<LODGroup>();
+                        LOD[] lods = lodGroup.GetLODs();
+                        lods[0].screenRelativeTransitionHeight = 0.15f; // 60% is too high
+                        lodGroup.SetLODs(lods);
+                        Plugin.Logger.LogDebug("LoDs: Knee");
+                        break;
+                    case "SeveredTongue":
+                        item.syncDiscardFunction = true;
+                        Plugin.Logger.LogDebug("Sync: Tongue");
                         break;
                     case "TeaKettle":
                         shovelPickUp = item.grabSFX;
@@ -386,6 +440,15 @@ namespace ButteryFixes.Utility
                         item.spawnPositionTypes.RemoveAt(i);
                     }
                 }*/
+
+                if (severedItems.TryGetValue(item.name, out Mesh severedMesh) && severedMesh != null)
+                {
+                    MeshFilter meshFilter = item.spawnPrefab.GetComponent<MeshFilter>();
+                    meshFilter.mesh = severedMesh;
+                    meshFilter.mesh.RecalculateNormals();
+                    meshFilter.mesh.RecalculateTangents();
+                    Plugin.Logger.LogDebug($"Mesh: {item.itemName}");
+                }
             }
 
             if (shovelPickUp != null)

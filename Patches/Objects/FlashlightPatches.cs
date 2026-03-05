@@ -14,7 +14,7 @@ namespace ButteryFixes.Patches.Objects
         [HarmonyPostfix]
         static void FlashlightItem_Post(FlashlightItem __instance)
         {
-            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || __instance.previousPlayerHeldBy /*== null*/ != GameNetworkManager.Instance.localPlayerController)
+            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || __instance.previousPlayerHeldBy /*== null*/ != GameNetworkManager.Instance.localPlayerController || !Configuration.patchPocketLights.Value)
                 return;
 
             NonPatchFunctions.ForceRefreshAllHelmetLights(__instance.previousPlayerHeldBy);

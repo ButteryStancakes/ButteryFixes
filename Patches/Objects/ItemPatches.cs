@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace ButteryFixes.Patches.Objects
 {
@@ -154,6 +155,21 @@ namespace ButteryFixes.Patches.Objects
             ParticleSystemRenderer[] psrs = randomFlyParticle.flyAudio.GetComponentsInChildren<ParticleSystemRenderer>();
             foreach (ParticleSystemRenderer psr in psrs)
                 psr.enabled = enable;
+        }
+
+        [HarmonyPatch(typeof(RandomFlyParticle), nameof(RandomFlyParticle.InitializeAfterPositioning))]
+        [HarmonyPrefix]
+        static void RandomFlyParticle_Pre_InitializeAfterPositioning(RandomFlyParticle __instance)
+        {
+            if (__instance.badFlyPrefab != null && __instance.badFlyPrefab.name == "WorseFlyParticle" && __instance.badFlyPrefab.TryGetComponent(out ParticleSystem worseFlyParticle))
+            {
+                ParticleSystem.MainModule main = worseFlyParticle.main;
+                if (main.startSize.constant == 1f)
+                {
+                    main.startSize = 0.08f; // flyPrefab ("FlyParticle") uses 0.05 here, but the secondary particle ("WorseParticle") uses 0.08
+                    Plugin.Logger.LogDebug($"{__instance.name}: Adjusted startSize for \"{worseFlyParticle.name}\"");
+                }
+            }
         }
     }
 }

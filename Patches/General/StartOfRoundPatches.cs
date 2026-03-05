@@ -2,6 +2,8 @@
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,6 +16,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPatch(nameof(StartOfRound.Awake))]
         [HarmonyBefore(Compatibility.GUID_GENERAL_IMPROVEMENTS)]
         [HarmonyPostfix]
+        [HarmonyWrapSafe]
         static void StartOfRound_Post_Awake(StartOfRound __instance)
         {
             ScriptableObjectOverrides.OverrideSelectableLevels();
@@ -403,6 +406,53 @@ namespace ButteryFixes.Patches.General
         {
             if (!__instance.IsServer && landingShip && Configuration.endOrbitEarly.Value)
                 __instance.inShipPhase = false;
+        }
+
+        [HarmonyPatch(nameof(StartOfRound.SetMagnetOnClientRpc))]
+        [HarmonyPrefix]
+        static void StartOfRound_Pre_SetMagnetOnClientRpc(StartOfRound __instance, ref bool __state)
+        {
+            __state = __instance.magnetOn;
+        }
+
+        [HarmonyPatch(nameof(StartOfRound.SetMagnetOnClientRpc))]
+        [HarmonyPostfix]
+        static void StartOfRound_Post_SetMagnetOnClientRpc(StartOfRound __instance, bool __state, bool on)
+        {
+            // magnet was just turned on by another player
+            if (on && !__state)
+            {
+                if (Vector3.Distance(GameNetworkManager.Instance.localPlayerController.gameplayCamera.transform.position, __instance.magnetAudio.transform.position) < 8f && !GameNetworkManager.Instance.localPlayerController.isInElevator)
+                {
+                    HUDManager.Instance.ShakeCamera(ScreenShakeType.Small);
+                    GameNetworkManager.Instance.localPlayerController.externalForceAutoFade += __instance.magnetAudio.transform.position - GameNetworkManager.Instance.localPlayerController.transform.position;
+                }
+            }
+        }
+
+        [HarmonyPatch(nameof(StartOfRound.SetMagnetOn))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> StartOfRound_Trans_SetMagnetOn(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            MethodInfo hudManagerInstance = AccessTools.DeclaredPropertyGetter(typeof(HUDManager), nameof(HUDManager.Instance)), shakeCamera = AccessTools.Method(typeof(HUDManager), nameof(HUDManager.ShakeCamera));
+            for (int i = 1; i < codes.Count - 2; i++)
+            {
+                if (codes[i].opcode == OpCodes.Call && codes[i].operand as MethodInfo == hudManagerInstance && codes[i + 2].opcode == OpCodes.Callvirt && codes[i + 2].operand as MethodInfo == shakeCamera && codes[i - 1].opcode == OpCodes.Brtrue)
+                {
+                    codes.InsertRange(i,
+                    [
+                        new CodeInstruction(OpCodes.Ldarg_1),
+                        new CodeInstruction(OpCodes.Brfalse, codes[i - 1].operand)
+                    ]);
+                    Plugin.Logger.LogDebug("Transpiler (Magnet): Don't pull local player when disabled");
+                    return codes;
+                }
+            }
+
+            Plugin.Logger.LogError("Magnet transpiler failed");
+            return instructions;
         }
     }
 }
