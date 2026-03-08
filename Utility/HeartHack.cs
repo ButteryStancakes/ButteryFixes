@@ -15,7 +15,7 @@ namespace ButteryFixes.Utility
                 // need to keep a custom timer, that we can increment a variable amount per frame
                 time += Time.deltaTime * loopShapeKey.fearMultiplier;
 
-                if (loopShapeKey.skinnedMeshRenderer != null)
+                if (loopShapeKey.skinnedMeshRenderer != null && loopShapeKey.enabled)
                 {
                     // overwrite original values
                     loopShapeKey.skinnedMeshRenderer.SetBlendShapeWeight(0, Mathf.PingPong(time * 156f, 100f)); // 156 = 260 * 0.6 (from LoopShapeKey)

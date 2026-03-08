@@ -154,7 +154,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void HUDManager_Post_CanPlayerScan(ref bool __result)
         {
-            if (!__result && GameNetworkManager.Instance.localPlayerController.inVehicleAnimation && !GameNetworkManager.Instance.localPlayerController.isPlayerDead)
+            if (!__result && !Compatibility.DISABLE_SCAN_PATCH && GameNetworkManager.Instance.localPlayerController.inVehicleAnimation && !GameNetworkManager.Instance.localPlayerController.isPlayerDead)
                 __result = true;
         }
 

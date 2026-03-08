@@ -88,7 +88,7 @@ namespace ButteryFixes.Patches.General
 
             if (buy != null)
             {
-                foreach (string furniture in new string[]{"WelcomeMat", "Fridge"})
+                foreach (string furniture in new string[] { "WelcomeMat", "Fridge" })
                 {
                     TerminalNode buyFurniture = buy.compatibleNouns.FirstOrDefault(noun => noun.noun?.name == furniture)?.result;
                     TerminalNode buyFurniture2 = buyFurniture?.terminalOptions?.FirstOrDefault(option => option.noun?.name == "Confirm")?.result;
@@ -263,7 +263,7 @@ namespace ButteryFixes.Patches.General
                 {
                     string allDecor = string.Empty;
                     foreach (TerminalNode decor in filteredDecor)
-                        allDecor += $"\n{decor.creatureName}  //  ${decor.itemCost}";
+                        allDecor += $"\n* {decor.creatureName}  //  Price: ${decor.itemCost}";
                     modifiedDisplayText = modifiedDisplayText.Replace("[unlockablesSelectionList]", allDecor);
                 }
             }

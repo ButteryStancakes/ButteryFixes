@@ -19,9 +19,10 @@ namespace ButteryFixes
         internal const string GUID_OPEN_BODY_CAMS = "Zaggy1024.OpenBodyCams";
         internal const string GUID_NO_LOST_SIGNAL = "Tomatobird.NoLostSignal";
         internal const string GUID_DROP_SHIP_DELIVERY_CAP_MODIFIER = "com.github.Sylkadi.DropShipDeliveryCapModifier";
+        internal const string GUID_CRUISER_IMPROVED = "DiggC.CruiserImproved";
 
         internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_MORE_COMPANY, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES, INSTALLED_REBALANCED_MOONS;
-        internal static bool DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING, ENABLE_VAIN_SHROUDS, DISABLE_ROTATION_PATCH, DISABLE_SIGNAL_PATCH, DISABLE_PURCHASE_CAP_PATCH;
+        internal static bool DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING, ENABLE_VAIN_SHROUDS, DISABLE_ROTATION_PATCH, DISABLE_SIGNAL_PATCH, DISABLE_PURCHASE_CAP_PATCH, DISABLE_SCAN_PATCH;
 
         internal static void Init()
         {
@@ -101,6 +102,12 @@ namespace ButteryFixes
             {
                 DISABLE_PURCHASE_CAP_PATCH = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Purchase cap patch (x12) will be disabled");
+            }
+
+            if (Chainloader.PluginInfos.ContainsKey(GUID_CRUISER_IMPROVED))
+            {
+                DISABLE_SCAN_PATCH = true;
+                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - CruiserImproved detected");
             }
         }
     }

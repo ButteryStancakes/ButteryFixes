@@ -209,7 +209,7 @@ namespace ButteryFixes
                 "Extra",
                 "FilterDecor",
                 false,
-                "Decorations (suits, furniture, etc.) you have already purchased will be filtered out of the shop's list on the terminal, potentially allowing you to see the unused \"[No items available]\" text.");
+                "Decorations (suits, furniture, etc.) you have already purchased will be filtered out of the shop's list on the terminal, potentially allowing you to see the unused \"[No items available]\" text.\nAlso corrects some inconsistent formatting, like missing bullet points and \"Price:\" text for the decor list.");
 
             typeGordion = configFile.Bind(
                 "Extra",

@@ -1,4 +1,5 @@
-﻿using DunGen;
+﻿using BepInEx.Bootstrap;
+using DunGen;
 using DunGen.Graph;
 using System.Collections.Generic;
 using UnityEngine;
@@ -80,6 +81,12 @@ namespace ButteryFixes.Utility
 
                     // garage
                     case "GarageTile":
+                        // v70PLF doesn't have any null check and causes a crash if my changes are applied
+                        if (Chainloader.PluginInfos.ContainsKey("watergun.v72lightfix"))
+                        {
+                            Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - V70PoweredLights Fix detected");
+                            break;
+                        }
                         Transform hangingLEDBarLight4 = tile.transform.Find("HangingLEDBarLight (4)");
                         Transform indirectLight1 = hangingLEDBarLight4.Find("IndirectLight (1)");
                         if (indirectLight1 != null && hangingLEDBarLight4.Find("IndirectLight") == null)
@@ -89,7 +96,7 @@ namespace ButteryFixes.Utility
                         }
                         break;
 
-                    // --- MINESHAFT ---
+                        // --- MINESHAFT ---
                 }
 
                 if (tile.name.StartsWith("Cave") || tile.name.Contains("Tunnel"))

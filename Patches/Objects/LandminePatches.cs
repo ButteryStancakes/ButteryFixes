@@ -42,6 +42,12 @@ namespace ButteryFixes.Patches.Objects
                     Plugin.Logger.LogDebug("Landmine: Hide terminal code after detonation");
                 }
             }
+            SphereCollider sphereCollider = __instance.transform.Find("GameObject")?.GetComponent<SphereCollider>();
+            if (sphereCollider != null)
+            {
+                sphereCollider.enabled = false;
+                Plugin.Logger.LogDebug("Landmine: Disable ground collider after detonation");
+            }
         }
 
         [HarmonyPatch(nameof(Landmine.SetOffMineAnimation))]
