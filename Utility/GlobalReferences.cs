@@ -93,5 +93,8 @@ namespace ButteryFixes.Utility
 
         // profitability
         internal static PlayerControllerB lastDriver;
+
+        internal static Vector3 lastLightningStrike = new(3000f, 0f, 3000f);
+        internal static float lightningLastStruck;
     }
 }

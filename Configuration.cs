@@ -29,7 +29,7 @@ namespace ButteryFixes
 
         internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
         internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, maskHornetsPower, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, unlimitedOldBirds, limitSpawnChance, fixHivePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches, patchLadders, alterBestiary, adjustCooldowns, autoCollect, endOrbitEarly, noBodyNoSignal, theGoldenGoblet, charredBodies, patchPocketLights;
+        internal static ConfigEntry<bool> makeConductive, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, fixSurfacePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches, patchLadders, alterBestiary, adjustCooldowns, autoCollect, endOrbitEarly, noBodyNoSignal, theGoldenGoblet, charredBodies, patchPocketLights, bodiesCollectSelf;
         internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
@@ -58,11 +58,17 @@ namespace ButteryFixes
                 true,
                 "When you board the ship, all scrap in your inventory should immediately display as collected on the HUD. If you encounter problems with inventory or item collection, see if turning this off helps.");
 
+            bodiesCollectSelf = configFile.Bind(
+                "Compatibility",
+                "BodiesCollectSelf",
+                true,
+                "Bodies will automatically collect themselves when teleported to the ship, or when players die inside of the ship.");
+
             endOrbitEarly = configFile.Bind(
                 "Compatibility",
                 "EndOrbitEarly",
                 true,
-                "[EXPERIMENTAL] Vanilla has a bug where orbit phase only ends for clients after the ship doors open, instead of after the lever is pulled, like for the host. This causes certain objects and enemies to desync, most notably the Giant Sapsucker (which becomes unable to damage clients) and its eggs (which hatch instantly).\nEnabling this setting will fix this core problem, but might cause unexpected behavior with other mods, if they assume vanilla's behavior.");
+                "Vanilla has a bug where orbit phase only ends for clients after the ship doors open, instead of after the lever is pulled, like for the host. This causes certain objects and enemies to desync, most notably the Giant Sapsucker (which becomes unable to damage clients) and its eggs (which hatch instantly).\nEnabling this setting will fix this core problem, but might cause unexpected behavior with other mods, if they assume vanilla's behavior.");
 
             patchPocketLights = configFile.Bind(
                 "Compatibility",
@@ -97,35 +103,17 @@ namespace ButteryFixes
                 false,
                 "(Host only) Enabling this will allow you to sell keys for $3 as listed, but will also cause them to be lost if all players die, and block belt bags from grabbing them. If this is disabled, they will no longer show \"Value: $3\" on the scanner, instead.");
 
-            limitSpawnChance = configFile.Bind(
-                "Gameplay",
-                "LimitSpawnChance",
-                true,
-                "(Host only) Prevents enemy spawn weight from exceeding 100 (likely the intended maximum) if its spawn curves would normally allow it to do so.\nThis will prevent some enemy types from spawning out of control on certain maps.");
-
-            unlimitedOldBirds = configFile.Bind(
-                "Gameplay",
-                "UnlimitedOldBirds",
-                false,
-                "(Host only) Allows Old Birds to continue spawning even once all the ones presently on the map have \"woken up\", like in vanilla. This will cause them to appear out of nowhere, since they don't have a proper spawning animation\nThis will also allow outdoor spawns to \"overflow\" when you unplug the apparatus, since that doesn't add Old Birds to the power count in vanilla.");
-
-            maskHornetsPower = configFile.Bind(
-                "Gameplay",
-                "MaskHornetsPower",
-                false,
-                "(Host only) Mask hornets internally have the same power level as butlers, but because they spawn in a non-standard way, they don't contribute to the indoor power. Enabling this will prevent additional monsters spawning to replace dead butlers.");
-
             fixJumpCheese = configFile.Bind(
                 "Gameplay",
                 "FixJumpCheese",
                 true,
                 "(Host only) Enabling this makes enemies hear players jumping and landing on the floor. This fixes the exploit where you can silently move past dogs with sprinting speed by spamming the jump button.");
 
-            fixHivePrices = configFile.Bind(
+            fixSurfacePrices = configFile.Bind(
                 "Gameplay",
-                "FixHivePrices",
+                "FixSurfacePrices",
                 true,
-                "(Host only) Fixes individual bee hives not having separate prices from one another. (In vanilla, all hives fall into two price classes depending on distance from ship)");
+                "(Host only) Fixes individual bee hives not having separate prices from one another. (In vanilla, all hives fall into two price classes depending on distance from ship) This also fixes sapsucker eggs having inconsistent prices on identical seeds.");
 
             fixGiantSight = configFile.Bind(
                 "Gameplay",
@@ -261,6 +249,21 @@ namespace ButteryFixes
             // overlaps compass as of v70
             configFile.Bind("Visual", "RestoreShipIcon", true, "Legacy setting, doesn't work");
             configFile.Remove(configFile["Visual", "RestoreShipIcon"].Definition);
+            // updated to FixSurfacePrices
+            if (fixSurfacePrices.Value)
+            {
+                bool fixHivePrices = configFile.Bind("Gameplay", "FixHivePrices", true, "Legacy setting, doesn't work").Value;
+                if (!fixHivePrices)
+                    fixSurfacePrices.Value = false;
+                configFile.Remove(configFile["Gameplay", "FixHivePrices"].Definition);
+            }
+            // moved to SpawnCycleFixes
+            configFile.Bind("Gameplay", "LimitSpawnChance", false, "Legacy setting, use \"SpawnCycleFixes\" instead");
+            configFile.Remove(configFile["Gameplay", "LimitSpawnChance"].Definition);
+            configFile.Bind("Gameplay", "UnlimitedOldBirds", false, "Legacy setting, use \"SpawnCycleFixes\" instead");
+            configFile.Remove(configFile["Gameplay", "UnlimitedOldBirds"].Definition);
+            configFile.Bind("Gameplay", "MaskHornetsPower", false, "Legacy setting, use \"MaskHornetsPower\" instead");
+            configFile.Remove(configFile["Gameplay", "MaskHornetsPower"].Definition);
 
             configFile.Save();
         }

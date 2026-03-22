@@ -1,5 +1,7 @@
-﻿using GameNetcodeStuff;
+﻿using ButteryFixes.Utility;
+using GameNetcodeStuff;
 using HarmonyLib;
+using UnityEngine;
 
 namespace ButteryFixes.Patches.General
 {
@@ -18,6 +20,38 @@ namespace ButteryFixes.Patches.General
                 __instance.targetingMetalObject = null;
                 // re-target sooner
                 __instance.getObjectToTargetInterval = 3.86f; // every 0.14s
+            }
+        }
+
+        [HarmonyPatch(nameof(StormyWeather.LightningStrike))]
+        [HarmonyPostfix]
+        static void StormyWeather_Post_LightningStrike(StormyWeather __instance, Vector3 strikePosition)
+        {
+            if (Vector3.Distance(strikePosition, __instance.explosionEffectParticle.transform.position) < 0.3f)
+            {
+                GlobalReferences.lastLightningStrike = __instance.explosionEffectParticle.transform.position;
+                GlobalReferences.lightningLastStruck = Time.realtimeSinceStartup;
+            }
+        }
+
+        [HarmonyPatch(nameof(StormyWeather.OnDisable))]
+        [HarmonyPostfix]
+        static void StormyWeather_Post_OnDisable(StormyWeather __instance)
+        {
+            GlobalReferences.lightningLastStruck = 0f;
+            GlobalReferences.lastLightningStrike = new(3000f, 0f, 3000f);
+        }
+
+        [HarmonyPatch(nameof(StormyWeather.OnEnable))]
+        [HarmonyPostfix]
+        static void StormyWeather_Post_OnEnable(StormyWeather __instance)
+        {
+            ParticleSystemRenderer particleSystemRenderer = __instance.staticElectricityParticle.GetComponent<ParticleSystemRenderer>();
+            if (particleSystemRenderer != null && particleSystemRenderer.renderMode == ParticleSystemRenderMode.VerticalBillboard)
+            {
+                particleSystemRenderer.renderMode = ParticleSystemRenderMode.Billboard;
+                particleSystemRenderer.alignment = ParticleSystemRenderSpace.View;
+                Plugin.Logger.LogDebug("Stormy: Fix static billboarding");
             }
         }
     }

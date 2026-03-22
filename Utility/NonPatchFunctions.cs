@@ -79,42 +79,6 @@ namespace ButteryFixes.Utility
             }
         }
 
-        public static void SpawnProbabilitiesPostProcess(ref List<int> spawnProbabilities, List<SpawnableEnemyWithRarity> enemies)
-        {
-            if (spawnProbabilities.Count != enemies.Count)
-                Plugin.Logger.LogWarning("SpawnProbabilities is a different size from the current enemies list. This should never happen outside of mod conflicts!");
-
-            for (int i = 0; i < spawnProbabilities.Count && i < enemies.Count; i++)
-            {
-                EnemyType enemyType = enemies[i].enemyType;
-                // prevent old birds from eating up spawns when there are no dormant nests left
-                if (enemyType.requireNestObjectsToSpawn && spawnProbabilities[i] > 0 && !Object.FindObjectsByType<EnemyAINestSpawnObject>(FindObjectsSortMode.None).Any(nest => nest.enemyType == enemyType))
-                {
-                    Plugin.Logger.LogDebug($"Enemy \"{enemyType.enemyName}\" spawning is disabled; no nests present on map");
-                    spawnProbabilities[i] = 0;
-                }
-                // prevents spawn weight from exceeding "maximum"
-                else if (Configuration.limitSpawnChance.Value && spawnProbabilities[i] > 100 && StartOfRound.Instance.currentLevelID < GlobalReferences.NUM_LEVELS)
-                {
-                    Plugin.Logger.LogDebug($"Enemy \"{enemyType.enemyName}\" is exceeding maximum spawn weight ({spawnProbabilities[i]} > 100)");
-                    spawnProbabilities[i] = 100;
-                }
-            }
-        }
-
-        public static void OldBirdSpawnsFromApparatus()
-        {
-            if (Configuration.unlimitedOldBirds.Value)
-                return;
-
-            if (GlobalReferences.allEnemiesList.TryGetValue("RadMech", out EnemyType oldBird))
-            {
-                oldBird.numberSpawned++;
-                RoundManager.Instance.currentOutsideEnemyPower += oldBird.PowerLevel;
-                Plugin.Logger.LogDebug("Old Bird spawned from apparatus");
-            }
-        }
-
         internal static void SmokingHotCorpse(Transform body)
         {
             if (GlobalReferences.smokeParticle == null || !body.TryGetComponent(out SkinnedMeshRenderer mesh))
@@ -142,7 +106,7 @@ namespace ButteryFixes.Utility
         {
             hives++;
 
-            if (!Configuration.fixHivePrices.Value || StartOfRound.Instance.isChallengeFile)
+            if (!Configuration.fixSurfacePrices.Value || StartOfRound.Instance.isChallengeFile)
                 return price;
 
             System.Random random = new(StartOfRound.Instance.randomMapSeed + 1314 + hives);
@@ -223,6 +187,32 @@ namespace ButteryFixes.Utility
                 return GlobalReferences.lastDriver;
 
             return GameNetworkManager.Instance.localPlayerController;
+        }
+
+        internal static IEnumerator LightningShakesBody(DeadBodyInfo deadBodyInfo)
+        {
+            yield return new WaitForFixedUpdate();
+            if (Time.realtimeSinceStartup - GlobalReferences.lightningLastStruck <= 2f && deadBodyInfo?.playerScript != null && Vector3.Distance(GlobalReferences.lastLightningStrike, deadBodyInfo.playerScript.positionOfDeath) <= 7f)
+            {
+                Plugin.Logger.LogDebug($"Player \"{deadBodyInfo.playerScript.playerUsername}\" was likely struck by lightning, shake rigidbodies");
+                ShakeRigidbodies shakeRigidbodies = deadBodyInfo.gameObject.AddComponent<ShakeRigidbodies>();
+                shakeRigidbodies.rigidBodies = [.. deadBodyInfo.GetComponentsInChildren<Rigidbody>().Where(rb => rb.gameObject.layer == 20 && !rb.name.EndsWith("lower") && !rb.name.StartsWith("shin"))];
+                shakeRigidbodies.shakeTimer = 5f;
+                shakeRigidbodies.shakeIntensity = 4755f;
+            }
+        }
+
+        internal static IEnumerator TryAutoCollectBody(DeadBodyInfo deadBodyInfo)
+        {
+            float timeOfDeath = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - timeOfDeath <= 2f && deadBodyInfo?.grabBodyObject == null)
+                yield return null;
+
+            if (deadBodyInfo != null && !deadBodyInfo.deactivated && deadBodyInfo.grabBodyObject != null && !deadBodyInfo.grabBodyObject.deactivated && deadBodyInfo.playerScript != null)
+            {
+                deadBodyInfo.playerScript.SetItemInElevator(true, true, deadBodyInfo.grabBodyObject);
+                Plugin.Logger.LogDebug($"Player \"{deadBodyInfo.playerScript?.playerUsername}\" automatically collected themself");
+            }
         }
     }
 }

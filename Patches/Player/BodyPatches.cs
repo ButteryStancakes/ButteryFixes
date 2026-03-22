@@ -1,6 +1,7 @@
 ﻿using ButteryFixes.Utility;
 using HarmonyLib;
 using UnityEngine;
+using System.Linq;
 
 namespace ButteryFixes.Patches.Player
 {
@@ -13,14 +14,24 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPostfix]
         static void DeadBodyInfo_Post_Start(DeadBodyInfo __instance)
         {
-            if (__instance.grabBodyObject != null && (__instance.playerScript.isInHangarShipRoom || StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(__instance.grabBodyObject.transform.position) || StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(__instance.playerScript.transform.position)))
-                __instance.playerScript.SetItemInElevator(true, true, __instance.grabBodyObject);
+            if (Configuration.bodiesCollectSelf.Value && (__instance.playerScript.isInHangarShipRoom || StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(__instance.playerScript.positionOfDeath)))
+            {
+                Plugin.Logger.LogDebug($"Player \"{__instance.playerScript?.playerUsername}\" died inside the ship");
+                if (!__instance.name.Contains("Mask Variant") || StartOfRound.Instance.currentLevel.name == "CompanyBuildingLevel")
+                    __instance.StartCoroutine(NonPatchFunctions.TryAutoCollectBody(__instance));
+            }
 
             if (!Configuration.playermodelPatches.Value)
                 return;
 
             if (__instance.causeOfDeath == CauseOfDeath.Stabbing)
                 __instance.MakeCorpseBloody();
+
+            if (__instance.causeOfDeath == CauseOfDeath.Blast && StartOfRound.Instance.currentLevel.currentWeather == LevelWeatherType.Stormy && __instance.playerScript != null && __instance.playerScript.positionOfDeath.y >= -100f)
+            {
+                Plugin.Logger.LogDebug($"Player \"{__instance.playerScript?.playerUsername}\" died to \"Blast\" outside during stormy weather");
+                __instance.StartCoroutine(NonPatchFunctions.LightningShakesBody(__instance));
+            }
 
             SkinnedMeshRenderer mesh = __instance.GetComponentInChildren<SkinnedMeshRenderer>();
             if (mesh != null && StartOfRound.Instance != null)
@@ -208,15 +219,8 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPostfix]
         static void PostSetRagdollPositionSafely(DeadBodyInfo __instance, Vector3 newPosition)
         {
-            if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && __instance.grabBodyObject != null && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(newPosition))
-            {
+            if (Configuration.bodiesCollectSelf.Value && !__instance.deactivated && __instance.grabBodyObject != null && !__instance.grabBodyObject.deactivated && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(newPosition))
                 GameNetworkManager.Instance.localPlayerController.SetItemInElevator(true, true, __instance.grabBodyObject);
-                /*if (!__instance.grabBodyObject.isInElevator && !__instance.grabBodyObject.isInShipRoom)
-                    StartOfRound.Instance.currentShipItemCount++;
-                __instance.grabBodyObject.isInElevator = true;
-                __instance.grabBodyObject.isInShipRoom = true;
-                RoundManager.Instance.CollectNewScrapForThisRound(__instance.grabBodyObject);*/
-            }
         }
 
         [HarmonyPatch(typeof(RagdollGrabbableObject), nameof(RagdollGrabbableObject.Update))]

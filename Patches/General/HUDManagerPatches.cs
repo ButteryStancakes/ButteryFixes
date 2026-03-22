@@ -219,5 +219,13 @@ namespace ButteryFixes.Patches.General
             if (__exception != null)
                 throw __exception;
         }
+
+        [HarmonyPatch(nameof(HUDManager.DisplayGlobalNotification))]
+        [HarmonyPrefix]
+        static void HUDManager_Pre_DisplayGlobalNotification(ref string displayText)
+        {
+            if (displayText.StartsWith("Found journal entry: ") && !displayText.EndsWith("'"))
+                displayText += "'";
+        }
     }
 }

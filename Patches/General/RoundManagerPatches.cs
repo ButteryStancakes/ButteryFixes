@@ -55,52 +55,6 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        static IEnumerable<CodeInstruction> TransSpawnRandomEnemy(List<CodeInstruction> codes, string firstTime, string enemies, string id)
-        {
-            FieldInfo firstTimeSpawning = AccessTools.Field(typeof(RoundManager), firstTime);
-            for (int i = 2; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Stfld && (FieldInfo)codes[i].operand == firstTimeSpawning)
-                {
-                    codes.InsertRange(i - 2, [
-                        new(OpCodes.Ldarg_0),
-                        new(OpCodes.Ldflda, ReflectionCache.SPAWN_PROBABILITIES),
-                        new(OpCodes.Ldarg_0),
-                        new(OpCodes.Ldfld, ReflectionCache.CURRENT_LEVEL),
-                        new(OpCodes.Ldfld, AccessTools.Field(typeof(SelectableLevel), enemies)),
-                        new(OpCodes.Call, ReflectionCache.SPAWN_PROBABILITIES_POST_PROCESS)
-                    ]);
-                    Plugin.Logger.LogDebug($"Transpiler ({id}): Post process probabilities");
-                    //i += 6;
-                    return codes;
-                }
-            }
-
-            Plugin.Logger.LogError($"{id} transpiler failed");
-            return codes;
-        }
-
-        [HarmonyPatch(nameof(RoundManager.AssignRandomEnemyToVent))]
-        [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> RoundManager_Trans_AssignRandomEnemyToVent(IEnumerable<CodeInstruction> instructions)
-        {
-            return TransSpawnRandomEnemy(instructions.ToList(), nameof(RoundManager.firstTimeSpawningEnemies), nameof(SelectableLevel.Enemies), "Spawner");
-        }
-
-        [HarmonyPatch(nameof(RoundManager.SpawnRandomOutsideEnemy))]
-        [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> RoundManager_Trans_SpawnRandomOutsideEnemy(IEnumerable<CodeInstruction> instructions)
-        {
-            return TransSpawnRandomEnemy(instructions.ToList(), nameof(RoundManager.firstTimeSpawningOutsideEnemies), nameof(SelectableLevel.OutsideEnemies), "Outside spawner");
-        }
-
-        [HarmonyPatch(nameof(RoundManager.SpawnRandomDaytimeEnemy))]
-        [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> RoundManager_Trans_SpawnRandomDaytimeEnemy(IEnumerable<CodeInstruction> instructions)
-        {
-            return TransSpawnRandomEnemy(instructions.ToList(), nameof(RoundManager.firstTimeSpawningDaytimeEnemies), nameof(SelectableLevel.DaytimeEnemies), "Daytime spawner");
-        }
-
         [HarmonyPatch(nameof(RoundManager.Awake))]
         [HarmonyPostfix]
         static void RoundManager_Post_Awake(RoundManager __instance)

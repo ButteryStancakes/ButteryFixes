@@ -8,7 +8,6 @@ namespace ButteryFixes
         internal const string GUID_GENERAL_IMPROVEMENTS = "ShaosilGaming.GeneralImprovements";
         internal const string GUID_BETTER_SPRAY_PAINT = "taffyko.BetterSprayPaint";
         internal const string GUID_EVERYTHING_CAN_DIE = "nwnt.EverythingCanDie";
-        internal const string GUID_LETHAL_QUANTITIES = "LethalQuantities";
         internal const string GUID_MORE_COMPANY = "me.swipez.melonloader.morecompany";
         internal const string GUID_TOUCHSCREEN = "me.pm.TheDeadSnake";
         internal const string GUID_REBALANCED_MOONS = "dopadream.lethalcompany.rebalancedmoons";
@@ -21,7 +20,7 @@ namespace ButteryFixes
         internal const string GUID_DROP_SHIP_DELIVERY_CAP_MODIFIER = "com.github.Sylkadi.DropShipDeliveryCapModifier";
         internal const string GUID_CRUISER_IMPROVED = "DiggC.CruiserImproved";
 
-        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_MORE_COMPANY, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_LETHAL_QUANTITIES, INSTALLED_REBALANCED_MOONS;
+        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_MORE_COMPANY, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_REBALANCED_MOONS;
         internal static bool DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING, ENABLE_VAIN_SHROUDS, DISABLE_ROTATION_PATCH, DISABLE_SIGNAL_PATCH, DISABLE_PURCHASE_CAP_PATCH, DISABLE_SCAN_PATCH;
 
         internal static void Init()
@@ -42,12 +41,6 @@ namespace ButteryFixes
             {
                 INSTALLED_EVERYTHING_CAN_DIE = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Everything Can Die detected");
-            }
-
-            if (Chainloader.PluginInfos.ContainsKey(GUID_LETHAL_QUANTITIES))
-            {
-                INSTALLED_LETHAL_QUANTITIES = true;
-                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Lethal Quantities detected");
             }
 
             if (Chainloader.PluginInfos.ContainsKey(GUID_MORE_COMPANY))

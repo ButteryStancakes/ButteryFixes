@@ -229,6 +229,14 @@ namespace ButteryFixes.Utility
                         bigMachine.localPosition = new(-108.444908f, -3.29539537f, 8.0433712f);
                         Plugin.Logger.LogDebug("Adamance - Fixed factory ambience");
                     }
+                    GameObject quicksandSign = GameObject.Find("/Environment/Props/QuicksandSign");
+                    if (quicksandSign != null)
+                    {
+                        BoxCollider boxCollider = quicksandSign.AddComponent<BoxCollider>();
+                        boxCollider.center = new(-0.00350059569f, -0.012053336f, 2.01861644f);
+                        boxCollider.size = new(1.5744015f, 0.149668708f, 4.20355749f);
+                        Plugin.Logger.LogDebug("Adamance - Fix sign collision");
+                    }
                     rotateFireExit = false;
                     break;
                 case "Level11Embrion":
