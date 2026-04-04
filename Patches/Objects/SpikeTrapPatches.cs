@@ -3,7 +3,7 @@
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(SpikeRoofTrap))]
-    internal class SpikeTrapPatches
+    static class SpikeTrapPatches
     {
         [HarmonyPatch(nameof(SpikeRoofTrap.StickBodyToSpikes))]
         [HarmonyPostfix]

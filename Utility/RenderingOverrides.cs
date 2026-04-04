@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using GameNetcodeStuff;
+using UnityEngine;
 using UnityEngine.Rendering;
 
 namespace ButteryFixes.Utility
@@ -22,6 +23,18 @@ namespace ButteryFixes.Utility
                 armsNotRendering = GlobalReferences.viewmodelArms.forceRenderingOff;
                 GlobalReferences.viewmodelArms.forceRenderingOff = true;
             }
+
+            ManualCameraRenderer mapScreen = StartOfRound.Instance?.mapScreen;
+            if (mapScreen != null && camera == mapScreen.headMountedCam && mapScreen.targetedPlayer != null)
+            {
+                if (mapScreen.targetedPlayer.isPlayerDead)
+                {
+                    if (mapScreen.targetedPlayer.deadBody?.nightVisionRadar != null)
+                        mapScreen.targetedPlayer.deadBody.nightVisionRadar.enabled = true;
+                }
+                else if (mapScreen.targetedPlayer.nightVisionRadar != null)
+                    mapScreen.targetedPlayer.nightVisionRadar.enabled = true;
+            }
         }
 
         public static void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
@@ -38,6 +51,16 @@ namespace ButteryFixes.Utility
             {
                 GlobalReferences.viewmodelArms.forceRenderingOff = (bool)armsNotRendering;
                 armsNotRendering = null;
+            }
+
+            PlayerControllerB targetedPlayer = StartOfRound.Instance.mapScreen?.targetedPlayer;
+            if (targetedPlayer != null)
+            {
+                if (targetedPlayer.nightVisionRadar != null)
+                    targetedPlayer.nightVisionRadar.enabled = false;
+
+                if (targetedPlayer.deadBody?.nightVisionRadar != null)
+                    targetedPlayer.deadBody.nightVisionRadar.enabled = false;
             }
         }
     }

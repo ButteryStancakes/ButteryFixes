@@ -11,7 +11,7 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(VehicleController))]
-    internal class CruiserPatches
+    static class CruiserPatches
     {
         static float radioPingTimestamp;
         static Transform keyHolder;
@@ -109,7 +109,6 @@ namespace ButteryFixes.Patches.Objects
                 GlobalReferences.vehicleController = __instance;
         }
 
-        //[HarmonyPatch(typeof(BushWolfEnemy), nameof(BushWolfEnemy.Update))]
         [HarmonyPatch(typeof(ClipboardItem), nameof(ClipboardItem.Update))]
         [HarmonyPatch(typeof(ForestGiantAI), nameof(ForestGiantAI.OnCollideWithPlayer))]
         [HarmonyPatch(typeof(GiantKiwiAI), nameof(GiantKiwiAI.AttackIfThreatened))]

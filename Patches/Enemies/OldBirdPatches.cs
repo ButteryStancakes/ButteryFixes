@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 namespace ButteryFixes.Patches.Enemies
 {
     [HarmonyPatch(typeof(RadMechAI))]
-    internal class OldBirdPatches
+    static class OldBirdPatches
     {
         [HarmonyPatch(nameof(RadMechAI.Stomp))]
         [HarmonyTranspiler]

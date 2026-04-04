@@ -5,7 +5,7 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(Turret))]
-    internal class TurretPatches
+    static class TurretPatches
     {
         // Default, Room, Colliders
         static LayerMask wallLayers = (1 << 0) | (1 << 8) | (1 << 11);

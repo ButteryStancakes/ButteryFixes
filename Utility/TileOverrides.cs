@@ -88,7 +88,7 @@ namespace ButteryFixes.Utility
                             break;
                         }
                         Transform hangingLEDBarLight4 = tile.transform.Find("HangingLEDBarLight (4)");
-                        Transform indirectLight1 = hangingLEDBarLight4.Find("IndirectLight (1)");
+                        Transform indirectLight1 = hangingLEDBarLight4?.Find("IndirectLight (1)");
                         if (indirectLight1 != null && hangingLEDBarLight4.Find("IndirectLight") == null)
                         {
                             indirectLight1.name = "IndirectLight";
@@ -134,6 +134,9 @@ namespace ButteryFixes.Utility
 
             foreach (IndoorMapType indoorMapType in indoorMapTypes)
             {
+                if (System.Array.IndexOf(GlobalReferences.INTERIOR_WHITELIST, indoorMapType.dungeonFlow.name) < 0)
+                    continue;
+
                 foreach (GraphNode node in indoorMapType.dungeonFlow.Nodes)
                     tileSets.AddRange(node.TileSets);
 

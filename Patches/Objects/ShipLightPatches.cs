@@ -4,7 +4,7 @@ using HarmonyLib;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch]
-    internal class ShipLightPatches
+    static class ShipLightPatches
     {
         [HarmonyPatch(typeof(CozyLights), nameof(CozyLights.Update))]
         [HarmonyPrefix]

@@ -1,6 +1,4 @@
-﻿using ButteryFixes.Utility;
-using GameNetcodeStuff;
-using HarmonyLib;
+﻿using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -10,26 +8,15 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Enemies
 {
     [HarmonyPatch(typeof(GiantKiwiAI))]
-    internal class SapsuckerPatches
+    static class SapsuckerPatches
     {
-        [HarmonyPatch(nameof(GiantKiwiAI.Start))]
-        [HarmonyPostfix]
-        static void GiantKiwiAI_Post_Start(GiantKiwiAI __instance)
-        {
-            if (!__instance.IsServer && __instance.birdNest != null)
-            {
-                Plugin.Logger.LogWarning("Giant Sapsucker cached an invalid nest due to \"test mode\", will fetch again next frame to avoid errors");
-                __instance.birdNest = null;
-            }
-        }
-
         [HarmonyPatch(nameof(GiantKiwiAI.SpawnNestEggs))]
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> GiantKiwiAI_Trans_SpawnNestEggs(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 
-            MethodInfo randomRange = AccessTools.Method(typeof(Random), nameof(Random.Range), [ typeof(int), typeof(int) ]), randomNext = AccessTools.Method(typeof(System.Random), nameof(System.Random.Next), [typeof(int), typeof(int)]);
+            MethodInfo randomRange = AccessTools.Method(typeof(Random), nameof(Random.Range), [typeof(int), typeof(int)]), randomNext = AccessTools.Method(typeof(System.Random), nameof(System.Random.Next), [typeof(int), typeof(int)]);
             for (int i = 2; i < codes.Count; i++)
             {
                 if (codes[i].opcode == OpCodes.Call && codes[i].operand as MethodInfo == randomRange)

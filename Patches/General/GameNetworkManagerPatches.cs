@@ -4,7 +4,7 @@ using HarmonyLib;
 namespace ButteryFixes.Patches.General
 {
     [HarmonyPatch(typeof(GameNetworkManager))]
-    internal class GameNetworkManagerPatches
+    static class GameNetworkManagerPatches
     {
         [HarmonyPatch(nameof(GameNetworkManager.SaveGame))]
         [HarmonyPostfix]

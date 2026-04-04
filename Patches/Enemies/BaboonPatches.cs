@@ -3,7 +3,7 @@
 namespace ButteryFixes.Patches.Enemies
 {
     [HarmonyPatch(typeof(BaboonBirdAI))]
-    class BaboonPatches
+    static class BaboonPatches
     {
         [HarmonyPatch(nameof(BaboonBirdAI.DoAIInterval))]
         [HarmonyPrefix]

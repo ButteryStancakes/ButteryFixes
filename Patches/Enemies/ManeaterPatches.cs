@@ -9,7 +9,7 @@ using Unity.Netcode;
 namespace ButteryFixes.Patches.Enemies
 {
     [HarmonyPatch(typeof(CaveDwellerAI))]
-    internal class ManeaterPatches
+    static class ManeaterPatches
     {
         [HarmonyPatch(nameof(CaveDwellerAI.DoBabyAIInterval))]
         [HarmonyTranspiler]

@@ -8,7 +8,7 @@ using System.Reflection.Emit;
 namespace ButteryFixes.Patches.Enemies
 {
     [HarmonyPatch(typeof(RedLocustBees))]
-    internal class BeePatches
+    static class BeePatches
     {
         [HarmonyPatch(nameof(RedLocustBees.SpawnHiveNearEnemy))]
         [HarmonyTranspiler]
@@ -16,13 +16,13 @@ namespace ButteryFixes.Patches.Enemies
         {
             List<CodeInstruction> codes = instructions.ToList();
 
-            FieldInfo localPlayerController = AccessTools.Field(typeof(GameNetworkManager), nameof(GameNetworkManager.localPlayerController));
             for (int i = 1; i < codes.Count; i++)
             {
-                if (codes[i].opcode == OpCodes.Ldloc_1 && codes[i - 1].opcode == OpCodes.Ldloc_3)
+                // literally why does this work but not casting it as a byte
+                if (codes[i].opcode == OpCodes.Ldloc_2 && codes[i - 1].opcode == OpCodes.Ldloc_S && codes[i - 1].operand.ToString().EndsWith("(4)"))
                 {
                     codes.InsertRange(i, [
-                        new(OpCodes.Ldloc_1),
+                        new(OpCodes.Ldloc_2),
                         new(OpCodes.Call, AccessTools.Method(typeof(NonPatchFunctions), nameof(NonPatchFunctions.RerollHivePrice))),
                     ]);
                     Plugin.Logger.LogDebug("Transpiler (Bee spawn): Hook custom price function");

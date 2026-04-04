@@ -4,7 +4,7 @@ using HarmonyLib;
 namespace ButteryFixes.Patches.Enemies
 {
     [HarmonyPatch(typeof(SandWormAI))]
-    internal class EarthLeviathanPatches
+    static class EarthLeviathanPatches
     {
         [HarmonyPatch(nameof(SandWormAI.EatPlayer))]
         [HarmonyPrefix]

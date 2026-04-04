@@ -4,7 +4,7 @@ using HarmonyLib;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(ShotgunItem))]
-    internal class ShotgunPatches
+    static class ShotgunPatches
     {
         [HarmonyPatch(nameof(ShotgunItem.ReloadGunEffectsClientRpc))]
         [HarmonyPostfix]

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(RadarBoosterItem))]
-    internal class RadarBoosterPatches
+    static class RadarBoosterPatches
     {
         [HarmonyPatch(nameof(RadarBoosterItem.Start))]
         [HarmonyPostfix]

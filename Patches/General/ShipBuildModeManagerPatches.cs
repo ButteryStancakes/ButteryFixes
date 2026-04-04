@@ -3,7 +3,7 @@
 namespace ButteryFixes.Patches.General
 {
     [HarmonyPatch(typeof(ShipBuildModeManager))]
-    internal class ShipBuildModeManagerPatches
+    static class ShipBuildModeManagerPatches
     {
         [HarmonyPatch(nameof(ShipBuildModeManager.StoreShipObjectClientRpc))]
         [HarmonyPostfix]

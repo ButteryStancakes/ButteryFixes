@@ -4,7 +4,7 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(StunGrenadeItem))]
-    internal class ThrowablePatches
+    static class ThrowablePatches
     {
         [HarmonyPatch(nameof(StunGrenadeItem.Start))]
         [HarmonyPostfix]

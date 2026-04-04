@@ -4,7 +4,7 @@ using HarmonyLib;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(KiwiBabyItem))]
-    internal class BabyBirdPatches
+    static class BabyBirdPatches
     {
         [HarmonyPatch(nameof(KiwiBabyItem.Start))]
         [HarmonyPostfix]

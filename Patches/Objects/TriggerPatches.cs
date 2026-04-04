@@ -5,7 +5,7 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(InteractTrigger))]
-    internal class TriggerPatches
+    static class TriggerPatches
     {
         [HarmonyPatch(nameof(InteractTrigger.Interact))]
         [HarmonyPrefix]

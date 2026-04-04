@@ -4,7 +4,7 @@ using HarmonyLib;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch]
-    class ShipLeverPatches
+    static class ShipLeverPatches
     {
         [HarmonyPatch(typeof(StartMatchLever), nameof(StartMatchLever.PlayLeverPullEffectsClientRpc))]
         [HarmonyPrefix]

@@ -9,7 +9,7 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch]
-    internal class ItemPatches
+    static class ItemPatches
     {
         [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.ChargeBatteries))]
         [HarmonyPostfix]
@@ -131,43 +131,31 @@ namespace ButteryFixes.Patches.Objects
             return instructions;
         }
 
-        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.Start))]
-        [HarmonyPostfix]
-        static void GrabbableObject_Post_Start(GrabbableObject __instance)
-        {
-            // keys - override with special icon always
-            if (__instance.itemProperties.itemId == 14 && Configuration.keysAreScrap.Value && __instance.radarIcon != null && RoundManager.Instance.mapPropsContainer != null)
-            {
-                Object.Destroy(__instance.radarIcon.gameObject);
-                __instance.radarIcon = Object.Instantiate(StartOfRound.Instance.keyRadarIconPrefab, RoundManager.Instance.mapPropsContainer.transform).transform;
-            }
-        }
-
-        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.EnableItemMeshes))]
-        [HarmonyPostfix]
-        static void GrabbableObject_Post_EnableItemMeshes(GrabbableObject __instance, bool enable)
-        {
-            RandomFlyParticle randomFlyParticle = __instance as RandomFlyParticle;
-            if (randomFlyParticle == null || randomFlyParticle.flyAudio == null)
-                return;
-
-            ParticleSystemRenderer[] psrs = randomFlyParticle.flyAudio.GetComponentsInChildren<ParticleSystemRenderer>();
-            foreach (ParticleSystemRenderer psr in psrs)
-                psr.enabled = enable;
-        }
-
         [HarmonyPatch(typeof(RandomFlyParticle), nameof(RandomFlyParticle.InitializeAfterPositioning))]
-        [HarmonyPrefix]
-        static void RandomFlyParticle_Pre_InitializeAfterPositioning(RandomFlyParticle __instance)
+        [HarmonyPostfix]
+        static void RandomFlyParticle_Post_InitializeAfterPositioning(RandomFlyParticle __instance)
         {
-            if (__instance.badFlyPrefab != null && __instance.badFlyPrefab.name == "WorseFlyParticle" && __instance.badFlyPrefab.TryGetComponent(out ParticleSystem worseFlyParticle))
+            if (__instance.flyParticle != null && __instance.flyParticle.name.StartsWith("WorseFlyParticle"))
             {
-                ParticleSystem.MainModule main = worseFlyParticle.main;
+                ParticleSystem.MainModule main = __instance.flyParticle.main;
                 if (main.startSize.constant == 1f)
                 {
                     main.startSize = 0.08f; // flyPrefab ("FlyParticle") uses 0.05 here, but the secondary particle ("WorseParticle") uses 0.08
-                    Plugin.Logger.LogDebug($"{__instance.name}: Adjusted startSize for \"{worseFlyParticle.name}\"");
+                    Plugin.Logger.LogDebug($"{__instance.name}: Adjusted startSize for \"{__instance.flyParticle.name}\"");
                 }
+            }
+        }
+
+        [HarmonyPatch(typeof(BeltBagItem), nameof(BeltBagItem.PutObjectInBagLocalClient))]
+        [HarmonyPostfix]
+        static void GrabbableObject_Post_PutObjectInBagLocalClient(GrabbableObject gObject)
+        {
+            // fix items spinning forever if you take them out of the microwave
+            if (gObject.rotateObject)
+            {
+                gObject.rotateObject = false;
+                if (GlobalReferences.microwavedItems.Contains(gObject))
+                    GlobalReferences.microwavedItems.Remove(gObject);
             }
         }
     }

@@ -13,7 +13,7 @@ using UnityEngine.Rendering.HighDefinition;
 namespace ButteryFixes.Patches.Player
 {
     [HarmonyPatch(typeof(PlayerControllerB))]
-    internal class PlayerPatches
+    static class PlayerPatches
     {
         static readonly string[] qeBugItems = [
             "Flashlight",
@@ -72,30 +72,6 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPostfix]
         static void PlayerControllerB_Post_ConnectClientToPlayerObject(PlayerControllerB __instance)
         {
-            if (Configuration.gameResolution.Value != GameResolution.DontChange)
-            {
-                RenderTexture playerScreen = __instance.gameplayCamera.targetTexture;
-                if (Configuration.gameResolution.Value == GameResolution.High)
-                {
-                    playerScreen.width = 970;
-                    playerScreen.height = 580;
-                    Plugin.Logger.LogInfo("High resolution applied");
-                }
-                else
-                {
-                    playerScreen.width = 620;
-                    playerScreen.height = 350;
-                    Plugin.Logger.LogInfo("Low resolution applied");
-                }
-                GlobalReferences.patchScanNodes = true;
-            }
-            else
-            {
-                if (GlobalReferences.patchScanNodes)
-                    Plugin.Logger.LogInfo("Resolution changes reverted");
-                GlobalReferences.patchScanNodes = false;
-            }
-
             // fix some oddities with local player rendering
             Renderer scavengerHelmet = __instance.localVisor.Find("ScavengerHelmet")?.GetComponent<Renderer>();
             if (scavengerHelmet != null)
@@ -172,9 +148,9 @@ namespace ButteryFixes.Patches.Player
             }
         }
 
-        [HarmonyPatch(nameof(PlayerControllerB.LandFromJumpClientRpc))]
+        [HarmonyPatch(nameof(PlayerControllerB.PlayHitGroundAudio))]
         [HarmonyPostfix]
-        static void PlayerControllerB_Post_LandFromJumpClientRpc(PlayerControllerB __instance)
+        static void PlayerControllerB_Post_PlayHitGroundAudio(PlayerControllerB __instance)
         {
             if (!bunnyhoppingPlayers.Contains(__instance))
                 return;
@@ -262,31 +238,6 @@ namespace ButteryFixes.Patches.Player
 
                 GlobalReferences.gibbedPlayer = StartOfRound.Instance.allPlayerScripts[playerId];
             }
-        }
-
-        [HarmonyPatch(nameof(PlayerControllerB.ThrowObjectClientRpc))]
-        [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> PlayerControllerB_Trans_ThrowObjectClientRpc(IEnumerable<CodeInstruction> instructions)
-        {
-            if (Compatibility.DISABLE_ROTATION_PATCH)
-                return instructions;
-
-            List<CodeInstruction> codes = instructions.ToList();
-
-            MethodInfo setObjectAsNoLongerHeld = AccessTools.Method(typeof(PlayerControllerB), nameof(PlayerControllerB.SetObjectAsNoLongerHeld));
-            for (int i = 1; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Call && codes[i].operand as MethodInfo == setObjectAsNoLongerHeld && codes[i - 1].opcode == OpCodes.Ldc_I4_M1)
-                {
-                    codes[i - 1].opcode = OpCodes.Ldarg_S;
-                    codes[i - 1].operand = (sbyte)5;
-                    Plugin.Logger.LogDebug("Transpiler (Player drop): Preserve rotation");
-                    return codes;
-                }
-            }
-
-            Plugin.Logger.LogError("Player drop transpiler failed");
-            return instructions;
         }
     }
 }

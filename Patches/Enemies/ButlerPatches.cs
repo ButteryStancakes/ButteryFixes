@@ -4,7 +4,7 @@ using HarmonyLib;
 namespace ButteryFixes.Patches.Enemies
 {
     [HarmonyPatch(typeof(ButlerEnemyAI))]
-    internal class ButlerPatches
+    static class ButlerPatches
     {
         [HarmonyPatch(nameof(ButlerEnemyAI.Start))]
         [HarmonyPostfix]

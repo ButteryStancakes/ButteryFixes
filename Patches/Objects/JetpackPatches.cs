@@ -5,7 +5,7 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(JetpackItem))]
-    internal class JetpackPatches
+    static class JetpackPatches
     {
         [HarmonyPatch(nameof(JetpackItem.ExplodeJetpackClientRpc))]
         [HarmonyPostfix]

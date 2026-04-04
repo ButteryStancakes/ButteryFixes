@@ -4,7 +4,7 @@ using HarmonyLib;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(ItemCharger))]
-    class ChargerCoilPatches
+    static class ChargerCoilPatches
     {
         [HarmonyPatch(nameof(ItemCharger.ChargeItem))]
         [HarmonyPostfix]

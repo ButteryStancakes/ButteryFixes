@@ -4,7 +4,7 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Enemies
 {
     [HarmonyPatch]
-    internal class AIPatches
+    static class AIPatches
     {
         [HarmonyPatch(typeof(DoorLock), nameof(DoorLock.OnTriggerStay))]
         [HarmonyPrefix]

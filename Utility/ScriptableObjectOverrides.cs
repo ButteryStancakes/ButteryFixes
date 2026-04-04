@@ -1,10 +1,8 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace ButteryFixes.Utility
 {
@@ -19,13 +17,6 @@ namespace ButteryFixes.Utility
                 switch (enemy.Key)
                 {
                     case "RadMech":
-                        SkinnedMeshRenderer dormantBody = enemy.Value.nestSpawnPrefab.GetComponentInChildren<SkinnedMeshRenderer>();
-                        if (dormantBody != null)
-                        {
-                            dormantBody.gameObject.layer = 19;
-                            Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Fix \"nest\" rendering on radar");
-                        }
-
                         ScanNodeProperties scanOldBird = enemy.Value.nestSpawnPrefab.GetComponentInChildren<ScanNodeProperties>();
                         if (scanOldBird != null)
                         {
@@ -51,8 +42,6 @@ namespace ButteryFixes.Utility
                         }
                         break;
                     case "ClaySurgeon":
-                        enemy.Value.enemyPrefab.GetComponent<NavMeshAgent>().speed = 0f;
-                        Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Don't slide around on fresh spawn");
                         foreach (Renderer rend in enemy.Value.enemyPrefab.GetComponentsInChildren<Renderer>())
                         {
                             if (rend.gameObject.layer == 19)
@@ -70,6 +59,7 @@ namespace ButteryFixes.Utility
                 }
                 // fix residue in ScriptableObject
                 enemy.Value.numberSpawned = 0;
+                enemy.Value.hasSpawnedAtLeastOne = false;
             }
         }
 
@@ -79,16 +69,11 @@ namespace ButteryFixes.Utility
             {
                 switch (selectableLevel.name)
                 {
-                    /*case "OffenseLevel":
-                        selectableLevel.videoReel = null;
-                        Plugin.Logger.LogDebug("Offense: Video reel");
-                        break;*/
-                    case "RendLevel":
-                        SpawnableMapObject spikeRoofTrapHazard = selectableLevel.spawnableMapObjects.FirstOrDefault(spawnableMapObject => spawnableMapObject.prefabToSpawn?.name == "SpikeRoofTrapHazard");
-                        if (spikeRoofTrapHazard != null)
+                    case "OffenseLevel":
+                        if (selectableLevel.videoReel.name == "MapView220Ass")
                         {
-                            spikeRoofTrapHazard.requireDistanceBetweenSpawns = true;
-                            Plugin.Logger.LogDebug("Rend: Space spike traps");
+                            selectableLevel.videoReel = null;
+                            Plugin.Logger.LogDebug("Offense: Video reel");
                         }
                         break;
                 }
@@ -116,24 +101,15 @@ namespace ButteryFixes.Utility
             Dictionary<string, bool> conductiveItems = new()
             {
                 //{ "Airhorn", true },
-                //{ "Clock", false },
                 //{ "ControlPad", false },
                 { "DustPan", true },
                 { "FancyCup", true },
-                //{ "Flask", false },
-                //{ "Hairdryer", true },
                 { "LockPicker", true },
                 //{ "MagnifyingGlass", true },
-                //{ "MoldPan", true },
                 { "Phone", true },
-                //{ "PlasticCup", false },
                 { "Shotgun", true },
-                //{ "SoccerBall", false },
                 { "SprayPaint", true },
                 //{ "SteeringWheel", true },
-                //{ "ToiletPaperRolls", false },
-                //{ "ToyTrain", false },
-                //{ "Zeddog", false }
             };
             Dictionary<string, bool> grabbableBeforeStart = new()
             {
@@ -148,10 +124,7 @@ namespace ButteryFixes.Utility
             Dictionary<string, bool> inspectable = new()
             {
                 { "BabyKiwiEgg", false },
-                { "ExtensionLadder", false },
-                { "MagnifyingGlass", true },
                 { "PillBottle", true },
-                { "RadarBooster", false },
                 { "SprayPaint", true },
                 { "WeedKillerBottle", true }
             };
@@ -163,8 +136,6 @@ namespace ButteryFixes.Utility
             };
             ScanNodeProperties scanNodeProperties;
 
-            AudioClip shovelPickUp = null, pickUpPlasticBin = null, dropPlastic1 = null, grabBottle = null, grabCardboardBox = null;
-            List<Item> metalSFXItems = [], plasticSFXItems = [], glassSFXItems = [], cardboardSFXItems = [];
             foreach (Item item in StartOfRound.Instance.allItemsList.itemsList)
             {
                 if (item == null)
@@ -173,7 +144,6 @@ namespace ButteryFixes.Utility
                     continue;
                 }
 
-                bool linearRolloff = false;
                 scanNodeProperties = item.spawnPrefab?.GetComponentInChildren<ScanNodeProperties>();
 
                 switch (item.name)
@@ -181,26 +151,6 @@ namespace ButteryFixes.Utility
                     case "BabyKiwiEgg":
                         item.spawnPrefab.GetComponent<KiwiBabyItem>().isInFactory = false;
                         Plugin.Logger.LogDebug("Factory: Egg");
-                        break;
-                    case "Boombox":
-                        item.spawnPrefab.GetComponent<BoomboxItem>().boomboxAudio.dopplerLevel = 0.3f * GlobalReferences.dopplerLevelMult;
-                        Plugin.Logger.LogDebug("Doppler level: Boombox");
-                        break;
-                    case "BottleBin":
-                        pickUpPlasticBin = item.grabSFX;
-                        break;
-                    case "Brush":
-                    case "Candy":
-                    case "Dentures":
-                    //case "Phone":
-                    case "PillBottle":
-                    case "PlasticCup":
-                    case "Remote":
-                    case "SoccerBall":
-                    case "SteeringWheel":
-                    case "Toothpaste":
-                    case "ToyCube":
-                        plasticSFXItems.Add(item);
                         break;
                     case "CashRegister":
                         if (Configuration.adjustCooldowns.Value)
@@ -216,12 +166,6 @@ namespace ButteryFixes.Utility
                             Plugin.Logger.LogDebug("Cooldown: Clown horn");
                         }
                         break;
-                    case "Cog1":
-                    case "EasterEgg":
-                    case "MapDevice":
-                    case "ZapGun":
-                        linearRolloff = true;
-                        break;
                     case "FancyCup":
                         if (Configuration.theGoldenGoblet.Value)
                         {
@@ -234,17 +178,9 @@ namespace ButteryFixes.Utility
                             item.itemName = item.itemName.Replace("Golden cup", "Golden goblet");
                             Plugin.Logger.LogDebug("Name: Golden cup");
                         }
-                        metalSFXItems.Add(item);
                         break;
                     case "FancyLamp":
                         item.verticalOffset = 0f;
-                        break;
-                    case "FancyPainting":
-                        cardboardSFXItems.Add(item);
-                        break;
-                    case "FishTestProp":
-                        linearRolloff = true;
-                        plasticSFXItems.Add(item);
                         break;
                     case "Flashlight":
                     case "ProFlashlight":
@@ -254,35 +190,11 @@ namespace ButteryFixes.Utility
                         flashlightItem.flashlightMesh.sharedMaterials = sharedMaterials;
                         Plugin.Logger.LogDebug($"Bulb off: {item.itemName}");
                         break;
-                    case "Flask":
-                        grabBottle = item.grabSFX;
-                        break;
-                    case "GarbageLid":
-                    case "MetalSheet":
-                        metalSFXItems.Add(item);
-                        break;
                     case "Hairdryer":
                         if (Configuration.adjustCooldowns.Value)
                         {
                             item.spawnPrefab.GetComponent<NoisemakerProp>().useCooldown = 1.35f;
                             Plugin.Logger.LogDebug("Cooldown: Hairdryer");
-                        }
-                        break;
-                    case "Key":
-                        if (Configuration.keysAreScrap.Value)
-                        {
-                            item.isScrap = true;
-                            Plugin.Logger.LogDebug("Scrap: Key");
-                        }
-                        else
-                        {
-                            item.spawnPrefab.GetComponent<KeyItem>().scrapValue = 0;
-                            if (scanNodeProperties != null)
-                            {
-                                scanNodeProperties.subText = string.Empty;
-                                scanNodeProperties.scrapValue = 0;
-                                Plugin.Logger.LogDebug("Scan node: Key");
-                            }
                         }
                         break;
                     case "Knife":
@@ -295,15 +207,7 @@ namespace ButteryFixes.Utility
                             Plugin.Logger.LogDebug("Scan node: Kitchen knife");
                         }
                         break;
-                    case "Mug":
-                        dropPlastic1 = item.dropSFX;
-                        break;
-                    case "PerfumeBottle":
-                    case "PickleJar":
-                        glassSFXItems.Add(item);
-                        break;
                     case "RedLocustHive":
-                        linearRolloff = true;
                         item.spawnPrefab.GetComponent<PhysicsProp>().isInFactory = false;
                         Plugin.Logger.LogDebug("Factory: Hive");
                         break;
@@ -331,18 +235,6 @@ namespace ButteryFixes.Utility
                         item.syncDiscardFunction = true;
                         Plugin.Logger.LogDebug("Sync: Tongue");
                         break;
-                    case "TeaKettle":
-                        shovelPickUp = item.grabSFX;
-                        break;
-                    case "TragedyMask":
-                        grabCardboardBox = item.grabSFX;
-                        break;
-                }
-
-                if (linearRolloff)
-                {
-                    item.spawnPrefab.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Linear;
-                    Plugin.Logger.LogDebug($"Audio rolloff: {item.itemName}");
                 }
 
                 if (item.spawnPrefab != null)
@@ -434,41 +326,6 @@ namespace ButteryFixes.Utility
                     Plugin.Logger.LogDebug($"Mesh: {item.itemName}");
                 }
             }
-
-            if (shovelPickUp != null)
-            {
-                foreach (Item metalSFXItem in metalSFXItems)
-                {
-                    metalSFXItem.grabSFX = shovelPickUp;
-                    Plugin.Logger.LogDebug($"Audio: {metalSFXItem.itemName}");
-                }
-            }
-            if (pickUpPlasticBin != null)
-            {
-                foreach (Item plasticSFXItem in plasticSFXItems)
-                {
-                    plasticSFXItem.grabSFX = pickUpPlasticBin;
-                    Plugin.Logger.LogDebug($"Audio: {plasticSFXItem.itemName}");
-                    if (plasticSFXItem.name == "PillBottle" && dropPlastic1 != null)
-                        plasticSFXItem.dropSFX = dropPlastic1;
-                }
-            }
-            if (grabBottle != null)
-            {
-                foreach (Item glassSFXItem in glassSFXItems)
-                {
-                    glassSFXItem.grabSFX = grabBottle;
-                    Plugin.Logger.LogDebug($"Audio: {glassSFXItem.itemName}");
-                }
-            }
-            if (grabCardboardBox != null)
-            {
-                foreach (Item cardboardSFXItem in cardboardSFXItems)
-                {
-                    cardboardSFXItem.grabSFX = grabCardboardBox;
-                    Plugin.Logger.LogDebug($"Audio: {cardboardSFXItem.itemName}");
-                }
-            }
         }
 
         internal static void OverrideUnlockables()
@@ -477,18 +334,6 @@ namespace ButteryFixes.Utility
             {
                 switch (unlockableItem.unlockableName)
                 {
-                    /*case "Television":
-                        unlockableItem.prefabObject.GetComponentInChildren<TVScript>().tvSFX.dopplerLevel = 0f * MUSIC_DOPPLER_LEVEL;
-                        Plugin.Logger.LogDebug("Doppler level: Television");
-                        break;*/
-                    case "Record player":
-                        unlockableItem.prefabObject.GetComponentInChildren<AnimatedObjectTrigger>().thisAudioSource.dopplerLevel = GlobalReferences.dopplerLevelMult;
-                        Plugin.Logger.LogDebug("Doppler level: Record player");
-                        break;
-                    case "Disco Ball":
-                        unlockableItem.prefabObject.GetComponentInChildren<CozyLights>().turnOnAudio.dopplerLevel = 0.92f * GlobalReferences.dopplerLevelMult;
-                        Plugin.Logger.LogDebug("Doppler level: Disco ball");
-                        break;
                     case "JackOLantern":
                         if (Configuration.adjustCooldowns.Value)
                         {
@@ -515,8 +360,6 @@ namespace ButteryFixes.Utility
                         Transform microwaveBody = unlockableItem.prefabObject.transform.Find("MicrowaveBody");
                         microwaveBody.gameObject.layer = 8;
                         Plugin.Logger.LogDebug("Collision: Microwave");
-                        microwaveBody.GetComponent<AudioSource>().playOnAwake = true;
-                        Plugin.Logger.LogDebug("Audio: Microwave");
                         InteractTrigger microwaveTrigger = microwaveBody.Find("MicrowaveDoor/DoorButtonClose").GetComponent<InteractTrigger>();
                         microwaveTrigger.hoverTip = microwaveTrigger.hoverTip.Replace("Store item", "Use microwave");
                         Plugin.Logger.LogDebug("Text: Microwave");

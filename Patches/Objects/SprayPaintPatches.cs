@@ -7,7 +7,7 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(SprayPaintItem))]
-    class SprayPaintPatches
+    static class SprayPaintPatches
     {
         [HarmonyPatch(nameof(SprayPaintItem.LateUpdate))]
         [HarmonyPrefix]

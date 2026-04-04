@@ -1,37 +1,13 @@
 ﻿using ButteryFixes.Utility;
 using GameNetcodeStuff;
 using HarmonyLib;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
 using UnityEngine;
 
 namespace ButteryFixes.Patches.General
 {
     [HarmonyPatch(typeof(HUDManager))]
-    internal class HUDManagerPatches
+    static class HUDManagerPatches
     {
-        internal static GameObject dummyAccessory;
-
-        [HarmonyPatch(nameof(HUDManager.UpdateScanNodes))]
-        [HarmonyPostfix]
-        static void HUDManager_Post_UpdateScanNodes(HUDManager __instance)
-        {
-            if (!GlobalReferences.patchScanNodes || GameNetworkManager.Instance?.localPlayerController == null)
-                return;
-
-            Rect rect = __instance.playerScreenTexture.GetComponent<RectTransform>().rect;
-            for (int i = 0; i < __instance.scanElements.Length; i++)
-            {
-                if (__instance.scanNodes.TryGetValue(__instance.scanElements[i], out ScanNodeProperties scanNodeProperties))
-                {
-                    Vector3 viewportPos = GameNetworkManager.Instance.localPlayerController.gameplayCamera.WorldToViewportPoint(scanNodeProperties.transform.position);
-                    // this places elements in the proper position regardless of resolution (rescaling causes awkward misalignments)
-                    __instance.scanElements[i].anchoredPosition = new Vector2(rect.xMin + (rect.width * viewportPos.x), rect.yMin + (rect.height * viewportPos.y));
-                }
-            }
-        }
-
         [HarmonyPatch(nameof(HUDManager.ShowPlayersFiredScreen))]
         [HarmonyPostfix]
         static void HUDManager_Post_ShowPlayersFiredScreen()
@@ -49,26 +25,6 @@ namespace ButteryFixes.Patches.General
         static void HUDManager_Post_ApplyPenalty(HUDManager __instance, int playersDead, int bodiesInsured)
         {
             __instance.statsUIElements.penaltyAddition.SetText($"{playersDead} casualties: -{Mathf.Clamp((20 * (playersDead - bodiesInsured)) + (8 * bodiesInsured), 0, 100)}%\n({bodiesInsured} bodies recovered)");
-        }
-
-        [HarmonyPatch(nameof(HUDManager.UpdateHealthUI))]
-        [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> HUDManager_Trans_UpdateHealthUI(IEnumerable<CodeInstruction> instructions)
-        {
-            List<CodeInstruction> codes = instructions.ToList();
-
-            for (int i = 0; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Ldarg_1 && codes[i + 1].opcode == OpCodes.Ldc_I4_S && (sbyte)codes[i + 1].operand == 20 && codes[i + 2].opcode == OpCodes.Bge)
-                {
-                    codes[i + 1].operand = (sbyte)10;
-                    Plugin.Logger.LogDebug("Transpiler (Health UI): Fix critical injury popup threshold");
-                    return codes;
-                }
-            }
-
-            Plugin.Logger.LogError("Health UI transpiler failed");
-            return instructions;
         }
 
         [HarmonyPatch(nameof(HUDManager.GetNewStoryLogClientRpc))]
@@ -92,6 +48,7 @@ namespace ButteryFixes.Patches.General
         {
             if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || StartOfRound.Instance.allPlayersDead || GlobalReferences.scrapNotCollected < 0)
             {
+                GlobalReferences.scrapNotCollected = -1;
                 GlobalReferences.scrapEaten = 0;
                 return;
             }
@@ -156,76 +113,6 @@ namespace ButteryFixes.Patches.General
         {
             if (!__result && !Compatibility.DISABLE_SCAN_PATCH && GameNetworkManager.Instance.localPlayerController.inVehicleAnimation && !GameNetworkManager.Instance.localPlayerController.isPlayerDead)
                 __result = true;
-        }
-
-        [HarmonyPatch(nameof(HUDManager.CreateToolAdModelAndDisplayAdClientRpc))]
-        [HarmonyPrefix]
-        static void HUDManager_Pre_CreateToolAdModelAndDisplayAdClientRpc(HUDManager __instance, ref int steepestSale)
-        {
-            if (!__instance.IsServer)
-                steepestSale = 100 - steepestSale;
-        }
-
-        [HarmonyPatch(nameof(HUDManager.CreateFurnitureAdModel))]
-        [HarmonyPrefix]
-        static void HUDManager_Pre_CreateFurnitureAdModel(UnlockableItem unlockable)
-        {
-            if (unlockable.unlockableType == 0)
-            {
-                if (unlockable.headCostumeObject != null && unlockable.lowerTorsoCostumeObject != null)
-                    return;
-
-                if (dummyAccessory == null)
-                {
-                    dummyAccessory = new("ButteryFixes_DummyAccessory")
-                    {
-                        layer = 5
-                    };
-                    dummyAccessory.AddComponent<MeshRenderer>();
-                    Plugin.Logger.LogDebug("Created dummy accessory for suit ads");
-                }
-
-                if (unlockable.headCostumeObject == null)
-                {
-                    unlockable.headCostumeObject = dummyAccessory;
-                    Plugin.Logger.LogDebug($"Temp: Assigned dummy hat for {unlockable.unlockableName}");
-                }
-                if (unlockable.lowerTorsoCostumeObject == null)
-                {
-                    unlockable.lowerTorsoCostumeObject = dummyAccessory;
-                    Plugin.Logger.LogDebug($"Temp: Assigned dummy tail for {unlockable.unlockableName}");
-                }
-            }
-        }
-
-        [HarmonyPatch(nameof(HUDManager.CreateFurnitureAdModel))]
-        [HarmonyFinalizer]
-        static void HUDManager_Final_CreateFurnitureAdModel(UnlockableItem unlockable, System.Exception __exception)
-        {
-            if (unlockable != null && unlockable.unlockableType == 0 && dummyAccessory != null)
-            {
-                if (unlockable.headCostumeObject == dummyAccessory)
-                {
-                    unlockable.headCostumeObject = null;
-                    Plugin.Logger.LogDebug($"Cleaned dummy hat from {unlockable.unlockableName}");
-                }
-                if (unlockable.lowerTorsoCostumeObject == dummyAccessory)
-                {
-                    unlockable.lowerTorsoCostumeObject = null;
-                    Plugin.Logger.LogDebug($"Cleaned dummy tail from {unlockable.unlockableName}");
-                }
-            }
-
-            if (__exception != null)
-                throw __exception;
-        }
-
-        [HarmonyPatch(nameof(HUDManager.DisplayGlobalNotification))]
-        [HarmonyPrefix]
-        static void HUDManager_Pre_DisplayGlobalNotification(ref string displayText)
-        {
-            if (displayText.StartsWith("Found journal entry: ") && !displayText.EndsWith("'"))
-                displayText += "'";
         }
     }
 }

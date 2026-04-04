@@ -3,7 +3,7 @@
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(BreakerBox))]
-    internal class BreakerBoxPatches
+    static class BreakerBoxPatches
     {
         [HarmonyPatch(nameof(BreakerBox.SetSwitchesOff))]
         [HarmonyPostfix]

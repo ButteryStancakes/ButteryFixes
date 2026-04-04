@@ -3,19 +3,8 @@
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(ExtensionLadderItem))]
-    internal class ExtensionLadderPatches
+    static class ExtensionLadderPatches
     {
-        [HarmonyPatch(nameof(ExtensionLadderItem.StartLadderAnimation))]
-        [HarmonyPostfix]
-        static void ExtensionLadderItem_Post_StartLadderAnimation(ExtensionLadderItem __instance)
-        {
-            if (__instance.ladderBlinkWarning)
-            {
-                __instance.ladderBlinkWarning = false;
-                Plugin.Logger.LogDebug("Fixed broken extension ladder warning");
-            }
-        }
-
         [HarmonyPatch(nameof(ExtensionLadderItem.Update))]
         [HarmonyPostfix]
         static void ExtensionLadderItem_Post_Update(ExtensionLadderItem __instance)
@@ -27,6 +16,13 @@ namespace ButteryFixes.Patches.Objects
                     __instance.propColliders[i].excludeLayers = -1;
                 Plugin.Logger.LogDebug("Suck players through ladder");
             }
+        }
+
+        [HarmonyPatch(nameof(ExtensionLadderItem.EquipItem))]
+        [HarmonyPostfix]
+        static void ExtensionLadderItem_Post_EquipItem(ExtensionLadderItem __instance)
+        {
+            __instance.ladderActivated = false;
         }
     }
 }

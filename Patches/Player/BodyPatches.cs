@@ -1,12 +1,11 @@
 ﻿using ButteryFixes.Utility;
 using HarmonyLib;
 using UnityEngine;
-using System.Linq;
 
 namespace ButteryFixes.Patches.Player
 {
     [HarmonyPatch(typeof(DeadBodyInfo))]
-    internal class BodyPatches
+    static class BodyPatches
     {
         static bool dontCheckRenderers;
 
@@ -217,10 +216,13 @@ namespace ButteryFixes.Patches.Player
 
         [HarmonyPatch(nameof(DeadBodyInfo.SetRagdollPositionSafely))]
         [HarmonyPostfix]
-        static void PostSetRagdollPositionSafely(DeadBodyInfo __instance, Vector3 newPosition)
+        static void DeadBodyInfo_Post_SetRagdollPositionSafely(DeadBodyInfo __instance, Vector3 newPosition)
         {
             if (Configuration.bodiesCollectSelf.Value && !__instance.deactivated && __instance.grabBodyObject != null && !__instance.grabBodyObject.deactivated && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(newPosition))
+            {
                 GameNetworkManager.Instance.localPlayerController.SetItemInElevator(true, true, __instance.grabBodyObject);
+                RoundManager.Instance.CollectNewScrapForThisRound(__instance.grabBodyObject);
+            }
         }
 
         [HarmonyPatch(typeof(RagdollGrabbableObject), nameof(RagdollGrabbableObject.Update))]

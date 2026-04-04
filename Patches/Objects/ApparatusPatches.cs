@@ -3,7 +3,7 @@
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(LungProp))]
-    internal class ApparatusPatches
+    static class ApparatusPatches
     {
         [HarmonyPatch(nameof(LungProp.Start))]
         [HarmonyPostfix]

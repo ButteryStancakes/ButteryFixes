@@ -8,7 +8,7 @@ using System.Reflection.Emit;
 namespace ButteryFixes.Patches.Enemies
 {
     [HarmonyPatch(typeof(FlowermanAI))]
-    internal class BrackenPatches
+    static class BrackenPatches
     {
         [HarmonyPatch(nameof(FlowermanAI.HitEnemy))]
         [HarmonyTranspiler]

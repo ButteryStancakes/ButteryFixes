@@ -5,7 +5,7 @@ using UnityEngine.Rendering.HighDefinition;
 namespace ButteryFixes.Patches.General
 {
     [HarmonyPatch(typeof(MenuManager))]
-    class MenuManagerPatches
+    static class MenuManagerPatches
     {
         [HarmonyPatch(nameof(MenuManager.Start))]
         [HarmonyPostfix]

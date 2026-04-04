@@ -2,20 +2,6 @@
 
 namespace ButteryFixes
 {
-    internal enum MusicDopplerLevel
-    {
-        Vanilla = -1,
-        None,
-        Reduced
-    }
-
-    internal enum GameResolution
-    {
-        DontChange = -1,
-        Low,
-        High
-    }
-
     internal enum FilmGrains
     {
         None = -1,
@@ -23,13 +9,25 @@ namespace ButteryFixes
         Full
     }
 
+    // just for save migration
+    enum GameResolution
+    {
+        DontChange = -1,
+        Low,
+        High
+    }
+    enum MusicDopplerLevel
+    {
+        Vanilla = -1,
+        None,
+        Reduced
+    }
+
     internal class Configuration
     {
         static ConfigFile configFile;
 
-        internal static ConfigEntry<MusicDopplerLevel> musicDopplerLevel;
-        internal static ConfigEntry<GameResolution> gameResolution;
-        internal static ConfigEntry<bool> makeConductive, fixJumpCheese, keysAreScrap, showApparatusValue, randomizeDefaultSeed, scanImprovements, fixFireExits, fixSurfacePrices, lockInTerminal, filterDecor, fixGiantSight, typeGordion, restoreArtificeAmbience, disableLODFade, playermodelPatches, patchLadders, alterBestiary, adjustCooldowns, autoCollect, endOrbitEarly, noBodyNoSignal, theGoldenGoblet, charredBodies, patchPocketLights, bodiesCollectSelf;
+        internal static ConfigEntry<bool> makeConductive, fixJumpCheese, showApparatusValue, scanImprovements, fixSurfacePrices, lockInTerminal, filterDecor, typeGordion, playermodelPatches, patchLadders, adjustCooldowns, noBodyNoSignal, theGoldenGoblet, charredBodies, bodiesCollectSelf, forceMaxQuality;
         internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
@@ -39,7 +37,6 @@ namespace ButteryFixes
             CompatibilityConfig();
             GameplayConfig();
             VisualConfig();
-            AudioConfig();
             ExtraConfig();
             MigrateLegacyConfigs();
         }
@@ -52,56 +49,20 @@ namespace ButteryFixes
                 true,
                 "Fixes stamina being wasted if you hold the sprint button on ladders. This will prevent other mods (Better Ladders, Fast Climbing, Better Stamina, General Improvements, etc.) from allowing ladder sprint as a feature.");
 
-            autoCollect = configFile.Bind(
-                "Compatibility",
-                "AutoCollect",
-                true,
-                "When you board the ship, all scrap in your inventory should immediately display as collected on the HUD. If you encounter problems with inventory or item collection, see if turning this off helps.");
-
             bodiesCollectSelf = configFile.Bind(
                 "Compatibility",
                 "BodiesCollectSelf",
-                true,
+                false,
                 "Bodies will automatically collect themselves when teleported to the ship, or when players die inside of the ship.");
-
-            endOrbitEarly = configFile.Bind(
-                "Compatibility",
-                "EndOrbitEarly",
-                true,
-                "Vanilla has a bug where orbit phase only ends for clients after the ship doors open, instead of after the lever is pulled, like for the host. This causes certain objects and enemies to desync, most notably the Giant Sapsucker (which becomes unable to damage clients) and its eggs (which hatch instantly).\nEnabling this setting will fix this core problem, but might cause unexpected behavior with other mods, if they assume vanilla's behavior.");
-
-            patchPocketLights = configFile.Bind(
-                "Compatibility",
-                "PatchPocketLights",
-                true,
-                "Patches some logic with the \"helmet lights\", from pocketed light sources. This fixes a vanilla bug where turning on two different types of lights (ex: a pro-flashlight and a laser pointer) and putting both in your pockets would result in only one displaying, while both continue to drain battery. (As a side effect, this also prevents the exploit where you can play with a permanent helmet light, from a flashlight that's not in your inventory)");
         }
 
         static void GameplayConfig()
         {
-            randomizeDefaultSeed = configFile.Bind(
-                "Gameplay",
-                "RandomizeDefaultSeed",
-                true,
-                "(Host only) Randomizes the seed when starting a new save file, rather than always using the default of 0. (This changes starting weather and shop sales.)");
-
-            fixFireExits = configFile.Bind(
-                "Gameplay",
-                "FixFireExits",
-                true,
-                "Fix fire exit rotation so you are always facing away from the door when you leave. This applies to interiors, as well as the exteriors of the original game's moons.");
-
             makeConductive = configFile.Bind(
                 "Gameplay",
                 "MakeConductive",
                 true,
                 "(Host only) Makes some metallic items that are non-conductive in vanilla actually conductive. This fix applies sensibly to the existing items, but you can disable it if you are used to vanilla's properties.");
-
-            keysAreScrap = configFile.Bind(
-                "Gameplay",
-                "KeysAreScrap",
-                false,
-                "(Host only) Enabling this will allow you to sell keys for $3 as listed, but will also cause them to be lost if all players die, and block belt bags from grabbing them. If this is disabled, they will no longer show \"Value: $3\" on the scanner, instead.");
 
             fixJumpCheese = configFile.Bind(
                 "Gameplay",
@@ -114,23 +75,15 @@ namespace ButteryFixes
                 "FixSurfacePrices",
                 true,
                 "(Host only) Fixes individual bee hives not having separate prices from one another. (In vanilla, all hives fall into two price classes depending on distance from ship) This also fixes sapsucker eggs having inconsistent prices on identical seeds.");
-
-            fixGiantSight = configFile.Bind(
-                "Gameplay",
-                "FixGiantSight",
-                true,
-                "(Host only) Fix Forest Keepers permanently remembering players and instantly entering chase on-sight. (Their memory is meant to decay when those players are not visible, but due to a logical error, it can never decrease unless at least one other player is being observed by the giant.)");
         }
 
         static void VisualConfig()
         {
-            gameResolution = configFile.Bind(
+            forceMaxQuality = configFile.Bind(
                 "Visual",
-                "GameResolution",
-                GameResolution.DontChange,
-                "The internal resolution rendered by the game. There are unused resolution presets in the game data that you can enable using this option.\n" +
-                "\"DontChange\" makes no changes - vanilla is 860x520, but this setting is also compatible with other resolution mods.\n" +
-                "\"Low\" is 620x350. \"High\" is 970x580.");
+                "ForceMaxQuality",
+                false,
+                "The game renders the screen at an increased resolution when using the terminal, separate from normal resolution settings. Enabling this setting will force \"terminal quality\" across the entire game, increasing overall visual fidelity.");
 
             restoreFilmGrain = configFile.Bind(
                 "Visual",
@@ -144,12 +97,6 @@ namespace ButteryFixes
                 false,
                 "Actually show the apparatus' value on the scanner instead of \"???\" (in vanilla, it is always $80)");
 
-            disableLODFade = configFile.Bind(
-                "Visual",
-                "DisableLODFade",
-                true,
-                "Disables level-of-detail cross-fading, which is broken in vanilla. This does not prevent \"pop in\" (when moving towards/away from objects) from occurring, but makes it happen only once instead of twice.");
-
             playermodelPatches = configFile.Bind(
                 "Visual",
                 "PlayermodelPatches",
@@ -157,35 +104,13 @@ namespace ButteryFixes
                 "Fixes some issues with dead bodies not displaying badges, using the wrong suit, not having attachments (bee and bunny), etc.\nIf you use ModelReplacementAPI I would strongly suggest disabling this if you run into issues!");
         }
 
-        static void AudioConfig()
-        {
-            musicDopplerLevel = configFile.Bind(
-                "Audio",
-                "MusicDopplerLevel",
-                MusicDopplerLevel.Reduced,
-                "Controls how much Unity's simulated \"Doppler effect\" applies to music sources like the dropship, boombox, etc. (This is what causes pitch distortion when moving towards/away from the source of the music)\n" +
-                "\"Vanilla\" makes no changes. \"Reduced\" will make the effect more subtle. \"None\" will disable it completely (so music always plays at the correct pitch)");
-
-            restoreArtificeAmbience = configFile.Bind(
-                "Audio",
-                "RestoreArtificeAmbience",
-                true,
-                "Restores the unique night-time ambience on Artifice, which is broken and doesn't play in vanilla.");
-        }
-
         static void ExtraConfig()
         {
-            charredBodies = configFile.Bind(
-                "Extra",
-                "CharredBodies",
-                true,
-                "When a player dies to any sort of explosion, their corpse will appear burnt, much like Cruiser explosions. (This also applies to electrocution from the electric chair.) \"PlayermodelPatches\" is *required* for this to work!");
-
             scanImprovements = configFile.Bind(
                 "Extra",
                 "ScanImprovements",
-                false,
-                "Allows the \"scan\" command on the terminal to count the value of items on your ship in orbit. Butlers' knives will be visible on the map and \"scan\" command before they are killed.");
+                true,
+                "Allows the \"scan\" command on the terminal to count the value of items on your ship while parked at Gordion. Butlers' knives will be visible on the map and \"scan\" command before they are killed.");
 
             lockInTerminal = configFile.Bind(
                 "Extra",
@@ -196,20 +121,14 @@ namespace ButteryFixes
             filterDecor = configFile.Bind(
                 "Extra",
                 "FilterDecor",
-                false,
-                "Decorations (suits, furniture, etc.) you have already purchased will be filtered out of the shop's list on the terminal, potentially allowing you to see the unused \"[No items available]\" text.\nAlso corrects some inconsistent formatting, like missing bullet points and \"Price:\" text for the decor list.");
+                true,
+                "Decorations (suits, furniture, etc.) you have already purchased will be filtered out of the shop's list on the terminal, potentially allowing you to see the unused \"[No items available]\" text.\n(Also fixes the missing bullet points.)");
 
             typeGordion = configFile.Bind(
                 "Extra",
                 "TypeGordion",
                 false,
                 "You can type \"Gordion\" into the terminal (in place of \"company\") when using the route/info commands.");
-
-            alterBestiary = configFile.Bind(
-                "Extra",
-                "AlterBestiary",
-                false,
-                "Restores some removed text and corrects certain typographical errors in bestiary entries.");
 
             adjustCooldowns = configFile.Bind(
                 "Extra",
@@ -227,7 +146,13 @@ namespace ButteryFixes
                 "Extra",
                 "TheGoldenGoblet",
                 false,
-                "Fixes Zeekerss' blatant typo when spelling \"Golden goblet\" (which, for reasons unknown, mistakenly became \"Golden cup\")");
+                "Renames the \"Golden cup\" to \"Golden goblet\"");
+
+            charredBodies = configFile.Bind(
+                "Extra",
+                "CharredBodies",
+                true,
+                "When a player dies to any sort of explosion, their corpse will appear burnt, much like Cruiser explosions. (This also applies to electrocution from the electric chair.) \"PlayermodelPatches\" is *required* for this to work!");
         }
 
         static void MigrateLegacyConfigs()
@@ -246,7 +171,7 @@ namespace ButteryFixes
                     scanImprovements.Value = true;
                 configFile.Remove(configFile["Extra", "ScanOnShip"].Definition);
             }
-            // overlaps compass as of v70
+            // overlaps compass as of v70 (also restored in v80)
             configFile.Bind("Visual", "RestoreShipIcon", true, "Legacy setting, doesn't work");
             configFile.Remove(configFile["Visual", "RestoreShipIcon"].Definition);
             // updated to FixSurfacePrices
@@ -257,13 +182,48 @@ namespace ButteryFixes
                     fixSurfacePrices.Value = false;
                 configFile.Remove(configFile["Gameplay", "FixHivePrices"].Definition);
             }
-            // moved to SpawnCycleFixes
-            configFile.Bind("Gameplay", "LimitSpawnChance", false, "Legacy setting, use \"SpawnCycleFixes\" instead");
+            // moved to Spawn Cycle Fixes
+            configFile.Bind("Gameplay", "LimitSpawnChance", false, "Legacy setting, use \"Spawn Cycle Fixes\" instead");
             configFile.Remove(configFile["Gameplay", "LimitSpawnChance"].Definition);
-            configFile.Bind("Gameplay", "UnlimitedOldBirds", false, "Legacy setting, use \"SpawnCycleFixes\" instead");
+            configFile.Bind("Gameplay", "UnlimitedOldBirds", false, "Legacy setting, use \"Spawn Cycle Fixes\" instead");
             configFile.Remove(configFile["Gameplay", "UnlimitedOldBirds"].Definition);
-            configFile.Bind("Gameplay", "MaskHornetsPower", false, "Legacy setting, use \"MaskHornetsPower\" instead");
+            configFile.Bind("Gameplay", "MaskHornetsPower", false, "Legacy setting, use \"Spawn Cycle Fixes\" instead");
             configFile.Remove(configFile["Gameplay", "MaskHornetsPower"].Definition);
+            // removed when fixed in v80
+            configFile.Bind("Gameplay", "RandomizeDefaultSeed", true, "Legacy setting, doesn't work");
+            configFile.Remove(configFile["Gameplay", "RandomizeDefaultSeed"].Definition);
+            configFile.Bind("Gameplay", "FixGiantSight", true, "Legacy setting, doesn't work");
+            configFile.Remove(configFile["Gameplay", "FixGiantSight"].Definition);
+            configFile.Bind("Compatibility", "PatchPocketLights", true, "Legacy setting, doesn't work");
+            configFile.Remove(configFile["Compatibility", "PatchPocketLights"].Definition);
+            configFile.Bind("Audio", "RestoreArtificeAmbience", true, "Legacy setting, doesn't work");
+            configFile.Remove(configFile["Audio", "RestoreArtificeAmbience"].Definition);
+            configFile.Bind("Visual", "DisableLODFade", true, "Legacy setting, doesn't work");
+            configFile.Remove(configFile["Visual", "DisableLODFade"].Definition);
+            // no longer compatible with changes from v80
+            configFile.Bind("Compatibility", "AutoCollect", true, "Legacy setting, doesn't work");
+            configFile.Remove(configFile["Compatibility", "AutoCollect"].Definition);
+            configFile.Bind("Compatibility", "EndOrbitEarly", true, "Legacy setting, doesn't work");
+            configFile.Remove(configFile["Compatibility", "EndOrbitEarly"].Definition);
+            // updated to ForceMaxQuality
+            if (!forceMaxQuality.Value)
+            {
+                GameResolution gameResolution = configFile.Bind("Visual", "GameResolution", GameResolution.DontChange, "Legacy setting, use \"ForceMaxQuality\" instead").Value;
+                if (gameResolution == GameResolution.High)
+                    forceMaxQuality.Value = true;
+                configFile.Remove(configFile["Visual", "GameResolution"].Definition);
+            }
+            // removed when fixed in v81
+            configFile.Bind("Gameplay", "KeysAreScrap", true, "Legacy setting, doesn't work");
+            configFile.Remove(configFile["Gameplay", "KeysAreScrap"].Definition);
+            configFile.Bind("Gameplay", "FixFireExits", true, "Legacy setting, doesn't work");
+            configFile.Remove(configFile["Gameplay", "FixFireExits"].Definition);
+            // moved to Enemy Sound Fixes
+            configFile.Bind("Audio", "MusicDopplerLevel", false, "Legacy setting, use \"Enemy Sound Fixes\" instead");
+            configFile.Remove(configFile["Audio", "MusicDopplerLevel"].Definition);
+            // just not necessary anymore as of v80 (sorry Sigurd)
+            configFile.Bind("Extra", "AlterBestiary", false, "Legacy setting, doesn't work");
+            configFile.Remove(configFile["Extra", "AlterBestiary"].Definition);
 
             configFile.Save();
         }

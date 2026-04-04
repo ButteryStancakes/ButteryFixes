@@ -4,7 +4,7 @@ using HarmonyLib;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(FlashlightItem))]
-    internal class FlashlightPatches
+    static class FlashlightPatches
     {
         [HarmonyPatch(nameof(FlashlightItem.PocketItem))]
         //[HarmonyPatch(nameof(FlashlightItem.PocketFlashlightClientRpc))]
@@ -14,7 +14,7 @@ namespace ButteryFixes.Patches.Objects
         [HarmonyPostfix]
         static void FlashlightItem_Post(FlashlightItem __instance)
         {
-            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || __instance.previousPlayerHeldBy /*== null*/ != GameNetworkManager.Instance.localPlayerController || !Configuration.patchPocketLights.Value)
+            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || __instance.previousPlayerHeldBy /*== null*/ != GameNetworkManager.Instance.localPlayerController)
                 return;
 
             NonPatchFunctions.ForceRefreshAllHelmetLights(__instance.previousPlayerHeldBy);

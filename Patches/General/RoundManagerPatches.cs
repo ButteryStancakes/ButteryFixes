@@ -1,17 +1,13 @@
 ﻿using ButteryFixes.Utility;
 using DunGen;
 using HarmonyLib;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using Unity.Netcode;
 using UnityEngine;
 
 namespace ButteryFixes.Patches.General
 {
     [HarmonyPatch(typeof(RoundManager))]
-    internal class RoundManagerPatches
+    static class RoundManagerPatches
     {
         [HarmonyPatch(nameof(RoundManager.PredictAllOutsideEnemies))]
         [HarmonyPostfix]
@@ -19,15 +15,10 @@ namespace ButteryFixes.Patches.General
         {
             // cleans up leftover spawn numbers from previous day + spawn predictions (when generating nests)
             foreach (string name in GlobalReferences.allEnemiesList.Keys)
+            {
                 GlobalReferences.allEnemiesList[name].numberSpawned = 0;
-        }
-
-        [HarmonyPatch(nameof(RoundManager.OnDestroy))]
-        [HarmonyPostfix]
-        static void RoundManager_Post_OnDestroy(RoundManager __instance)
-        {
-            // prevents persistence when quitting mid-day and rehosting
-            __instance.ResetEnemyVariables();
+                GlobalReferences.allEnemiesList[name].hasSpawnedAtLeastOne = false;
+            }
         }
 
         [HarmonyPatch(nameof(RoundManager.PowerSwitchOffClientRpc))]
@@ -37,26 +28,9 @@ namespace ButteryFixes.Patches.General
             Object.FindAnyObjectByType<BreakerBox>()?.breakerBoxHum.Stop();
         }
 
-        [HarmonyPatch(nameof(RoundManager.SetExitIDs))]
-        [HarmonyPostfix]
-        static void RoundManager_Post_SetExitIDs(RoundManager __instance)
-        {
-            EntranceTeleport[] entranceTeleports = Object.FindObjectsByType<EntranceTeleport>(FindObjectsSortMode.None);
-            if (Configuration.fixFireExits.Value)
-            {
-                foreach (EntranceTeleport entranceTeleport in entranceTeleports)
-                {
-                    if (entranceTeleport.entranceId > 0 && !entranceTeleport.isEntranceToBuilding)
-                    {
-                        entranceTeleport.entrancePoint.localRotation = Quaternion.Euler(entranceTeleport.entrancePoint.localEulerAngles.x, entranceTeleport.entrancePoint.localEulerAngles.y + 180f, entranceTeleport.entrancePoint.localEulerAngles.z);
-                        Plugin.Logger.LogDebug("Fixed rotation of internal fire exit");
-                    }
-                }
-            }
-        }
-
         [HarmonyPatch(nameof(RoundManager.Awake))]
         [HarmonyPostfix]
+        [HarmonyWrapSafe]
         static void RoundManager_Post_Awake(RoundManager __instance)
         {
             TileOverrides.OverrideTiles(__instance.dungeonFlowTypes);
@@ -81,7 +55,7 @@ namespace ButteryFixes.Patches.General
 
         [HarmonyPatch(nameof(RoundManager.SpawnOutsideHazards))]
         [HarmonyPostfix]
-        static void RoundManager_Post_SpawnOutsideHazards(RoundManager __instance)
+        static void RoundManager_Post_SpawnOutsideHazards()
         {
             // this can't run in OnSceneLoaded because the navmesh needs to be baked first
             if (!Compatibility.INSTALLED_REBALANCED_MOONS && StartOfRound.Instance.currentLevel.sceneName == "Level6Dine")
@@ -127,20 +101,6 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void RoundManager_Post_FinishGeneratingNewLevelClientRpc(RoundManager __instance)
         {
-            if (Configuration.disableLODFade.Value)
-            {
-                foreach (LODGroup lodGroup in Object.FindObjectsByType<LODGroup>(FindObjectsSortMode.None))
-                {
-                    if (lodGroup.fadeMode != LODFadeMode.None)
-                    {
-                        lodGroup.fadeMode = LODFadeMode.None;
-                        Plugin.Logger.LogDebug($"Disable LOD fade on \"{lodGroup.name}\"");
-                    }
-                }
-            }
-
-            NonPatchFunctions.TestForVainShrouds();
-
             EntranceTeleport mainEntrance = Object.FindObjectsByType<EntranceTeleport>(FindObjectsSortMode.None).FirstOrDefault(teleport => teleport.entranceId == 0 && !teleport.isEntranceToBuilding);
             GlobalReferences.mainEntrancePos = mainEntrance != null ? mainEntrance.entrancePoint.position : Vector3.zero;
 
@@ -201,82 +161,21 @@ namespace ButteryFixes.Patches.General
                     }
                 }
             }
-
-            if (!__instance.IsServer || __instance.currentDungeonType != 4)
-                return;
-
-            MineshaftElevatorController mineshaftElevatorController = RoundManager.Instance.currentMineshaftElevator ?? __instance.spawnedSyncedObjects.FirstOrDefault(spawnedSyncedObject => spawnedSyncedObject.name.StartsWith("MineshaftElevator"))?.GetComponent<MineshaftElevatorController>();
-            if (mineshaftElevatorController == null)
-            {
-                Plugin.Logger.LogWarning("Mineshaft interior was selected, but could not find the elevator on host");
-                return;
-            }
-
-            SpikeRoofTrap[] spikeRoofTraps = Object.FindObjectsByType<SpikeRoofTrap>(FindObjectsSortMode.None);
-            foreach (SpikeRoofTrap spikeRoofTrap in spikeRoofTraps)
-            {
-                if (Vector3.Distance(spikeRoofTrap.spikeTrapAudio.transform.position, mineshaftElevatorController.elevatorBottomPoint.position) < 7f)
-                {
-                    NetworkObject netObj = spikeRoofTrap.GetComponentInParent<NetworkObject>();
-                    if (netObj != null && netObj.IsSpawned)
-                    {
-                        Plugin.Logger.LogDebug($"Spike trap #{spikeRoofTrap.GetInstanceID()} was destroyed (too close to the elevator)");
-                        netObj.Despawn();
-                    }
-                    else
-                        Plugin.Logger.LogWarning("Error occurred while despawning spike trap (could not find network object, or it was not network spawned yet)");
-                }
-            }
         }
 
-        [HarmonyPatch(nameof(RoundManager.SpawnScrapInLevel))]
-        [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> RoundManager_Trans_SpawnScrapInLevel(IEnumerable<CodeInstruction> instructions)
+        [HarmonyPatch(nameof(RoundManager.DespawnPropsAtEndOfRound))]
+        [HarmonyPrefix]
+        static void RoundManager_Pre_DespawnPropsAtEndOfRound(RoundManager __instance)
         {
-            List<CodeInstruction> codes = instructions.ToList();
+            if (__instance.IsServer)
+                return;
 
-            FieldInfo itemId = AccessTools.Field(typeof(Item), nameof(Item.itemId));
-            MethodInfo min = AccessTools.Method(typeof(Mathf), nameof(Mathf.Min), [typeof(int), typeof(int)]);
-            for (int i = 0; i < codes.Count - 1; i++)
+            // fix collected notification re-playing
+            foreach (GrabbableObject shipScrap in __instance.scrapDroppedInShip)
             {
-                if (codes[i].opcode == OpCodes.Ldfld && (FieldInfo)codes[i].operand == itemId && codes[i + 1].opcode == OpCodes.Ldc_I4 && (int)codes[i + 1].operand == 152767)
-                {
-                    for (int j = i + 2; j < codes.Count; j++)
-                    {
-                        if (codes[j].opcode == OpCodes.Call && (codes[j].operand as MethodInfo) == min)
-                        {
-                            bool patch30 = false, patch99 = false;
-                            for (int k = i + 2; k < j; k++)
-                            {
-                                if (codes[k].opcode == OpCodes.Ldc_I4_S)
-                                {
-                                    sbyte operand = (sbyte)codes[k].operand;
-                                    if (operand == 30)
-                                    {
-                                        codes[k].operand = (sbyte)0;
-                                        patch30 = true;
-                                    }
-                                    else if (operand == 99)
-                                    {
-                                        codes[k].opcode = OpCodes.Ldc_I4;
-                                        codes[k].operand = int.MaxValue;
-                                        patch99 = true;
-                                    }
-
-                                    if (patch30 && patch99)
-                                    {
-                                        Plugin.Logger.LogDebug("Transpiler (Scrap spawn): Don't boost gift box");
-                                        return codes;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                if (shipScrap != null && shipScrap.isInShipRoom)
+                    shipScrap.scrapPersistedThroughRounds = true;
             }
-
-            Plugin.Logger.LogError("Scrap spawn transpiler failed");
-            return instructions;
         }
     }
 }

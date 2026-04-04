@@ -8,7 +8,7 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(DoorLock))]
-    internal class DoorPatches
+    static class DoorPatches
     {
         [HarmonyPatch(nameof(DoorLock.UnlockDoor))]
         [HarmonyTranspiler]

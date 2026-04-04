@@ -4,15 +4,15 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Enemies
 {
     [HarmonyPatch(typeof(MouthDogAI))]
-    internal class EyelessDogPatches
+    static class EyelessDogPatches
     {
         [HarmonyPatch(nameof(MouthDogAI.DetectNoise))]
         [HarmonyPostfix]
         static void MouthDogAI_Post_DetectNoise(MouthDogAI __instance)
         {
-            // vanilla doesn't always clamp suspicion level to 11 (maxSuspicionLevel)
-            if (__instance.suspicionLevel > 11)
-                __instance.suspicionLevel = 11;
+            // vanilla doesn't always clamp suspicion level
+            if (__instance.suspicionLevel > MouthDogAI.maxSuspicionLevel)
+                __instance.suspicionLevel = MouthDogAI.maxSuspicionLevel;
         }
 
         [HarmonyPatch(nameof(MouthDogAI.DetectNoise))]

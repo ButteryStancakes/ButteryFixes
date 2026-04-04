@@ -1,6 +1,5 @@
 ﻿using GameNetcodeStuff;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -58,15 +57,25 @@ namespace ButteryFixes.Utility
                 bool enable = false;
                 if (!forceOff)
                 {
-                    for (int j = 0; j < player.ItemSlots.Length; j++)
+                    if (player.ItemOnlySlot != null)
                     {
-                        if (player.ItemSlots[j] != null)
+                        FlashlightItem flashlightItemUtility = player.ItemOnlySlot as FlashlightItem;
+                        if (flashlightItemUtility != null && flashlightItemUtility.flashlightTypeID == i && flashlightItemUtility.isPocketed && flashlightItemUtility.isBeingUsed && flashlightItemUtility.insertedBattery.charge > 0f)
+                            enable = true;
+                    }
+
+                    if (!enable)
+                    {
+                        for (int j = 0; j < player.ItemSlots.Length; j++)
                         {
-                            FlashlightItem flashlightItem = player.ItemSlots[j] as FlashlightItem;
-                            if (flashlightItem != null && flashlightItem.flashlightTypeID == i && flashlightItem.isPocketed && flashlightItem.isBeingUsed && flashlightItem.insertedBattery.charge > 0f)
+                            if (player.ItemSlots[j] != null)
                             {
-                                enable = true;
-                                break;
+                                FlashlightItem flashlightItem = player.ItemSlots[j] as FlashlightItem;
+                                if (flashlightItem != null && flashlightItem.flashlightTypeID == i && flashlightItem.isPocketed && flashlightItem.isBeingUsed && flashlightItem.insertedBattery.charge > 0f)
+                                {
+                                    enable = true;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -143,22 +152,6 @@ namespace ButteryFixes.Utility
                 GlobalReferences.lockingCamera--;
         }
 
-        internal static void TestForVainShrouds()
-        {
-            if (Compatibility.ENABLE_VAIN_SHROUDS || StartOfRound.Instance == null)
-                return;
-
-            foreach (SelectableLevel level in StartOfRound.Instance.levels)
-            {
-                if (level.moldSpreadIterations > 0 && level.canSpawnMold)
-                {
-                    Compatibility.ENABLE_VAIN_SHROUDS = true;
-                    Plugin.Logger.LogInfo("YesFox is not installed, but current save file still has Vain Shrouds");
-                    return;
-                }
-            }
-        }
-
         public static Vector3 GetTrueExitPoint(bool ignore = true, bool ignore2 = false)
         {
             // in mineshaft, point to the bottom of the elevator instead
@@ -211,6 +204,7 @@ namespace ButteryFixes.Utility
             if (deadBodyInfo != null && !deadBodyInfo.deactivated && deadBodyInfo.grabBodyObject != null && !deadBodyInfo.grabBodyObject.deactivated && deadBodyInfo.playerScript != null)
             {
                 deadBodyInfo.playerScript.SetItemInElevator(true, true, deadBodyInfo.grabBodyObject);
+                RoundManager.Instance.CollectNewScrapForThisRound(deadBodyInfo.grabBodyObject);
                 Plugin.Logger.LogDebug($"Player \"{deadBodyInfo.playerScript?.playerUsername}\" automatically collected themself");
             }
         }

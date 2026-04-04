@@ -4,7 +4,7 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(Landmine))]
-    internal class LandminePatches
+    static class LandminePatches
     {
         [HarmonyPatch(nameof(Landmine.Start))]
         [HarmonyPostfix]

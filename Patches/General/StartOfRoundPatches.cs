@@ -11,7 +11,7 @@ using UnityEngine.UI;
 namespace ButteryFixes.Patches.General
 {
     [HarmonyPatch(typeof(StartOfRound))]
-    internal class StartOfRoundPatches
+    static class StartOfRoundPatches
     {
         [HarmonyPatch(nameof(StartOfRound.Awake))]
         [HarmonyBefore(Compatibility.GUID_GENERAL_IMPROVEMENTS)]
@@ -21,16 +21,6 @@ namespace ButteryFixes.Patches.General
         {
             ScriptableObjectOverrides.OverrideSelectableLevels();
 
-            GlobalReferences.dopplerLevelMult = Configuration.musicDopplerLevel.Value switch
-            {
-                MusicDopplerLevel.None => 0f,
-                MusicDopplerLevel.Reduced => 0.333f,
-                _ => 1f,
-            };
-            __instance.speakerAudioSource.dopplerLevel = GlobalReferences.dopplerLevelMult;
-            __instance.shipDoorAudioSource.dopplerLevel = GlobalReferences.dopplerLevelMult;
-            Plugin.Logger.LogDebug("Doppler level: Ship speakers");
-
             GlobalReferences.playerBody = __instance.playerRagdolls[0].GetComponent<SkinnedMeshRenderer>().sharedMesh;
             GlobalReferences.scavengerSuitBurnt = __instance.playerRagdolls[6].GetComponent<SkinnedMeshRenderer>().sharedMaterial;
             GlobalReferences.smokeParticle = __instance.playerRagdolls[6].transform.Find("SmokeParticle")?.gameObject;
@@ -39,24 +29,22 @@ namespace ButteryFixes.Patches.General
             AudioSource stickyNote = __instance.elevatorTransform.Find("StickyNoteItem")?.GetComponent<AudioSource>();
             if (stickyNote != null)
             {
-                stickyNote.rolloffMode = AudioRolloffMode.Linear;
-                stickyNote.GetComponent<PhysicsProp>().scrapValue = 0;
-                Plugin.Logger.LogDebug($"Audio rolloff: Sticky note");
+                PhysicsProp physicsProp = stickyNote.GetComponent<PhysicsProp>();
+                physicsProp.scrapValue = 0;
+                Plugin.Logger.LogDebug("Value: Sticky note");
+                physicsProp.itemProperties.disallowUtilitySlot = true;
+                Plugin.Logger.LogDebug("Utility: Sticky note");
             }
             AudioSource clipboard = __instance.elevatorTransform.Find("ClipboardManual")?.GetComponent<AudioSource>();
             if (clipboard != null)
             {
-                clipboard.rolloffMode = AudioRolloffMode.Linear;
                 clipboard.GetComponent<ClipboardItem>().scrapValue = 0;
-                Plugin.Logger.LogDebug($"Audio rolloff: Clipboard");
+                Plugin.Logger.LogDebug("Value: Clipboard");
             }
 
             ScriptableObjectOverrides.OverrideUnlockables();
 
             GlobalReferences.shipAnimator = __instance.shipAnimatorObject.GetComponent<Animator>();
-
-            __instance.VehiclesList.FirstOrDefault(vehicle => vehicle.name == "CompanyCruiser").GetComponent<VehicleController>().radioAudio.dopplerLevel = Configuration.musicDopplerLevel.Value == MusicDopplerLevel.Reduced ? 0.37f : GlobalReferences.dopplerLevelMult;
-            Plugin.Logger.LogDebug("Doppler level: Cruiser");
 
             ParticleSystem windParticle = __instance.elevatorTransform.GetComponent<PlayAudioAnimationEvent>()?.particle;
             if (windParticle)
@@ -86,14 +74,6 @@ namespace ButteryFixes.Patches.General
             {
                 if (!ragdollPieces.GetComponent<PlayerGibsLinker>())
                     ragdollPieces.AddComponent<PlayerGibsLinker>();
-
-                // don't apply extra force to these 2 meat chunks
-                PhysicsExplosionForce[] physicsExplosionForces = ragdollPieces.GetComponentsInChildren<PhysicsExplosionForce>();
-                foreach (PhysicsExplosionForce physicsExplosionForce in physicsExplosionForces)
-                {
-                    if (physicsExplosionForce.gameObject != ragdollPieces)
-                        physicsExplosionForce.enabled = false;
-                }
 
                 Plugin.Logger.LogDebug("Ragdoll: Sapsucker pieces");
             }
@@ -216,17 +196,6 @@ namespace ButteryFixes.Patches.General
             }
         }
 
-        [HarmonyPatch(nameof(StartOfRound.SetTimeAndPlanetToSavedSettings))]
-        [HarmonyPrefix]
-        static void StartOfRound_Pre_SetTimeAndPlanetToSavedSettings()
-        {
-            if (!Compatibility.INSTALLED_GENERAL_IMPROVEMENTS && Configuration.randomizeDefaultSeed.Value && GameNetworkManager.Instance.currentSaveFileName != "LCChallengeFile" && !ES3.KeyExists("RandomSeed", GameNetworkManager.Instance.currentSaveFileName))
-            {
-                ES3.Save("RandomSeed", Random.Range(1, 100000000), GameNetworkManager.Instance.currentSaveFileName);
-                Plugin.Logger.LogInfo("Re-rolled starting seed");
-            }
-        }
-
         [HarmonyPatch(nameof(StartOfRound.ReviveDeadPlayers))]
         [HarmonyPostfix]
         static void StartOfRound_Post_ReviveDeadPlayers()
@@ -284,21 +253,6 @@ namespace ButteryFixes.Patches.General
             if (SoundManager.Instance != null && SoundManager.Instance.echoEnabled && GameNetworkManager.Instance.localPlayerController != null && GameNetworkManager.Instance.localPlayerController.isPlayerDead && GameNetworkManager.Instance.localPlayerController.spectatedPlayerScript != null && !GameNetworkManager.Instance.localPlayerController.spectatedPlayerScript.isInsideFactory)
                 SoundManager.Instance.SetEchoFilter(false);
 
-            if (!__instance.inShipPhase && __instance.shipDoorsEnabled && !__instance.suckingPlayersOutOfShip && GameNetworkManager.Instance?.localPlayerController != null && GameNetworkManager.Instance.localPlayerController.isInElevator && GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom && Configuration.autoCollect.Value)
-            {
-                for (int i = 0; i < GameNetworkManager.Instance.localPlayerController.ItemSlots.Length; i++)
-                {
-                    if (GameNetworkManager.Instance.localPlayerController.ItemSlots[i] == null)
-                        continue;
-
-                    if (!GameNetworkManager.Instance.localPlayerController.ItemSlots[i].isInShipRoom)
-                    {
-                        GameNetworkManager.Instance.localPlayerController.SetAllItemsInElevator(true, true);
-                        break;
-                    }
-                }
-            }
-
             ButlerRadar.UpdateButlers();
         }
 
@@ -333,9 +287,6 @@ namespace ButteryFixes.Patches.General
                     }
                 }
             }
-
-            if (__instance.currentLevel.name != "CompanyBuildingLevel")
-                TimeOfDay.Instance.playDelayedMusicCoroutine = null;
 
             ButlerRadar.ClearAllButlers();
         }
@@ -383,14 +334,6 @@ namespace ButteryFixes.Patches.General
             //}
         }
 
-        [HarmonyPatch(nameof(StartOfRound.LoadPlanetsMoldSpreadData))]
-        //[HarmonyPatch(nameof(StartOfRound.SetPlanetsMold))]
-        [HarmonyPostfix]
-        static void StartOfRound_Post_PlanetsMold(StartOfRound __instance)
-        {
-            NonPatchFunctions.TestForVainShrouds();
-        }
-
         [HarmonyPatch(nameof(StartOfRound.SetMapScreenInfoToCurrentLevel))]
         [HarmonyPostfix]
         static void StartOfRound_Post_SetMapScreenInfoToCurrentLevel(StartOfRound __instance)
@@ -398,14 +341,6 @@ namespace ButteryFixes.Patches.General
             // fix Embrion challenge moons displaying the wrong name
             if (__instance.isChallengeFile && __instance.currentLevel.LevelDescription.Contains("Embrion"))
                 __instance.screenLevelDescription.SetText(__instance.screenLevelDescription.text.Replace("Embrion is devoid", "Devoid"));
-        }
-
-        [HarmonyPatch(nameof(StartOfRound.ResetPlayersLoadedValueClientRpc))]
-        [HarmonyPostfix]
-        static void StartOfRound_Post_ResetPlayersLoadedValueClientRpc(StartOfRound __instance, bool landingShip)
-        {
-            if (!__instance.IsServer && landingShip && Configuration.endOrbitEarly.Value)
-                __instance.inShipPhase = false;
         }
 
         [HarmonyPatch(nameof(StartOfRound.SetMagnetOnClientRpc))]

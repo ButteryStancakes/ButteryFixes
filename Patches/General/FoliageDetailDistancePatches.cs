@@ -4,7 +4,7 @@ using HarmonyLib;
 namespace ButteryFixes.Patches.General
 {
     [HarmonyPatch(typeof(FoliageDetailDistance))]
-    internal class FoliageDetailDistancePatches
+    static class FoliageDetailDistancePatches
     {
         [HarmonyPatch(nameof(FoliageDetailDistance.Start))]
         [HarmonyPostfix]

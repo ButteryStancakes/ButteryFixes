@@ -6,7 +6,7 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(MicrowaveItem))]
-    internal class MicrowavePatches
+    static class MicrowavePatches
     {
         [HarmonyPatch(nameof(MicrowaveItem.TurnOnMicrowave))]
         [HarmonyPrefix]

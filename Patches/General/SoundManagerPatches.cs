@@ -3,7 +3,7 @@
 namespace ButteryFixes.Patches.General
 {
     [HarmonyPatch(typeof(SoundManager))]
-    internal class SoundManagerPatches
+    static class SoundManagerPatches
     {
         [HarmonyPatch(nameof(SoundManager.Start))]
         [HarmonyPostfix]

@@ -10,7 +10,7 @@ using UnityEngine.UI;
 namespace ButteryFixes.Patches.General
 {
     [HarmonyPatch(typeof(Terminal))]
-    internal class TerminalPatches
+    static class TerminalPatches
     {
         static int groupCreditsLastFrame = -1;
         static RectTransform groupCreditsBackground;
@@ -28,48 +28,16 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void Terminal_Post_Start(Terminal __instance)
         {
-            if (!Compatibility.ENABLE_VAIN_SHROUDS)
+            foreach (TerminalNode enemyFile in __instance.enemyFiles)
             {
-                TerminalNode vainShroudFile = __instance.enemyFiles.FirstOrDefault(enemyFile => enemyFile.name == "VainShroudFile");
-                if (vainShroudFile != null && __instance.scannedEnemyIDs.Contains(vainShroudFile.creatureFileID))
+                switch (enemyFile.name)
                 {
-                    Compatibility.ENABLE_VAIN_SHROUDS = true;
-                    Plugin.Logger.LogDebug("Vain Shrouds have already been scanned on this save");
-                }
-            }
-
-            if (Configuration.alterBestiary.Value)
-            {
-                foreach (TerminalNode enemyFile in __instance.enemyFiles)
-                {
-                    switch (enemyFile.name)
-                    {
-                        case "NutcrackerFile":
-                            if (enemyFile.displayText.EndsWith("house."))
-                            {
-                                enemyFile.displayText += "\n\nThey watch with one tireless eye, which only senses movement; It remembers the last creature it noticed whether they are moving or not.";
-                                Plugin.Logger.LogDebug("Bestiary: Nutcracker");
-                            }
-                            break;
-                        case "RadMechFile":
-                            if (!enemyFile.displayText.Contains("Anglen"))
-                            {
-                                enemyFile.displayText = enemyFile.displayText.Replace(
-                                    "\n The subject of who developed the Old Birds has been an intense debate since their first recorded appearance on December 18 of 2143, when a large number of Old Birds invaded the",
-                                    "\n The subject of who developed the Old Birds has been an intense debate since their first recorded appearance on December 18 of 2143, when over fifty Old Birds invaded the Anglen Capital. This is considered one of the first major causes for the downfall of the Anglen Empire. The most commonly upheld theory takes into account the tension between the Anglen and Buemoch military throughout the 2100's, however nothing has been proven in the centuries since.");
-                            }
-                            if (!enemyFile.displayText.Contains("Sigurd") && Compatibility.ENABLE_VAIN_SHROUDS)
-                            {
-                                enemyFile.displayText = enemyFile.displayText.Replace("OLD BIRDS", "OLD BIRDS\n\nSigurd's danger level: 95%")
-                                    + " DON'T MESS AROUND OR THEYLL GIVE YOU A RIDE.tHEY LOSE TRACK QUICK AND THEY CANT TURN VERY FAST, THEYRE DUMB AND THEY WONT SHUT UP sorry caps";
-                            }
-                            Plugin.Logger.LogDebug("Bestiary: Old Birds");
-                            break;
-                        case "MaskHornetsFile":
-                            enemyFile.creatureName = enemyFile.creatureName[0].ToString().ToUpper() + enemyFile.creatureName[1..];
-                            Plugin.Logger.LogDebug("Bestiary: Mask hornets");
-                            break;
-                    }
+                    case "MaskHornetsFile":
+                        enemyFile.creatureName = enemyFile.creatureName[0].ToString().ToUpper() + enemyFile.creatureName[1..];
+                        if (enemyFile.displayVideo.name == "NutcrackerVideo0001-0109")
+                            enemyFile.displayVideo = null;
+                        Plugin.Logger.LogDebug("Bestiary: Mask hornets");
+                        break;
                 }
             }
 
@@ -139,11 +107,7 @@ namespace ButteryFixes.Patches.General
                                 route.compatibleNouns =
                                 [
                                     .. route.compatibleNouns,
-                                    new()
-                                    {
-                                        noun = gordion,
-                                        result = companyNoun.result
-                                    },
+                                    new(gordion, companyNoun.result)
                                 ];
                                 __instance.terminalNodes.allKeywords =
                                 [
@@ -162,11 +126,7 @@ namespace ButteryFixes.Patches.General
                                         info.compatibleNouns =
                                         [
                                             .. info.compatibleNouns,
-                                            new()
-                                            {
-                                                noun = gordion,
-                                                result = companyNoun2.result
-                                            },
+                                            new(gordion, companyNoun2.result)
                                         ];
 
                                         Plugin.Logger.LogDebug("Terminal: Registered \"gordion\" to info");
@@ -194,12 +154,11 @@ namespace ButteryFixes.Patches.General
         {
             if (Configuration.scanImprovements.Value && modifiedDisplayText.Contains("[scanForItems]"))
             {
-                bool scanOnShip = StartOfRound.Instance.inShipPhase || (GlobalReferences.HangarShipDoor != null && !GlobalReferences.HangarShipDoor.buttonsEnabled) || StartOfRound.Instance.currentLevel.name == "CompanyBuildingLevel";
+                bool scanOnShip = StartOfRound.Instance.inShipPhase /*|| (GlobalReferences.HangarShipDoor != null && !GlobalReferences.HangarShipDoor.buttonsEnabled)*/ || StartOfRound.Instance.currentLevel.name == "CompanyBuildingLevel";
 
                 int objects = 0;
                 int value = 0;
                 System.Random rand = new(StartOfRound.Instance.randomMapSeed + 91);
-                string vehicleText = string.Empty;
                 foreach (GrabbableObject grabbableObject in Object.FindObjectsByType<GrabbableObject>(FindObjectsSortMode.None))
                 {
                     if (!grabbableObject.itemProperties.isScrap || grabbableObject is RagdollGrabbableObject)
@@ -229,14 +188,11 @@ namespace ButteryFixes.Patches.General
                             value += Mathf.Clamp(rand.Next(min, max), grabbableObject.scrapValue - (6 * objects), grabbableObject.scrapValue + (9 * objects));
                         }
                         objects++;
-
-                        if (inCruiser && string.IsNullOrEmpty(vehicleText))
-                            vehicleText = " and Cruiser";
                     }
                 }
 
                 if (scanOnShip)
-                    modifiedDisplayText = modifiedDisplayText.Replace("[scanForItems]", $"There are {objects} objects inside the ship{vehicleText}, totalling at an exact value of ${value}.");
+                    modifiedDisplayText = modifiedDisplayText.Replace("[scanForItems]", $"There are {objects} objects in the ship, totalling at ${value}.");
                 else
                 {
                     // also count unkilled butlers
@@ -360,7 +316,7 @@ namespace ButteryFixes.Patches.General
 
         [HarmonyPatch(nameof(Terminal.QuitTerminal))]
         [HarmonyPrefix]
-        static void Terminal_Pre_QuitTerminal(Terminal __instance)
+        static void Terminal_Pre_QuitTerminal()
         {
             if (GlobalReferences.lockingCamera > 0 && GameNetworkManager.Instance.localPlayerController.inTerminalMenu)
                 GlobalReferences.lockingCamera--;
@@ -386,6 +342,12 @@ namespace ButteryFixes.Patches.General
                         groupCreditsBackground.sizeDelta = new(75.175f + extraWidth, groupCreditsBackground.sizeDelta.y);
                     }
                 }
+            }
+
+            if (Configuration.forceMaxQuality.Value)
+            {
+                HUDManager.Instance.playerScreenTexture.texture = __instance.playerScreenTexHighRes;
+                GameNetworkManager.Instance.localPlayerController.gameplayCamera.targetTexture = __instance.playerScreenTexHighRes;
             }
         }
     }

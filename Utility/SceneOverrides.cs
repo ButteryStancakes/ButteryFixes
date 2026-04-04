@@ -12,11 +12,12 @@ namespace ButteryFixes.Utility
             if (mode != LoadSceneMode.Additive)
                 return;
 
-            bool rotateFireExit = Configuration.fixFireExits.Value;
             // factory ambience
             Transform bigMachine = GameObject.Find("/Environment/Map/DiageticAmbiance/BigMachine")?.transform;
             // for unused objects underneath the map
             List<string> modelsIntroScene = [];
+            // entrance scan node
+            GameObject scanNodeMainEntrance = GameObject.Find("/Environment/ScanNodes/ScanNode");
             switch (scene.name)
             {
                 case "Level1Experimentation":
@@ -124,10 +125,14 @@ namespace ButteryFixes.Utility
                     break;
                 case "Level3Vow":
                     Plugin.Logger.LogDebug("Detected landing on Vow");
-                    rotateFireExit = false;
                     break;
                 case "Level4March":
                     Plugin.Logger.LogDebug("Detected landing on March");
+                    if (scanNodeMainEntrance != null)
+                    {
+                        scanNodeMainEntrance.transform.position = new(-108.02002f, 0.585000992f, 21.3051224f);
+                        Plugin.Logger.LogDebug("March - Relocated \"Main entrance\" scan node");
+                    }
                     break;
                 case "Level5Rend":
                     Plugin.Logger.LogDebug("Detected landing on Rend");
@@ -210,17 +215,6 @@ namespace ButteryFixes.Utility
                         bigMachine.localPosition = new(bigMachine.localPosition.x, 14.2f, bigMachine.localPosition.z);
                         Plugin.Logger.LogDebug("Artifice - Fixed factory ambience");
                     }*/
-                    if (Configuration.restoreArtificeAmbience.Value)
-                    {
-                        AudioSource nightTimeSilenceBass = GameObject.Find("/Systems/Audio/HighAndLowAltitudeBG/LowAudio")?.GetComponent<AudioSource>();
-                        if (nightTimeSilenceBass != null)
-                        {
-                            nightTimeSilenceBass.playOnAwake = true;
-                            if (!nightTimeSilenceBass.isPlaying)
-                                nightTimeSilenceBass.Play();
-                            Plugin.Logger.LogDebug("Artifice - Restored nighttime ambience");
-                        }
-                    }
                     break;
                 case "Level10Adamance":
                     Plugin.Logger.LogDebug("Detected landing on Adamance");
@@ -237,7 +231,6 @@ namespace ButteryFixes.Utility
                         boxCollider.size = new(1.5744015f, 0.149668708f, 4.20355749f);
                         Plugin.Logger.LogDebug("Adamance - Fix sign collision");
                     }
-                    rotateFireExit = false;
                     break;
                 case "Level11Embrion":
                     Plugin.Logger.LogDebug("Detected landing on Embrion");
@@ -249,7 +242,6 @@ namespace ButteryFixes.Utility
                     break;
                 case "CompanyBuilding":
                     Plugin.Logger.LogDebug("Detected landing on Gordion");
-                    GameObject scanNodeMainEntrance = GameObject.Find("/Environment/ScanNodes/ScanNode");
                     if (scanNodeMainEntrance != null)
                     {
                         scanNodeMainEntrance.SetActive(false);
@@ -258,21 +250,7 @@ namespace ButteryFixes.Utility
                     break;
                 default:
                     Plugin.Logger.LogInfo("Landed on unknown moon");
-                    rotateFireExit = false;
                     break;
-            }
-
-            // fire exits
-            if (rotateFireExit)
-            {
-                foreach (EntranceTeleport entranceTeleport in Object.FindObjectsByType<EntranceTeleport>(FindObjectsSortMode.None))
-                {
-                    if (entranceTeleport.isEntranceToBuilding && entranceTeleport.entranceId > 0)
-                    {
-                        entranceTeleport.entrancePoint.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                        Plugin.Logger.LogDebug($"Fixed rotation of external fire exit #{entranceTeleport.entranceId}");
-                    }
-                }
             }
 
             // hide out-of-bounds objects

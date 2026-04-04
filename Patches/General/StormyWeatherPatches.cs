@@ -6,7 +6,7 @@ using UnityEngine;
 namespace ButteryFixes.Patches.General
 {
     [HarmonyPatch(typeof(StormyWeather))]
-    class StormyWeatherPatches
+    static class StormyWeatherPatches
     {
         [HarmonyPatch(nameof(StormyWeather.Update))]
         [HarmonyPostfix]

@@ -9,6 +9,13 @@ namespace ButteryFixes.Utility
         // Experimentation, Assurance, Vow, Gordion, March, Adamance, Rend, Dine, Offense, Titan, Artifice, Liquidation, Embrion
         internal const int NUM_LEVELS = 13;
 
+        internal static readonly string[] INTERIOR_WHITELIST = [
+            "Level1Flow",
+            "Level1Flow3Exits",
+            "Level2Flow",
+            "Level3Flow"
+        ];
+
         static Terminal _terminal;
         internal static Terminal Terminal
         {
@@ -21,7 +28,7 @@ namespace ButteryFixes.Utility
             }
         }
 
-        static HangarShipDoor hangarShipDoor;
+        /*static HangarShipDoor hangarShipDoor;
         internal static HangarShipDoor HangarShipDoor
         {
             get
@@ -31,7 +38,7 @@ namespace ButteryFixes.Utility
 
                 return hangarShipDoor;
             }
-        }
+        }*/
 
         static StartMatchLever startMatchLever;
         internal static StartMatchLever StartMatchLever
@@ -45,9 +52,19 @@ namespace ButteryFixes.Utility
             }
         }
 
-        internal static Dictionary<string, EnemyType> allEnemiesList = [];
+        static MoldSpreadManager moldSpreadManager;
+        internal static MoldSpreadManager MoldSpreadManager
+        {
+            get
+            {
+                if (moldSpreadManager == null)
+                    moldSpreadManager = Object.FindAnyObjectByType<MoldSpreadManager>();
 
-        internal static float dopplerLevelMult = 1f;
+                return moldSpreadManager;
+            }
+        }
+
+        internal static Dictionary<string, EnemyType> allEnemiesList = [];
 
         // player corpse burn effect
         internal static Mesh playerBody;
@@ -59,9 +76,6 @@ namespace ButteryFixes.Utility
         internal static Transform shipNode;
         internal static Vector3 shipNodeOffset;
         internal static readonly Vector3 shipDefaultPos = new(1.27146339f, 0.278438568f, -7.5f);
-
-        // to fix screen position of scan nodes when changing resolution
-        internal static bool patchScanNodes;
 
         // for end-of-round scrap counter
         internal static int scrapNotCollected = -1, scrapEaten;

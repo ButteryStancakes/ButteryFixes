@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace ButteryFixes.Patches.General
 {
     [HarmonyPatch(typeof(QuickMenuManager))]
-    internal class QuickMenuManagerPatches
+    static class QuickMenuManagerPatches
     {
         [HarmonyPatch(nameof(QuickMenuManager.Start))]
         [HarmonyPostfix]

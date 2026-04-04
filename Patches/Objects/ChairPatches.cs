@@ -5,7 +5,7 @@ using HarmonyLib;
 namespace ButteryFixes.Patches.Objects
 {
     [HarmonyPatch(typeof(MoveToExitSpecialAnimation))]
-    class MoveToExitSpecialAnimationPatches
+    static class MoveToExitSpecialAnimationPatches
     {
         [HarmonyPatch(nameof(MoveToExitSpecialAnimation.OnShipPowerSurge))]
         [HarmonyPostfix]

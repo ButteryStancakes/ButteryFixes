@@ -10,7 +10,7 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Enemies
 {
     [HarmonyPatch(typeof(NutcrackerEnemyAI))]
-    internal class NutcrackerPatches
+    static class NutcrackerPatches
     {
         [HarmonyPatch(nameof(NutcrackerEnemyAI.Start))]
         [HarmonyPostfix]
@@ -53,6 +53,7 @@ namespace ButteryFixes.Patches.Enemies
         {
             List<CodeInstruction> codes = instructions.ToList();
 
+            int count = 0;
             FieldInfo collidersAndRoomMaskAndDefault = AccessTools.Field(typeof(StartOfRound), nameof(StartOfRound.collidersAndRoomMaskAndDefault));
             for (int i = 1; i < codes.Count; i++)
             {
@@ -60,8 +61,14 @@ namespace ButteryFixes.Patches.Enemies
                 {
                     codes[i].operand = AccessTools.Method(typeof(Physics), nameof(Physics.Linecast), [typeof(Vector3), typeof(Vector3), typeof(int), typeof(QueryTriggerInteraction)]);
                     codes.Insert(i, new(OpCodes.Ldc_I4_1));
-                    Plugin.Logger.LogDebug("Transpiler (Nutcracker sight): Ignore triggers when spotting player");
-                    return codes; // i++;
+                    count++;
+                    if (count == 2)
+                    {
+                        Plugin.Logger.LogDebug("Transpiler (Nutcracker sight): Ignore triggers when spotting player");
+                        return codes;
+                    }
+                    else
+                        i++;
                 }
             }
 

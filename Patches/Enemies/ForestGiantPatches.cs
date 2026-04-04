@@ -1,5 +1,4 @@
 ﻿using ButteryFixes.Utility;
-using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +9,8 @@ using UnityEngine;
 namespace ButteryFixes.Patches.Enemies
 {
     [HarmonyPatch(typeof(ForestGiantAI))]
-    internal class ForestGiantPatches
+    static class ForestGiantPatches
     {
-        static int lastGiantRange = 70;
-
         [HarmonyPatch(nameof(ForestGiantAI.AnimationEventA))]
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> ForestGiantAI_Trans_AnimationEventA(IEnumerable<CodeInstruction> instructions)
@@ -39,41 +36,14 @@ namespace ButteryFixes.Patches.Enemies
             return instructions;
         }
 
-        [HarmonyPatch(nameof(ForestGiantAI.LookForPlayers))]
-        [HarmonyPostfix]
-        static void ForestGiantAI_Post_LookForPlayers(ForestGiantAI __instance)
-        {
-            for (int i = 0; i < __instance.playerStealthMeters.Length; i++)
-                __instance.playerStealthMeters[i] = Mathf.Clamp01(__instance.playerStealthMeters[i]);
-        }
-
-        [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.GetAllPlayersInLineOfSight))]
-        [HarmonyPostfix]
-        static void ForestGiantAI_Post_GetAllPlayersInLineOfSight(EnemyAI __instance, PlayerControllerB[] __result, int range)
-        {
-            if (__instance is ForestGiantAI forestGiantAI)
-            {
-                lastGiantRange = range;
-                // when no players are in line of sight, forget about players you've seen before
-                if (__result == null && __instance.IsOwner && Configuration.fixGiantSight.Value)
-                {
-                    for (int i = 0; i < forestGiantAI.playerStealthMeters.Length; i++)
-                        forestGiantAI.playerStealthMeters[i] = Mathf.Clamp01(forestGiantAI.playerStealthMeters[i] - (0.33f * Time.deltaTime));
-                }
-            }
-        }
-
         [HarmonyPatch(typeof(ForestGiantAI), nameof(ForestGiantAI.GiantSeePlayerEffect))]
         [HarmonyPrefix]
         static bool ForestGiantAI_Pre_GiantSeePlayerEffect(EnemyAI __instance)
         {
-            if (__instance.eye == null || GameNetworkManager.Instance.localPlayerController.gameplayCamera == null)
+            if (__instance.eye == null || GameNetworkManager.Instance.localPlayerController.gameplayCamera == null || TimeOfDay.Instance.currentLevelWeather != LevelWeatherType.Foggy)
                 return true;
 
-            if (lastGiantRange > 30 && TimeOfDay.Instance.currentLevelWeather == LevelWeatherType.Foggy)
-                lastGiantRange = 30;
-
-            return Vector3.Distance(__instance.eye.position, GameNetworkManager.Instance.localPlayerController.gameplayCamera.transform.position) <= lastGiantRange;
+            return Vector3.Distance(__instance.eye.position, GameNetworkManager.Instance.localPlayerController.gameplayCamera.transform.position) <= 30;
         }
     }
 }
