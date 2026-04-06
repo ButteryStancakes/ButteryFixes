@@ -90,10 +90,6 @@ namespace ButteryFixes.Patches.General
 
                 __instance.LostSignalUI.SetActive(__instance.playerIsInCaves);
             }
-
-            // fix ship icon getting stuck on screen
-            if (__instance.shipIcon != null && __instance.shipArrowUI != null && __instance.shipIcon.activeSelf && !__instance.shipArrowUI.activeSelf)
-                __instance.shipIcon.SetActive(false);
         }
 
         // vanilla logic is too susceptible to problems... needs to be replaced

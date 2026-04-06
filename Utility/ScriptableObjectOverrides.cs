@@ -70,7 +70,7 @@ namespace ButteryFixes.Utility
                 switch (selectableLevel.name)
                 {
                     case "OffenseLevel":
-                        if (selectableLevel.videoReel.name == "MapView220Ass")
+                        if (selectableLevel.videoReel != null && selectableLevel.videoReel.name == "MapView220Ass")
                         {
                             selectableLevel.videoReel = null;
                             Plugin.Logger.LogDebug("Offense: Video reel");

@@ -34,7 +34,7 @@ namespace ButteryFixes.Patches.General
                 {
                     case "MaskHornetsFile":
                         enemyFile.creatureName = enemyFile.creatureName[0].ToString().ToUpper() + enemyFile.creatureName[1..];
-                        if (enemyFile.displayVideo.name == "NutcrackerVideo0001-0109")
+                        if (enemyFile.displayVideo != null && enemyFile.displayVideo.name == "NutcrackerVideo0001-0109")
                             enemyFile.displayVideo = null;
                         Plugin.Logger.LogDebug("Bestiary: Mask hornets");
                         break;
@@ -56,15 +56,12 @@ namespace ButteryFixes.Patches.General
 
             if (buy != null)
             {
-                foreach (string furniture in new string[] { "WelcomeMat", "Fridge" })
+                TerminalNode buyFridge = buy.compatibleNouns.FirstOrDefault(noun => noun.noun?.name == "Fridge")?.result;
+                TerminalNode buyFridge2 = buyFridge?.terminalOptions?.FirstOrDefault(option => option.noun?.name == "Confirm")?.result;
+                if (buyFridge2 != null)
                 {
-                    TerminalNode buyFurniture = buy.compatibleNouns.FirstOrDefault(noun => noun.noun?.name == furniture)?.result;
-                    TerminalNode buyFurniture2 = buyFurniture?.terminalOptions?.FirstOrDefault(option => option.noun?.name == "Confirm")?.result;
-                    if (buyFurniture2 != null)
-                    {
-                        buyFurniture2.itemCost = buyFurniture.itemCost;
-                        Plugin.Logger.LogDebug($"Price: {StartOfRound.Instance.unlockablesList.unlockables[buyFurniture2.shipUnlockableID].unlockableName}");
-                    }
+                    buyFridge2.itemCost = buyFridge.itemCost;
+                    Plugin.Logger.LogDebug("Price: Fridge");
                 }
             }
 
@@ -154,14 +151,14 @@ namespace ButteryFixes.Patches.General
         {
             if (Configuration.scanImprovements.Value && modifiedDisplayText.Contains("[scanForItems]"))
             {
-                bool scanOnShip = StartOfRound.Instance.inShipPhase /*|| (GlobalReferences.HangarShipDoor != null && !GlobalReferences.HangarShipDoor.buttonsEnabled)*/ || StartOfRound.Instance.currentLevel.name == "CompanyBuildingLevel";
+                bool scanOnShip = StartOfRound.Instance.inShipPhase || (GlobalReferences.HangarShipDoor != null && !GlobalReferences.HangarShipDoor.buttonsEnabled) || StartOfRound.Instance.currentLevel.name == "CompanyBuildingLevel";
 
                 int objects = 0;
                 int value = 0;
                 System.Random rand = new(StartOfRound.Instance.randomMapSeed + 91);
                 foreach (GrabbableObject grabbableObject in Object.FindObjectsByType<GrabbableObject>(FindObjectsSortMode.None))
                 {
-                    if (!grabbableObject.itemProperties.isScrap || grabbableObject is RagdollGrabbableObject)
+                    if ((!grabbableObject.itemProperties.isScrap && grabbableObject.itemProperties.itemId != 14) || grabbableObject is RagdollGrabbableObject)
                         continue;
 
                     bool inShip = grabbableObject.isInShipRoom || grabbableObject.isInElevator;
@@ -344,11 +341,11 @@ namespace ButteryFixes.Patches.General
                 }
             }
 
-            if (Configuration.forceMaxQuality.Value)
+            /*if (Configuration.forceMaxQuality.Value)
             {
                 HUDManager.Instance.playerScreenTexture.texture = __instance.playerScreenTexHighRes;
                 GameNetworkManager.Instance.localPlayerController.gameplayCamera.targetTexture = __instance.playerScreenTexHighRes;
-            }
+            }*/
         }
     }
 }

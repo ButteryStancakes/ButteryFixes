@@ -50,10 +50,11 @@ namespace ButteryFixes.Utility
                     Transform steelDoor = GameObject.Find("/Environment/SteelDoor")?.transform;
                     if (steelDoor != null)
                     {
-                        steelDoor.localPosition = new(-194.668f, 19.788f, steelDoor.localPosition.z);
+                        /*steelDoor.localPosition = new(-194.668f, 19.788f, steelDoor.localPosition.z);
                         InteractTrigger cube = steelDoor.Find("DoorMesh/Cube")?.GetComponent<InteractTrigger>();
                         if (cube != null)
-                            cube.hoverTip = cube.hoverTip.Replace("[ LMB ]", "[LMB]");
+                            cube.hoverTip = cube.hoverTip.Replace("[ LMB ]", "[LMB]");*/
+                        steelDoor.gameObject.SetActive(false);
                         Plugin.Logger.LogDebug("Experimentation - Fixed old back entrance");
                     }
                     // hide weird untextured geometry
@@ -83,8 +84,8 @@ namespace ButteryFixes.Utility
                         "Cube.001",
                         "Cube.004",
                         "Cube.006",
-                        "Cube.007/HangarRoomBeams.001",
-                        "Cube.007/SiloWithLadder.001",
+                        //"Cube.007/HangarRoomBeams.001",
+                        //"Cube.007/SiloWithLadder.001",
                         "Girder1",
                         "GridPlate",
                         "LadderFrame",
@@ -128,11 +129,6 @@ namespace ButteryFixes.Utility
                     break;
                 case "Level4March":
                     Plugin.Logger.LogDebug("Detected landing on March");
-                    if (scanNodeMainEntrance != null)
-                    {
-                        scanNodeMainEntrance.transform.position = new(-108.02002f, 0.585000992f, 21.3051224f);
-                        Plugin.Logger.LogDebug("March - Relocated \"Main entrance\" scan node");
-                    }
                     break;
                 case "Level5Rend":
                     Plugin.Logger.LogDebug("Detected landing on Rend");

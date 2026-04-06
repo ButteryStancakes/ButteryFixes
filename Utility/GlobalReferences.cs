@@ -28,7 +28,7 @@ namespace ButteryFixes.Utility
             }
         }
 
-        /*static HangarShipDoor hangarShipDoor;
+        static HangarShipDoor hangarShipDoor;
         internal static HangarShipDoor HangarShipDoor
         {
             get
@@ -38,7 +38,7 @@ namespace ButteryFixes.Utility
 
                 return hangarShipDoor;
             }
-        }*/
+        }
 
         static StartMatchLever startMatchLever;
         internal static StartMatchLever StartMatchLever
