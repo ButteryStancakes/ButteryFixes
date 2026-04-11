@@ -52,7 +52,7 @@ namespace ButteryFixes
             bodiesCollectSelf = configFile.Bind(
                 "Compatibility",
                 "BodiesCollectSelf",
-                false,
+                true,
                 "Bodies will automatically collect themselves when teleported to the ship, or when players die inside of the ship.");
         }
 

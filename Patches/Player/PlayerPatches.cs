@@ -239,5 +239,16 @@ namespace ButteryFixes.Patches.Player
                 GlobalReferences.gibbedPlayer = StartOfRound.Instance.allPlayerScripts[playerId];
             }
         }
+
+        [HarmonyPatch(nameof(PlayerControllerB.KillPlayer))]
+        [HarmonyPostfix]
+        static void PlayerControllerB_Post_KillPlayer(PlayerControllerB __instance)
+        {
+            if (__instance == GameNetworkManager.Instance.localPlayerController)
+            {
+                GlobalReferences.lockingCamera = 0;
+                GlobalReferences.sittingInArmchair = false;
+            }
+        }
     }
 }

@@ -8,8 +8,6 @@ namespace ButteryFixes.Utility
 {
     internal static class ScriptableObjectOverrides
     {
-        static Mesh ear, severedHandLOD0, severedThighLOD0;
-
         internal static void OverrideEnemyTypes()
         {
             foreach (KeyValuePair<string, EnemyType> enemy in GlobalReferences.allEnemiesList)
@@ -82,31 +80,15 @@ namespace ButteryFixes.Utility
 
         internal static void OverrideItems()
         {
-            if (ear == null || severedHandLOD0 == null || severedThighLOD0 == null)
-            {
-                try
-                {
-                    AssetBundle meshes = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "severedmesh"));
-                    ear = meshes.LoadAsset<Mesh>("Ear");
-                    severedHandLOD0 = meshes.LoadAsset<Mesh>("SeveredHandLOD0");
-                    severedThighLOD0 = meshes.LoadAsset<Mesh>("SeveredThighLOD0");
-                    meshes.Unload(false);
-                }
-                catch
-                {
-                    Plugin.Logger.LogError("Encountered some error loading assets from bundle \"severedmesh\". Did you install the plugin correctly?");
-                }
-            }
-
             Dictionary<string, bool> conductiveItems = new()
             {
                 //{ "Airhorn", true },
                 //{ "ControlPad", false },
                 { "DustPan", true },
-                { "FancyCup", true },
+                { "FancyCup", !Compatibility.INSTALLED_UPTURNED_VARIETY },
                 { "LockPicker", true },
                 //{ "MagnifyingGlass", true },
-                { "Phone", true },
+                //{ "Phone", true },
                 { "Shotgun", true },
                 { "SprayPaint", true },
                 //{ "SteeringWheel", true },
@@ -127,12 +109,6 @@ namespace ButteryFixes.Utility
                 { "PillBottle", true },
                 { "SprayPaint", true },
                 { "WeedKillerBottle", true }
-            };
-            Dictionary<string, Mesh> severedItems = new()
-            {
-                { "SeveredEar", ear },
-                { "SeveredHand", severedHandLOD0 },
-                { "SeveredThigh", severedThighLOD0 }
             };
             ScanNodeProperties scanNodeProperties;
 
@@ -305,25 +281,6 @@ namespace ButteryFixes.Utility
                 {
                     item.canBeGrabbedBeforeGameStart = grabbableBeforeStart[item.name];
                     Plugin.Logger.LogDebug($"Hold before ship has landed: {item.itemName} ({item.canBeGrabbedBeforeGameStart})");
-                }
-
-                // refactor this in the future, to be more flexible and less hardcoded
-                /*for (int i = item.spawnPositionTypes.Count - 1; i >= 0; i--)
-                {
-                    if (item.spawnPositionTypes[i] != null && item.spawnPositionTypes[i].name == "TestItem")
-                    {
-                        Plugin.Logger.LogDebug($"\"{item.name}\" includes a broken spawngroup which will block it from spawning in normal gameplay. This has been fixed");
-                        item.spawnPositionTypes.RemoveAt(i);
-                    }
-                }*/
-
-                if (severedItems.TryGetValue(item.name, out Mesh severedMesh) && severedMesh != null)
-                {
-                    MeshFilter meshFilter = item.spawnPrefab.GetComponent<MeshFilter>();
-                    meshFilter.mesh = severedMesh;
-                    meshFilter.mesh.RecalculateNormals();
-                    meshFilter.mesh.RecalculateTangents();
-                    Plugin.Logger.LogDebug($"Mesh: {item.itemName}");
                 }
             }
         }

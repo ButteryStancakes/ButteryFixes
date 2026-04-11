@@ -40,10 +40,27 @@ namespace ButteryFixes.Patches.Enemies
         [HarmonyPrefix]
         static bool ForestGiantAI_Pre_GiantSeePlayerEffect(EnemyAI __instance)
         {
-            if (__instance.eye == null || GameNetworkManager.Instance.localPlayerController.gameplayCamera == null || TimeOfDay.Instance.currentLevelWeather != LevelWeatherType.Foggy)
+            if (__instance.eye == null || GameNetworkManager.Instance.localPlayerController.gameplayCamera == null)
                 return true;
 
-            return Vector3.Distance(__instance.eye.position, GameNetworkManager.Instance.localPlayerController.gameplayCamera.transform.position) <= 30;
+            float dist = Vector3.Distance(__instance.eye.position, GameNetworkManager.Instance.localPlayerController.gameplayCamera.transform.position);
+
+            if (dist > 16f && GameNetworkManager.Instance.localPlayerController.isUnderwater)
+                return false;
+
+            if (dist > 30f && TimeOfDay.Instance.currentLevelWeather == LevelWeatherType.Foggy)
+                return false;
+
+            float suspicionMult = 1f;
+            if (!GameNetworkManager.Instance.localPlayerController.isCrouching)
+                suspicionMult += 1f;
+            if (GameNetworkManager.Instance.localPlayerController.timeSincePlayerMoving < 0.1f)
+                suspicionMult += 1f;
+
+            if (suspicionMult < 2f && dist >= 45f)
+                return false;
+
+            return true;
         }
     }
 }

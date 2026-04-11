@@ -218,7 +218,7 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPostfix]
         static void DeadBodyInfo_Post_SetRagdollPositionSafely(DeadBodyInfo __instance, Vector3 newPosition)
         {
-            if (Configuration.bodiesCollectSelf.Value && !__instance.deactivated && __instance.grabBodyObject != null && !__instance.grabBodyObject.deactivated && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(newPosition))
+            if (Configuration.bodiesCollectSelf.Value && !__instance.deactivated && __instance.gameObject.activeSelf && __instance.grabBodyObject != null && !__instance.grabBodyObject.deactivated && StartOfRound.Instance.shipInnerRoomBounds.bounds.Contains(newPosition))
             {
                 GameNetworkManager.Instance.localPlayerController.SetItemInElevator(true, true, __instance.grabBodyObject);
                 RoundManager.Instance.CollectNewScrapForThisRound(__instance.grabBodyObject);
