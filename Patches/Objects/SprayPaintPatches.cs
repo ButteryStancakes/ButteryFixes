@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
 
@@ -96,9 +97,10 @@ namespace ButteryFixes.Patches.Objects
 
             List<CodeInstruction> codes = instructions.ToList();
 
+            MethodInfo distance = AccessTools.Method(typeof(Vector3), nameof(Vector3.Distance));
             for (int i = 1; i < codes.Count; i++)
             {
-                if (codes[i].opcode == OpCodes.Ldc_R4 && (float)codes[i].operand == 0.175f && codes[i - 1].opcode == OpCodes.Call && codes[i - 1].operand.ToString().Contains("Distance"))
+                if (codes[i].opcode == OpCodes.Ldc_R4 && (float)codes[i].operand == 0.175f && codes[i - 1].opcode == OpCodes.Call && codes[i - 1].operand as MethodInfo == distance)
                 {
                     codes[i].operand = 0.1f;
                     Plugin.Logger.LogDebug("Transpiler (Spray paint): Decrease distance between decals");

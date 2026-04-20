@@ -45,7 +45,7 @@ namespace ButteryFixes.Patches.General
             GlobalReferences.allEnemiesList.Clear();
             GlobalReferences.lockingCamera = 0;
             GlobalReferences.sittingInArmchair = false;
-            ButlerRadar.ClearAllButlers();
+            EnemyRadar.Reset();
         }
     }
 }

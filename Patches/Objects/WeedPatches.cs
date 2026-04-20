@@ -44,8 +44,8 @@ namespace ButteryFixes.Patches.Objects
             {
                 if (codes[i].opcode == OpCodes.Call)
                 {
-                    string methodName = codes[i].operand.ToString();
-                    if (methodName.Contains("FindObjectOfType") && methodName.Contains("MoldSpreadManager"))
+                    MethodInfo methodInfo = codes[i].operand as MethodInfo;
+                    if (methodInfo == ReflectionCache.FIND_OBJECT_OF_TYPE_MOLD_SPREAD_MANAGER)
                     {
                         codes[i].operand = ReflectionCache.MOLD_SPREAD_MANAGER;
                         Plugin.Logger.LogDebug($"Transpiler ({__originalMethod.DeclaringType}.{__originalMethod.Name}): Cache mold manager");

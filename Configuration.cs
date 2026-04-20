@@ -27,7 +27,7 @@ namespace ButteryFixes
     {
         static ConfigFile configFile;
 
-        internal static ConfigEntry<bool> makeConductive, fixJumpCheese, showApparatusValue, scanImprovements, fixSurfacePrices, lockInTerminal, filterDecor, typeGordion, playermodelPatches, patchLadders, adjustCooldowns, noBodyNoSignal, theGoldenGoblet, charredBodies, bodiesCollectSelf, forceMaxQuality;
+        internal static ConfigEntry<bool> makeConductive, fixJumpCheese, showApparatusValue, scanImprovements, fixSurfacePrices, lockInTerminal, filterDecor, typeGordion, playermodelPatches, patchLadders, adjustCooldowns, noBodyNoSignal, theGoldenGoblet, charredBodies, bodiesCollectSelf;
         internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
@@ -79,12 +79,6 @@ namespace ButteryFixes
 
         static void VisualConfig()
         {
-            forceMaxQuality = configFile.Bind(
-                "Visual",
-                "ForceMaxQuality",
-                false,
-                "The game renders the screen at an increased resolution when using the terminal, separate from normal resolution settings. Enabling this setting will force \"terminal quality\" across the entire game, increasing overall visual fidelity.");
-
             restoreFilmGrain = configFile.Bind(
                 "Visual",
                 "RestoreFilmGrain",
@@ -110,7 +104,7 @@ namespace ButteryFixes
                 "Extra",
                 "ScanImprovements",
                 true,
-                "Allows the \"scan\" command on the terminal to count the value of items on your ship while parked at Gordion. Butlers' knives will be visible on the map and \"scan\" command before they are killed.");
+                "Allows the \"scan\" command on the terminal to count the value of items on your ship while parked at Gordion. Butlers' knives will be visible on the map and \"scan\" command before they are killed. When infected by Cadavers, you will be able to see a red dot when spectating yourself on the ship's radar, just like other players.");
 
             lockInTerminal = configFile.Bind(
                 "Extra",
@@ -205,16 +199,11 @@ namespace ButteryFixes
             configFile.Remove(configFile["Compatibility", "AutoCollect"].Definition);
             configFile.Bind("Compatibility", "EndOrbitEarly", true, "Legacy setting, doesn't work");
             configFile.Remove(configFile["Compatibility", "EndOrbitEarly"].Definition);
-            // updated to ForceMaxQuality
-            if (!forceMaxQuality.Value)
-            {
-                GameResolution gameResolution = configFile.Bind("Visual", "GameResolution", GameResolution.DontChange, "Legacy setting, use \"ForceMaxQuality\" instead").Value;
-                if (gameResolution == GameResolution.High)
-                    forceMaxQuality.Value = true;
-                configFile.Remove(configFile["Visual", "GameResolution"].Definition);
-            }
+            // replaced with pause menu setting
+            configFile.Bind("Visual", "ForceMaxQuality", false, "Legacy setting, doesn't work");
+            configFile.Remove(configFile["Visual", "ForceMaxQuality"].Definition);
             // removed when fixed in v81
-            configFile.Bind("Gameplay", "KeysAreScrap", true, "Legacy setting, doesn't work");
+            configFile.Bind("Gameplay", "KeysAreScrap", false, "Legacy setting, doesn't work");
             configFile.Remove(configFile["Gameplay", "KeysAreScrap"].Definition);
             configFile.Bind("Gameplay", "FixFireExits", true, "Legacy setting, doesn't work");
             configFile.Remove(configFile["Gameplay", "FixFireExits"].Definition);

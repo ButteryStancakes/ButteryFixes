@@ -193,7 +193,7 @@ namespace ButteryFixes.Patches.General
                 else
                 {
                     // also count unkilled butlers
-                    for (int i = 0; i < ButlerRadar.CountButlers(); i++)
+                    for (int i = 0; i < EnemyRadar.CountButlers(); i++)
                     {
                         (int min, int max) = valueOverrides["Knife"];
                         value += Mathf.Clamp(rand.Next(min, max), 35 - (6 * objects), 35 + (9 * objects));

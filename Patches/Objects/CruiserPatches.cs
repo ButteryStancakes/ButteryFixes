@@ -129,8 +129,8 @@ namespace ButteryFixes.Patches.Objects
             {
                 if (codes[i].opcode == OpCodes.Call)
                 {
-                    string methodName = codes[i].operand.ToString();
-                    if (methodName.Contains("FindObjectOfType") && methodName.Contains("VehicleController"))
+                    MethodInfo methodInfo = codes[i].operand as MethodInfo;
+                    if (methodInfo == ReflectionCache.FIND_OBJECT_OF_TYPE_VEHICLE_CONTROLLER)
                     {
                         codes[i].opcode = OpCodes.Ldsfld;
                         codes[i].operand = ReflectionCache.VEHICLE_CONTROLLER;

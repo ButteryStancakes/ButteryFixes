@@ -253,7 +253,7 @@ namespace ButteryFixes.Patches.General
             if (SoundManager.Instance != null && SoundManager.Instance.echoEnabled && GameNetworkManager.Instance.localPlayerController != null && GameNetworkManager.Instance.localPlayerController.isPlayerDead && GameNetworkManager.Instance.localPlayerController.spectatedPlayerScript != null && !GameNetworkManager.Instance.localPlayerController.spectatedPlayerScript.isInsideFactory)
                 SoundManager.Instance.SetEchoFilter(false);
 
-            ButlerRadar.UpdateButlers();
+            EnemyRadar.Refresh();
         }
 
         [HarmonyPatch(nameof(StartOfRound.ShipHasLeft))]
@@ -288,7 +288,7 @@ namespace ButteryFixes.Patches.General
                 }
             }
 
-            ButlerRadar.ClearAllButlers();
+            EnemyRadar.Reset();
         }
 
         [HarmonyPatch(nameof(StartOfRound.ResetShip))]
@@ -388,6 +388,32 @@ namespace ButteryFixes.Patches.General
 
             Plugin.Logger.LogError("Magnet transpiler failed");
             return instructions;
+        }
+
+        [HarmonyPatch(nameof(StartOfRound.SetPlanetsMold))]
+        [HarmonyPrefix]
+        static void StartOfRound_Pre_SetPlanetsMold(StartOfRound __instance, ref float __state)
+        {
+            __state = TimeOfDay.Instance.luckValue;
+
+            TimeOfDay.Instance.luckValue = 0f;
+            for (int i = 0; i < TimeOfDay.Instance.furniturePlacedAtQuotaStart.Count; i++)
+            {
+                if (i >= __instance.unlockablesList.unlockables.Count)
+                    continue;
+
+                TimeOfDay.Instance.luckValue += __instance.unlockablesList.unlockables[TimeOfDay.Instance.furniturePlacedAtQuotaStart[i]].luckValue;
+            }
+
+            TimeOfDay.Instance.luckValue = Mathf.Clamp(TimeOfDay.Instance.luckValue, -0.5f, 1f);
+            Plugin.Logger.LogDebug($"Weeds: Luck {__state * 100}% -> {TimeOfDay.Instance.luckValue * 100}%");
+        }
+
+        [HarmonyPatch(nameof(StartOfRound.SetPlanetsMold))]
+        [HarmonyPostfix]
+        static void StartOfRound_Post_SetPlanetsMold(StartOfRound __instance, float __state)
+        {
+            TimeOfDay.Instance.luckValue = __state;
         }
     }
 }

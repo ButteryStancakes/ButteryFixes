@@ -11,7 +11,7 @@ namespace ButteryFixes.Patches.Enemies
         static void ButlerEnemyAI_Post_Start(ButlerEnemyAI __instance)
         {
             if (Configuration.scanImprovements.Value)
-                ButlerRadar.SpawnButler(__instance);
+                EnemyRadar.SpawnButler(__instance);
         }
     }
 }

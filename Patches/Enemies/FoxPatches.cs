@@ -24,23 +24,19 @@ namespace ButteryFixes.Patches.Enemies
             {
                 if (codes[i].opcode == OpCodes.Call)
                 {
-                    string methodName = codes[i].operand.ToString();
-                    if (methodName.Contains("FindObjectOfType") && methodName.Contains("VehicleController"))
+                    MethodInfo methodInfo = codes[i].operand as MethodInfo;
+                    if (methodInfo == ReflectionCache.FIND_OBJECT_OF_TYPE_VEHICLE_CONTROLLER)
                     {
                         codes[i].opcode = OpCodes.Ldsfld;
                         codes[i].operand = ReflectionCache.VEHICLE_CONTROLLER;
                         Plugin.Logger.LogDebug($"Transpiler (BushWolfEnemy.Update): Cache Cruiser script");
                     }
-                    else
+                    else if (methodInfo == mathfMax && codes[i - 1].opcode == OpCodes.Ldc_I4_0 && codes[i - 4].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 4].operand == livingPlayers)
                     {
-                        MethodInfo methodInfo = codes[i].operand as MethodInfo;
-                        if (methodInfo == mathfMax && codes[i - 1].opcode == OpCodes.Ldc_I4_0 && codes[i - 4].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 4].operand == livingPlayers)
-                        {
-                            codes[i].operand = mathfClamp;
-                            codes.Insert(i, new(OpCodes.Ldc_I4_3));
-                            i++;
-                            Plugin.Logger.LogDebug($"Transpiler (Fox AI): Clamp livingPlayers-1 between 0 and 3");
-                        }
+                        codes[i].operand = mathfClamp;
+                        codes.Insert(i, new(OpCodes.Ldc_I4_3));
+                        i++;
+                        Plugin.Logger.LogDebug($"Transpiler (Fox AI): Clamp livingPlayers-1 between 0 and 3");
                     }
                 }
             }

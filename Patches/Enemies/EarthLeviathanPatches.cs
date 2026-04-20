@@ -17,7 +17,7 @@ namespace ButteryFixes.Patches.Enemies
         [HarmonyPrefix]
         static bool SandWormAI_Pre_OnCollideWithEnemy(SandWormAI __instance, EnemyAI enemyScript)
         {
-            return __instance.enemyType != enemyScript.enemyType;
+            return enemyScript == null || __instance.enemyType != enemyScript.enemyType;
         }
     }
 }

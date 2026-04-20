@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -129,6 +130,40 @@ namespace ButteryFixes.Utility
                     break;
                 case "Level4March":
                     Plugin.Logger.LogDebug("Detected landing on March");
+                    Transform trees = GameObject.Find("/Environment/Map/Trees")?.transform;
+                    if (trees != null)
+                    {
+                        GameObject wychElmA_LOD1 = trees.GetComponentsInChildren<MeshFilter>().FirstOrDefault(meshFilter => meshFilter.name == "WychElmA_LOD1" && meshFilter.sharedMesh?.name == "WychElmTreeALOD1" && meshFilter.GetComponent<Renderer>() != null)?.gameObject;
+
+                        foreach (Transform tree in trees)
+                        {
+                            if (!tree.name.StartsWith("WychElmA"))
+                                continue;
+
+                            Renderer lod1 = tree.Find("WychElmA_LOD1")?.GetComponent<Renderer>();
+                            if (lod1 != null)
+                            {
+                                lod1.enabled = true;
+                                Plugin.Logger.LogDebug($"March - Enable LOD \"{lod1.name}\" for \"{tree.name}\"");
+                            }
+                            else if (wychElmA_LOD1 != null)
+                            {
+                                LODGroup lodGroup = tree.GetComponent<LODGroup>();
+                                if (lodGroup == null)
+                                    continue;
+
+                                LOD[] lods = lodGroup.GetLODs();
+                                if (lods.Length < 2 || (lods[1].renderers != null && lods[1].renderers.Length > 0 && lods[1].renderers[0] != null))
+                                    continue;
+
+                                lods[1].renderers = [Object.Instantiate(wychElmA_LOD1, tree).GetComponent<Renderer>()];
+
+                                lodGroup.SetLODs(lods);
+
+                                Plugin.Logger.LogDebug($"March - Add LOD1 \"{lods[1].renderers[0].name}\" to \"{tree.name}\"");
+                            }
+                        }
+                    }
                     break;
                 case "Level5Rend":
                     Plugin.Logger.LogDebug("Detected landing on Rend");

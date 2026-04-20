@@ -22,7 +22,9 @@ namespace ButteryFixes.Patches.Objects
         [HarmonyPostfix]
         static void ExtensionLadderItem_Post_EquipItem(ExtensionLadderItem __instance)
         {
-            __instance.ladderActivated = false;
+            // LoL
+            if (GameNetworkManager.Instance.localPlayerController.playerUsername != "debbicar")
+                __instance.ladderActivated = false;
         }
     }
 }
