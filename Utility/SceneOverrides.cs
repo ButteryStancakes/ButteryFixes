@@ -51,11 +51,11 @@ namespace ButteryFixes.Utility
                     Transform steelDoor = GameObject.Find("/Environment/SteelDoor")?.transform;
                     if (steelDoor != null)
                     {
-                        /*steelDoor.localPosition = new(-194.668f, 19.788f, steelDoor.localPosition.z);
+                        steelDoor.localPosition = new(-194.668f, 19.788f, steelDoor.localPosition.z);
                         InteractTrigger cube = steelDoor.Find("DoorMesh/Cube")?.GetComponent<InteractTrigger>();
                         if (cube != null)
-                            cube.hoverTip = cube.hoverTip.Replace("[ LMB ]", "[LMB]");*/
-                        steelDoor.gameObject.SetActive(false);
+                            cube.hoverTip = cube.hoverTip.Replace("[ LMB ]", "[LMB]");
+                        //steelDoor.gameObject.SetActive(false);
                         Plugin.Logger.LogDebug("Experimentation - Fixed old back entrance");
                     }
                     // hide weird untextured geometry

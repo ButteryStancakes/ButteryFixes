@@ -32,5 +32,20 @@ namespace ButteryFixes.Patches.General
                 }
             }
         }
+
+        [HarmonyPatch(nameof(TimeOfDay.Awake))]
+        [HarmonyPostfix]
+        static void TimeOfDay_Post_Awake(TimeOfDay __instance)
+        {
+            foreach (ParticleSystem particleSystem in __instance.GetComponentsInChildren<ParticleSystem>(true))
+            {
+                ParticleSystem.CollisionModule collisionModule = particleSystem.collision;
+                if (collisionModule.enabled && particleSystem.GetComponent<ParticleSystemRenderer>().sharedMaterial.name.StartsWith("RainParticle"))
+                {
+                    collisionModule.collidesWith |= 1 << 30;
+                    Plugin.Logger.LogDebug($"Rain particles \"{particleSystem.name}\" collide with vehicles");
+                }
+            }
+        }
     }
 }
