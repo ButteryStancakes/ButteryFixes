@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using ButteryFixes.Utility;
+using HarmonyLib;
 
 namespace ButteryFixes.Patches.Objects
 {
@@ -18,6 +19,13 @@ namespace ButteryFixes.Patches.Objects
         {
             if (__instance.breakerBoxHum.isPlaying && RoundManager.Instance.powerOffPermanently)
                 __instance.breakerBoxHum.Stop();
+        }
+
+        [HarmonyPatch(nameof(BreakerBox.Start))]
+        [HarmonyPostfix]
+        static void BreakerBox_Post_Start(BreakerBox __instance)
+        {
+            GlobalReferences.breakerBox = __instance;
         }
     }
 }

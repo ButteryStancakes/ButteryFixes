@@ -13,5 +13,8 @@ namespace ButteryFixes.Utility
         internal static readonly MethodInfo FIND_OBJECT_OF_TYPE_MOLD_SPREAD_MANAGER = AccessTools.Method(typeof(Object), nameof(Object.FindObjectOfType), null, [typeof(MoldSpreadManager)]);
         internal static readonly FieldInfo VEHICLE_CONTROLLER = AccessTools.Field(typeof(GlobalReferences), nameof(GlobalReferences.vehicleController));
         internal static readonly MethodInfo MOLD_SPREAD_MANAGER = AccessTools.DeclaredPropertyGetter(typeof(GlobalReferences), nameof(GlobalReferences.MoldSpreadManager));
+
+        internal static readonly MethodInfo SET_SCRAP_VALUE = AccessTools.Method(typeof(GrabbableObject), nameof(GrabbableObject.SetScrapValue));
+        internal static readonly MethodInfo TRACK_GIFT_BOX_ON_CLIENT = AccessTools.Method(typeof(ScrapTracker), nameof(ScrapTracker.TrackGiftBoxOnClient));
     }
 }

@@ -75,5 +75,13 @@ namespace ButteryFixes.Patches.Enemies
             Plugin.Logger.LogError("Nutcracker sight transpiler failed");
             return instructions;
         }
+
+        [HarmonyPatch(nameof(NutcrackerEnemyAI.GrabGun))]
+        [HarmonyPostfix]
+        [HarmonyPriority(Priority.Last)]
+        static void NutcrackerEnemyAI_Post_GrabGun(NutcrackerEnemyAI __instance)
+        {
+            ScrapTracker.Track(__instance.gun);
+        }
     }
 }

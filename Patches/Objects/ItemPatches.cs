@@ -158,5 +158,12 @@ namespace ButteryFixes.Patches.Objects
                     GlobalReferences.microwavedItems.Remove(gObject);
             }
         }
+
+        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.OnDestroy))]
+        [HarmonyPostfix]
+        static void GrabbableObject_Post_OnDestroy(GrabbableObject __instance)
+        {
+            ScrapTracker.Untrack(__instance);
+        }
     }
 }

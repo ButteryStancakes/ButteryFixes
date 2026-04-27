@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using ButteryFixes.Utility;
+using GameNetcodeStuff;
+using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -31,6 +33,17 @@ namespace ButteryFixes.Patches.Enemies
 
             Plugin.Logger.LogError("Sapsucker eggs transpiler failed");
             return instructions;
+        }
+
+        [HarmonyPatch(nameof(GiantKiwiAI.SpawnEggsClientRpc))]
+        [HarmonyPostfix]
+        static void GiantKiwiAI_Post_SpawnEggsClientRpc(GiantKiwiAI __instance)
+        {
+            if (__instance.hasSpawnedEggs)
+            {
+                foreach (KiwiBabyItem egg in __instance.eggs)
+                    ScrapTracker.Track(egg);
+            }
         }
     }
 }

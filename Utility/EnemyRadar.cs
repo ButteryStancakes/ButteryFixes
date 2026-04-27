@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ButteryFixes.Utility
 {
-    internal class EnemyRadar
+    internal static class EnemyRadar
     {
         internal class RadarButler
         {

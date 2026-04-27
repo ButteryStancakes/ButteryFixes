@@ -33,5 +33,13 @@ namespace ButteryFixes.Patches.Enemies
             Plugin.Logger.LogError("Bee spawn transpiler failed");
             return instructions;
         }
+
+        [HarmonyPatch(nameof(RedLocustBees.SpawnHiveClientRpc))]
+        [HarmonyPostfix]
+        static void RedLocustBees_Post_SpawnHiveClientRpc(RedLocustBees __instance)
+        {
+            if (__instance.hasSpawnedHive)
+                ScrapTracker.Track(__instance.hive);
+        }
     }
 }

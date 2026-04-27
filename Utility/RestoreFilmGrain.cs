@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace ButteryFixes.Utility
 {
-    internal class RestoreFilmGrain
+    internal static class RestoreFilmGrain
     {
         static Texture scanline, scanlineBlue;
 

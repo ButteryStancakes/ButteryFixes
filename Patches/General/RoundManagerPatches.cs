@@ -1,7 +1,9 @@
 ﻿using ButteryFixes.Utility;
 using DunGen;
 using HarmonyLib;
+using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace ButteryFixes.Patches.General
@@ -175,6 +177,67 @@ namespace ButteryFixes.Patches.General
             {
                 if (shipScrap != null && shipScrap.isInShipRoom)
                     shipScrap.scrapPersistedThroughRounds = true;
+            }
+        }
+
+        [HarmonyPatch(nameof(RoundManager.SyncScrapValuesClientRpc))]
+        [HarmonyPostfix]
+        static void RoundManager_Post_SyncScrapValuesClientRpc(RoundManager __instance, NetworkObjectReference[] spawnedScrap)
+        {
+            for (int i = 0; i < spawnedScrap.Length; i++)
+            {
+                if (spawnedScrap[i].TryGet(out NetworkObject networkObject) && networkObject.TryGetComponent(out GrabbableObject grabbableObject) && grabbableObject is not GiftBoxItem)
+                    ScrapTracker.Track(grabbableObject);
+            }
+
+            /*KeyItem[] keyItems = Object.FindObjectsByType<KeyItem>(FindObjectsSortMode.None);
+            foreach (KeyItem keyItem in keyItems)
+                ScrapTracker.Track(keyItem);*/
+
+            // run now, since all the props should probably be spawned for every client at this point
+            if (__instance.currentDungeonType == 4)
+            {
+                if (__instance.dungeonGenerator?.Generator?.Root == null)
+                {
+                    Plugin.Logger.LogWarning("Could not find dungeon after scrap sync step");
+                    return;
+                }
+
+                if (GlobalReferences.breakerBox == null)
+                {
+                    Plugin.Logger.LogWarning("Breaker box still hasn't spawned on client after scrap sync step");
+                    return;
+                }
+
+                EntranceTeleport[] interiorFireExis = [.. Object.FindObjectsByType<EntranceTeleport>(FindObjectsSortMode.None).Where(entranceTeleport => entranceTeleport.entranceId > 0 && !entranceTeleport.isEntranceToBuilding)];
+                if (interiorFireExis.Length < 1)
+                {
+                    Plugin.Logger.LogWarning("Fire exits still haven't spawned on client after scrap sync step");
+                    return;
+                }
+
+                List<Vector3> positionsOfInterest = [GlobalReferences.breakerBox.transform.position];
+                foreach (EntranceTeleport interiorFireExit in interiorFireExis)
+                    positionsOfInterest.Add(interiorFireExit.entrancePoint.position);
+
+                Renderer[] rends = __instance.dungeonGenerator.Generator.Root.GetComponentsInChildren<Renderer>();
+                foreach (Renderer rend in rends)
+                {
+                    if (!rend.name.StartsWith("Pipe.001 (9)") && !rend.name.StartsWith("Pipe.001 (10)"))
+                        continue;
+
+                    foreach (Vector3 pos in positionsOfInterest)
+                    {
+                        if (Vector3.Distance(rend.transform.position, pos) < 2f)
+                        {
+                            rend.enabled = false;
+                            rend.forceRenderingOff = true;
+                            rend.gameObject.SetActive(false);
+                            Plugin.Logger.LogDebug($"Hide renderer \"{rend.name}\" because it is blocking a spawned prop");
+                            break;
+                        }
+                    }
+                }
             }
         }
     }

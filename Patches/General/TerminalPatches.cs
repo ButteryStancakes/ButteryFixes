@@ -22,6 +22,7 @@ namespace ButteryFixes.Patches.General
             { "Shotgun", (25, 90) }, // 25 from v50 beta
             { "LungApparatus", (40, 131) }, // 130 from v9
             { "BabyKiwiEgg", (30, 200) },
+            { "Key", (3, 6) }, // 5 from v80 beta
         };
 
         [HarmonyPatch(nameof(Terminal.Start))]
@@ -42,17 +43,6 @@ namespace ButteryFixes.Patches.General
             }
 
             TerminalKeyword buy = __instance.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.name == "Buy");
-
-            BuyableVehicle cruiser = __instance.buyableVehicles.FirstOrDefault(buyableVehicle => buyableVehicle.vehicleDisplayName == "Cruiser");
-            if (cruiser != null)
-            {
-                AudioSource clipboardCruiser = cruiser.secondaryPrefab?.transform.GetComponent<AudioSource>();
-                if (clipboardCruiser != null)
-                {
-                    clipboardCruiser.rolloffMode = AudioRolloffMode.Linear;
-                    Plugin.Logger.LogDebug("Audio rolloff: Clipboard (Cruiser)");
-                }
-            }
 
             if (buy != null)
             {
@@ -346,6 +336,45 @@ namespace ButteryFixes.Patches.General
                 HUDManager.Instance.playerScreenTexture.texture = __instance.playerScreenTexHighRes;
                 GameNetworkManager.Instance.localPlayerController.gameplayCamera.targetTexture = __instance.playerScreenTexHighRes;
             }*/
+        }
+
+        [HarmonyPatch(nameof(Terminal.SyncTerminalValuesClientRpc))]
+        [HarmonyPostfix]
+        static void Terminal_Post_SyncTerminalValuesClientRpc(Terminal __instance)
+        {
+            if (__instance.IsServer)
+                return;
+
+            // remove duplicate entries
+            __instance.scannedEnemyIDs = [.. __instance.scannedEnemyIDs.Distinct()];
+            __instance.unlockedStoryLogs = [.. __instance.unlockedStoryLogs.Distinct()];
+
+            // "First Log" is always supposed to be available
+            if (!__instance.unlockedStoryLogs.Contains(0))
+                __instance.unlockedStoryLogs.Insert(0, 0);
+        }
+
+        [HarmonyPatch(nameof(Terminal.SyncTerminalValuesServerRpc))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> Terminal_Trans_SyncTerminalValuesServerRpc(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            FieldInfo scannedEnemyIDs = AccessTools.Field(typeof(Terminal), nameof(Terminal.scannedEnemyIDs));
+            MethodInfo count = AccessTools.DeclaredPropertyGetter(typeof(List<int>), nameof(List<int>.Count));
+            for (int i = 1; i < codes.Count - 3; i++)
+            {
+                if (codes[i].opcode == OpCodes.Ldfld && (FieldInfo)codes[i].operand == scannedEnemyIDs && codes[i + 1].opcode == OpCodes.Callvirt && codes[i + 1].operand as MethodInfo == count && codes[i + 3].opcode == OpCodes.Ble)
+                {
+                    for (int j = i - 1; j <= i + 3; j++)
+                        codes[j].opcode = OpCodes.Nop;
+                    Plugin.Logger.LogDebug("Transpiler (Terminal sync): Always sync bestiary/SIGURD");
+                    return codes;
+                }
+            }
+
+            Plugin.Logger.LogError("Terminal sync transpiler failed");
+            return instructions;
         }
     }
 }

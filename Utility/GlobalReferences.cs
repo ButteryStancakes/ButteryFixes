@@ -77,9 +77,6 @@ namespace ButteryFixes.Utility
         internal static Vector3 shipNodeOffset;
         internal static readonly Vector3 shipDefaultPos = new(1.27146339f, 0.278438568f, -7.5f);
 
-        // for end-of-round scrap counter
-        internal static int scrapNotCollected = -1, scrapEaten;
-
         // for cozy lights
         internal static Animator shipAnimator;
 
@@ -114,5 +111,11 @@ namespace ButteryFixes.Utility
 
         // for staging
         internal static bool forceMaxQuality;
+
+        // spore coughing
+        internal static bool localPlayerHasBackFlowers;
+
+        // piping fix for mineshafts
+        internal static BreakerBox breakerBox;
     }
 }

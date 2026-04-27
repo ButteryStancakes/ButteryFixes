@@ -45,7 +45,9 @@ namespace ButteryFixes.Patches.General
             GlobalReferences.allEnemiesList.Clear();
             GlobalReferences.lockingCamera = 0;
             GlobalReferences.sittingInArmchair = false;
+            GlobalReferences.localPlayerHasBackFlowers = false;
             EnemyRadar.Reset();
+            ScrapTracker.Reset();
         }
     }
 }

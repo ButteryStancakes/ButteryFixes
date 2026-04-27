@@ -1,6 +1,7 @@
 ﻿using ButteryFixes.Utility;
 using HarmonyLib;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -261,32 +262,19 @@ namespace ButteryFixes.Patches.General
         static void StartOfRound_Post_ShipHasLeft(StartOfRound __instance)
         {
             // this needs to run before the scene unloads or it will miss the apparatus
-            GlobalReferences.scrapNotCollected = 0;
-            foreach (GrabbableObject grabbableObject in Object.FindObjectsByType<GrabbableObject>(FindObjectsSortMode.None))
+            GrabbableObject[] grabbableObjects = Object.FindObjectsByType<GrabbableObject>(FindObjectsSortMode.None);
+            foreach (GrabbableObject grabbableObject in grabbableObjects)
             {
-                NetworkObject networkObject = grabbableObject.GetComponent<NetworkObject>();
-                if (networkObject == null || !networkObject.IsSpawned)
-                    continue;
-
-                if (grabbableObject.itemProperties.isScrap && grabbableObject.scrapValue > 0 && ((grabbableObject is not GiftBoxItem && grabbableObject.deactivated) || (!grabbableObject.isInShipRoom && !grabbableObject.isInElevator && !grabbableObject.isHeld) || grabbableObject.isInFactory) && !grabbableObject.scrapPersistedThroughRounds && grabbableObject is not RagdollGrabbableObject)
+                if (grabbableObject is GiftBoxItem giftBoxItem)
                 {
-                    GlobalReferences.scrapNotCollected += grabbableObject.scrapValue;
-                    //Plugin.Logger.LogDebug($"Did not collect: {grabbableObject.itemProperties.itemName} (${grabbableObject.scrapValue})");
+                    if (!giftBoxItem.IsServer)
+                        ScrapTracker.TrackGiftBoxOnClient(giftBoxItem, null);
                 }
+                else
+                    ScrapTracker.Track(grabbableObject);
             }
             // unkilled butlers are still worth the knife they didn't drop
-            foreach (ButlerEnemyAI butlerEnemyAI in Object.FindObjectsByType<ButlerEnemyAI>(FindObjectsSortMode.None))
-            {
-                if (!butlerEnemyAI.isEnemyDead)
-                {
-                    KnifeItem knife = butlerEnemyAI.knifePrefab?.GetComponent<KnifeItem>();
-                    if (knife != null)
-                    {
-                        GlobalReferences.scrapNotCollected += knife.scrapValue;
-                        //Plugin.Logger.LogDebug($"Did not kill Butler (${knife.scrapValue})");
-                    }
-                }
-            }
+            ScrapTracker.CountButlers();
 
             EnemyRadar.Reset();
         }
@@ -314,6 +302,8 @@ namespace ButteryFixes.Patches.General
                     Plugin.Logger.LogDebug($"Fixed player #{i} ({__instance.allPlayerScripts[i].playerUsername}) still bleeding after recovering full HP");
                 }
             }
+
+            GlobalReferences.localPlayerHasBackFlowers = false;
         }
 
         [HarmonyPatch(nameof(StartOfRound.PositionSuitsOnRack))]

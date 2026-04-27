@@ -1,6 +1,10 @@
 ﻿using ButteryFixes.Utility;
 using GameNetcodeStuff;
 using HarmonyLib;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using UnityEngine;
 
 namespace ButteryFixes.Patches.Enemies
@@ -50,8 +54,13 @@ namespace ButteryFixes.Patches.Enemies
         [HarmonyPostfix]
         static void CadaverGrowthAI_Post_IncreaseBackFlowers(CadaverGrowthAI __instance, int playerId)
         {
-            if (StartOfRound.Instance.allPlayerScripts[playerId] == GameNetworkManager.Instance.localPlayerController && Configuration.scanImprovements.Value)
-                EnemyRadar.InfectLocalPlayer(__instance);
+            if (StartOfRound.Instance.allPlayerScripts[playerId] == GameNetworkManager.Instance.localPlayerController)
+            {
+                GlobalReferences.localPlayerHasBackFlowers = true;
+
+                if (Configuration.scanImprovements.Value)
+                    EnemyRadar.InfectLocalPlayer(__instance);
+            }
         }
 
         [HarmonyPatch(typeof(CadaverGrowthAI), nameof(CadaverGrowthAI.CurePlayer))]
@@ -59,7 +68,10 @@ namespace ButteryFixes.Patches.Enemies
         static void CadaverGrowthAI_Post_CurePlayer(CadaverGrowthAI __instance, int playerId)
         {
             if (StartOfRound.Instance.allPlayerScripts[playerId] == GameNetworkManager.Instance.localPlayerController)
+            {
+                GlobalReferences.localPlayerHasBackFlowers = false;
                 EnemyRadar.CureLocalPlayer();
+            }
         }
 
         [HarmonyPatch(typeof(CadaverGrowthAI), nameof(CadaverGrowthAI.InfectPlayer))]
@@ -97,12 +109,50 @@ namespace ButteryFixes.Patches.Enemies
             }
         }
 
-        [HarmonyPatch(typeof(CadaverGrowthAI), nameof(CadaverGrowthAI.Start))]
+        [HarmonyPatch(typeof(CadaverGrowthAI), nameof(CadaverGrowthAI.OnEnable))]
         [HarmonyPostfix]
-        static void CadaverGrowthAI_Post_Start(CadaverGrowthAI __instance)
+        static void CadaverGrowthAI_Post_OnEnable(CadaverGrowthAI __instance)
         {
             if (cadaverGrowthAI == null)
                 cadaverGrowthAI = __instance;
+        }
+
+        [HarmonyPatch(typeof(CadaverGrowthAI), nameof(CadaverGrowthAI.OnDisable))]
+        [HarmonyPostfix]
+        static void CadaverGrowthAI_Post_OnDisable(CadaverGrowthAI __instance)
+        {
+            if (cadaverGrowthAI == __instance)
+                cadaverGrowthAI = null;
+
+            GlobalReferences.localPlayerHasBackFlowers = false;
+        }
+
+        [HarmonyPatch(typeof(CadaverGrowthAI), nameof(CadaverGrowthAI.OnLocalPlayerTalk))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> CadaverGrowthAI_Trans_OnLocalPlayerTalk(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            FieldInfo backFlowers = AccessTools.Field(typeof(PlayerInfection), nameof(PlayerInfection.backFlowers));
+            for (int i = 1; i < codes.Count - 3; i++)
+            {
+                if (codes[i].opcode == OpCodes.Ldfld && (FieldInfo)codes[i].operand == backFlowers && codes[i + 1].opcode == OpCodes.Ldnull && codes[i + 3].opcode == OpCodes.Brfalse)
+                {
+                    for (int j = i - 1; j <= i + 2; j++)
+                    {
+                        if (j != i)
+                            codes[j].opcode = OpCodes.Nop;
+                    }
+                    codes[i].opcode = OpCodes.Ldsfld;
+                    codes[i].operand = AccessTools.Field(typeof(GlobalReferences), nameof(GlobalReferences.localPlayerHasBackFlowers));
+                    codes[i + 3].opcode = OpCodes.Brtrue;
+                    Plugin.Logger.LogDebug("Transpiler (Cadaver voice): Restore spore cough");
+                    return codes;
+                }
+            }
+
+            Plugin.Logger.LogError("Cadaver voice transpiler failed");
+            return instructions;
         }
     }
 }

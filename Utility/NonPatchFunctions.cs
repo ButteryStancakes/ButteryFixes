@@ -105,12 +105,6 @@ namespace ButteryFixes.Utility
             Plugin.Logger.LogDebug("Smoke from freshly burnt corpse");
         }
 
-        public static void BabyEatsScrap(GrabbableObject grabObj)
-        {
-            if (grabObj.itemProperties.isScrap)
-                GlobalReferences.scrapEaten += grabObj.scrapValue;
-        }
-
         public static int RerollHivePrice(int price, Vector3 pos)
         {
             hives++;

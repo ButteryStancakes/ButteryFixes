@@ -46,22 +46,18 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void HUDManager_Post_FillEndGameStats(HUDManager __instance, int scrapCollected = 0)
         {
-            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || StartOfRound.Instance.allPlayersDead || GlobalReferences.scrapNotCollected < 0)
-            {
-                GlobalReferences.scrapNotCollected = -1;
-                GlobalReferences.scrapEaten = 0;
+            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || StartOfRound.Instance.allPlayersDead)
                 return;
-            }
 
-            int trueTotal = scrapCollected + GlobalReferences.scrapNotCollected + GlobalReferences.scrapEaten;
-            GlobalReferences.scrapNotCollected = -1;
-            GlobalReferences.scrapEaten = 0;
+            if (RoundManager.Instance.totalScrapValueInLevel > ScrapTracker.TotalValue)
+                Plugin.Logger.LogWarning("Vanilla is tracking more scrap than we are - this shouldn't happen");
 
-            __instance.statsUIElements.quotaDenominator.SetText(trueTotal.ToString());
+            __instance.statsUIElements.quotaDenominator.SetText(ScrapTracker.TotalValue.ToString());
+            ScrapTracker.Reset();
 
-            int grade = 0;
+            /*int grade = 0;
 
-            float scrapPercentage = (float)scrapCollected / trueTotal;
+            float scrapPercentage = (float)scrapCollected / ScrapTracker.TotalValue;
             if (scrapPercentage >= 0.99f)
                 grade += 2;
             else if (scrapPercentage >= 0.6f)
@@ -87,7 +83,7 @@ namespace ButteryFixes.Patches.General
                 grade--;
 
             string[] grades = { "D", "C", "B", "A", "S" };
-            __instance.statsUIElements.gradeLetter.SetText(grades[Mathf.Clamp(grade + 1, 0, grades.Length)]);
+            __instance.statsUIElements.gradeLetter.SetText(grades[Mathf.Clamp(grade + 1, 0, grades.Length)]);*/
         }
 
         [HarmonyPatch(nameof(HUDManager.SetPlayerLevelSmoothly))]
@@ -113,6 +109,21 @@ namespace ButteryFixes.Patches.General
         {
             if (!__result && !Compatibility.DISABLE_SCAN_PATCH && GameNetworkManager.Instance.localPlayerController.inVehicleAnimation && !GameNetworkManager.Instance.localPlayerController.isPlayerDead)
                 __result = true;
+        }
+
+        [HarmonyPatch(nameof(HUDManager.AddNewScrapFoundToDisplay))]
+        [HarmonyPostfix]
+        static void HUDManager_Post_AddNewScrapFoundToDisplay(HUDManager __instance)
+        {
+            if (__instance.itemsToBeDisplayed.Count < 1)
+                return;
+
+            GrabbableObject itemToDisplay = __instance.itemsToBeDisplayed[^1];
+            if (itemToDisplay == null)
+                return;
+
+            if (itemToDisplay is GiftBoxItem giftBoxItem && giftBoxItem.deactivated)
+                __instance.itemsToBeDisplayed.Remove(itemToDisplay);
         }
     }
 }
