@@ -27,24 +27,40 @@ namespace ButteryFixes.Patches.Enemies
                     Plugin.Logger.LogDebug($"Cadaver #{__instance.GetInstanceID()}: Fixed erroneous collision on \"{collider.name}\"");
                 }
             }
+
+            SkinnedMeshRenderer body = __instance.skinnedMeshRenderers.FirstOrDefault(skinnedMeshRenderer => skinnedMeshRenderer != null && skinnedMeshRenderer.name == "MeshLOD0");
+            if (body != null && body.enabled)
+            {
+                body.enabled = false;
+                body.forceRenderingOff = true;
+                body.gameObject.SetActive(false);
+                Plugin.Logger.LogDebug($"Cadaver #{__instance.GetInstanceID()}: Permanently disable main renderer");
+            }
         }
 
         [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.EnableEnemyMesh))]
         [HarmonyPrefix]
-        static void CadaverBloomAI_Pre_EnableEnemyMeshes(EnemyAI __instance, bool overrideDoNotSet)
+        static void CadaverBloomAI_Pre_EnableEnemyMesh(EnemyAI __instance, ref bool enable, bool overrideDoNotSet)
         {
-            if (overrideDoNotSet && __instance is CadaverBloomAI)
+            if (__instance is CadaverBloomAI)
             {
-                // fix MapRadar renderers showing up on the bodycams
-                foreach (Renderer rend in __instance.meshRenderers)
-                {
-                    if (rend == null)
-                        continue;
+                // fix cadavers becoming visible again after death, especially near the ship
+                if (__instance.isEnemyDead)
+                    enable = false;
 
-                    if (rend.gameObject.layer == 14)
+                if (overrideDoNotSet)
+                {
+                    // fix MapRadar renderers showing up on the bodycams
+                    foreach (Renderer rend in __instance.meshRenderers)
                     {
-                        rend.enabled = false;
-                        rend.forceRenderingOff = true;
+                        if (rend == null)
+                            continue;
+
+                        if (rend.gameObject.layer == 14)
+                        {
+                            rend.enabled = false;
+                            rend.forceRenderingOff = true;
+                        }
                     }
                 }
             }
