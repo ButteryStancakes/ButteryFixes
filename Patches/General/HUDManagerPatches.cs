@@ -1,5 +1,4 @@
 ﻿using ButteryFixes.Utility;
-using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
 

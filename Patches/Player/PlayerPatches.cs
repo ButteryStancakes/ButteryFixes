@@ -3,8 +3,6 @@ using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -191,7 +189,7 @@ namespace ButteryFixes.Patches.Player
         [HarmonyPostfix]
         static void PlayerControllerB_Post_PlaceGrabbableObject(GrabbableObject placeObject)
         {
-            if (StartOfRound.Instance.isObjectAttachedToMagnet && StartOfRound.Instance.attachedVehicle != null && placeObject.transform.parent == StartOfRound.Instance.attachedVehicle.transform)
+            if (StartOfRound.Instance.isObjectAttachedToMagnet && StartOfRound.Instance.attachedVehicle != null && placeObject.transform.parent == StartOfRound.Instance.attachedVehicle.transform && (!Compatibility.INSTALLED_V55_CRUISER || StartOfRound.Instance.attachedVehicle.vehicleID != 0))
             {
                 GameNetworkManager.Instance.localPlayerController.SetItemInElevator(true, true, placeObject);
                 Plugin.Logger.LogDebug($"Item \"{placeObject.itemProperties.itemName}\" #{placeObject.GetInstanceID()} was placed inside a magnetized Cruiser and auto-collected");

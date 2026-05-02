@@ -110,6 +110,7 @@ namespace ButteryFixes.Patches.Objects
         }
 
         [HarmonyPatch(typeof(BushWolfEnemy), nameof(BushWolfEnemy.Update))]
+        [HarmonyPatch(typeof(CadaverBloomAI), nameof(CadaverBloomAI.GetPhysicsParentAtEnemyPosition))]
         [HarmonyPatch(typeof(ClipboardItem), nameof(ClipboardItem.Update))]
         [HarmonyPatch(typeof(ForestGiantAI), nameof(ForestGiantAI.OnCollideWithPlayer))]
         [HarmonyPatch(typeof(GiantKiwiAI), nameof(GiantKiwiAI.AttackIfThreatened))]
@@ -128,15 +129,11 @@ namespace ButteryFixes.Patches.Objects
 
             for (int i = 0; i < codes.Count; i++)
             {
-                if (codes[i].opcode == OpCodes.Call)
+                if (codes[i].opcode == OpCodes.Call && codes[i].operand as MethodInfo == ReflectionCache.FIND_OBJECT_OF_TYPE_VEHICLE_CONTROLLER)
                 {
-                    MethodInfo methodInfo = codes[i].operand as MethodInfo;
-                    if (methodInfo == ReflectionCache.FIND_OBJECT_OF_TYPE_VEHICLE_CONTROLLER)
-                    {
-                        codes[i].opcode = OpCodes.Ldsfld;
-                        codes[i].operand = ReflectionCache.VEHICLE_CONTROLLER;
-                        Plugin.Logger.LogDebug($"Transpiler ({__originalMethod.DeclaringType}.{__originalMethod.Name}): Cache Cruiser script");
-                    }
+                    codes[i].opcode = OpCodes.Ldsfld;
+                    codes[i].operand = ReflectionCache.VEHICLE_CONTROLLER;
+                    Plugin.Logger.LogDebug($"Transpiler ({__originalMethod.DeclaringType}.{__originalMethod.Name}): Cache Cruiser script");
                 }
             }
 

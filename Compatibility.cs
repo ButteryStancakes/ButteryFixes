@@ -19,8 +19,9 @@ namespace ButteryFixes
         internal const string GUID_DROP_SHIP_DELIVERY_CAP_MODIFIER = "com.github.Sylkadi.DropShipDeliveryCapModifier";
         internal const string GUID_CRUISER_IMPROVED = "DiggC.CruiserImproved";
         internal const string GUID_UPTURNED_VARIETY = "butterystancakes.lethalcompany.upturnedvariety";
+        internal const string GUID_VERSION55_COMPANY_CRUISER = "scandal.v55cruiser";
 
-        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_MORE_COMPANY, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_REBALANCED_MOONS, INSTALLED_UPTURNED_VARIETY;
+        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_MORE_COMPANY, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_REBALANCED_MOONS, INSTALLED_UPTURNED_VARIETY, INSTALLED_V55_CRUISER;
         internal static bool DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING, DISABLE_ROTATION_PATCH, DISABLE_SIGNAL_PATCH, DISABLE_PURCHASE_CAP_PATCH, DISABLE_SCAN_PATCH;
 
         internal static void Init()
@@ -101,6 +102,12 @@ namespace ButteryFixes
             {
                 INSTALLED_UPTURNED_VARIETY = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Upturned Variety detected");
+            }
+
+            if (Chainloader.PluginInfos.ContainsKey(GUID_VERSION55_COMPANY_CRUISER))
+            {
+                INSTALLED_V55_CRUISER = true;
+                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Version-55 Company Cruiser detected");
             }
         }
     }

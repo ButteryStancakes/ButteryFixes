@@ -81,7 +81,7 @@ namespace ButteryFixes.Patches.Enemies
 
         [HarmonyPatch(typeof(CadaverGrowthAI), nameof(CadaverGrowthAI.CurePlayer))]
         [HarmonyPostfix]
-        static void CadaverGrowthAI_Post_CurePlayer(CadaverGrowthAI __instance, int playerId)
+        static void CadaverGrowthAI_Post_CurePlayer(int playerId)
         {
             if (StartOfRound.Instance.allPlayerScripts[playerId] == GameNetworkManager.Instance.localPlayerController)
             {

@@ -1,7 +1,5 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using UnityEngine;
 
 namespace ButteryFixes.Utility

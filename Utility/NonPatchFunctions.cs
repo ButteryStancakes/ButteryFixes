@@ -202,5 +202,12 @@ namespace ButteryFixes.Utility
                 Plugin.Logger.LogDebug($"Player \"{deadBodyInfo.playerScript?.playerUsername}\" automatically collected themself");
             }
         }
+
+        internal static IEnumerator ResyncCompanyRandomOnDelay(DepositItemsDesk depositItemsDesk)
+        {
+            yield return new WaitUntil(() => StartOfRound.Instance.shipDoorsEnabled);
+            if (depositItemsDesk != null)
+                depositItemsDesk.CompanyLevelRandom = new(StartOfRound.Instance.randomMapSeed + 39);
+        }
     }
 }
