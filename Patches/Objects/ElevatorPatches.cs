@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 
 namespace ButteryFixes.Patches.Objects
 {
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(MineshaftElevatorController))]
     internal class ElevatorPatches
     {
         [HarmonyPatch(typeof(CadaverBloomAI), nameof(CadaverBloomAI.GetPhysicsParentAtEnemyPosition))]
@@ -32,6 +32,21 @@ namespace ButteryFixes.Patches.Objects
 
             //Plugin.Logger.LogWarning($"{__originalMethod.Name} transpiler failed");
             return instructions;
+        }
+
+        [HarmonyPatch(nameof(MineshaftElevatorController.CallElevatorOnServer))]
+        [HarmonyPrefix]
+        static void MineshaftElevatorController_Pre_CallElevatorOnServer(MineshaftElevatorController __instance, ref bool __state)
+        {
+            __state = __instance.elevatorCalled;
+        }
+
+        [HarmonyPatch(nameof(MineshaftElevatorController.CallElevatorOnServer))]
+        [HarmonyPostfix]
+        static void MineshaftElevatorController_Post_CallElevatorOnServer(MineshaftElevatorController __instance, bool __state)
+        {
+            if (__instance.elevatorCalled && !__state)
+                __instance.callCooldown = 4f;
         }
     }
 }

@@ -166,5 +166,35 @@ namespace ButteryFixes.Patches.Objects
             if (__instance.currentDriver != null && GlobalReferences.lastDriver != __instance.currentDriver && !__instance.magnetedToShip)
                 GlobalReferences.lastDriver = __instance.currentDriver;
         }
+
+        [HarmonyPatch(typeof(VehicleCollisionTrigger), nameof(VehicleCollisionTrigger.OnTriggerEnter))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> VehicleCollisionTrigger_Trans_OnTriggerEnter(IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            MethodInfo log = AccessTools.Method(typeof(Debug), nameof(Debug.Log), [typeof(object)]);
+            for (int i = 0; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Ldstr && (string)codes[i].operand == "Truck collision: {0} || {1} || {2}")
+                {
+                    for (int j = i; j < codes.Count; j++)
+                    {
+                        if (codes[j].opcode == OpCodes.Call && codes[j].operand as MethodInfo == log)
+                        {
+                            codes[j].opcode = OpCodes.Nop;
+                            break;
+                        }
+
+                        codes[j].opcode = OpCodes.Nop;
+                    }
+                    Plugin.Logger.LogDebug($"Transpiler (Cruiser collision): Resolve NRE by removing unnecessary log");
+                    return codes;
+                }
+            }
+
+            Plugin.Logger.LogWarning($"Cruiser collision transpiler failed");
+            return codes;
+        }
     }
 }
