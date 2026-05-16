@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using ButteryFixes.Utility;
+using HarmonyLib;
 using UnityEngine;
 
 namespace ButteryFixes.Patches.General
@@ -46,6 +47,16 @@ namespace ButteryFixes.Patches.General
                     Plugin.Logger.LogDebug($"Rain particles \"{particleSystem.name}\" collide with vehicles");
                 }
             }
+        }
+
+        [HarmonyPatch(nameof(TimeOfDay.SetBeginMeteorShowerClientRpc))]
+        [HarmonyPostfix]
+        static void TimeOfDay_Post_SetBeginMeteorShowerClientRpc(TimeOfDay __instance)
+        {
+            if (!__instance.currentDayTimeStarted)
+                Plugin.Logger.LogWarning("Client received a meteor shower RPC before currentDayTimeStarted was enabled. This would have caused bugs in vanilla!");
+
+            GlobalReferences.meteorRPCReceivedTime = Time.realtimeSinceStartup;
         }
     }
 }

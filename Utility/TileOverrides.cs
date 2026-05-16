@@ -82,7 +82,7 @@ namespace ButteryFixes.Utility
                     // garage
                     case "GarageTile":
                         // v70PLF doesn't have any null check and causes a crash if my changes are applied
-                        if (Chainloader.PluginInfos.ContainsKey("watergun.v72lightfix"))
+                        if (Chainloader.PluginInfos.ContainsKey(Compatibility.GUID_V70_POWERED_LIGHTS_FIX))
                         {
                             Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - V70PoweredLights Fix detected");
                             break;
@@ -99,15 +99,29 @@ namespace ButteryFixes.Utility
                         // --- MINESHAFT ---
                 }
 
-                if (tile.name.StartsWith("Cave") || tile.name.Contains("Tunnel"))
+                bool cave = tile.name.StartsWith("Cave");
+                if (cave || tile.name.Contains("Tunnel"))
                 {
                     ParticleSystemRenderer[] particleSystemRenderers = tile.GetComponentsInChildren<ParticleSystemRenderer>();
                     foreach (ParticleSystemRenderer partSysRend in particleSystemRenderers)
                     {
-                        if (partSysRend.sharedMaterial != null && partSysRend.sharedMaterial.name.StartsWith("RainParticle") && !partSysRend.name.StartsWith("RainHit"))
+                        if (partSysRend.sharedMaterial != null && partSysRend.sharedMaterial.name.StartsWith("RainParticle") && !partSysRend.name.StartsWith("RainHit") && partSysRend.renderMode != ParticleSystemRenderMode.VerticalBillboard)
                         {
                             partSysRend.renderMode = ParticleSystemRenderMode.VerticalBillboard;
-                            Plugin.Logger.LogDebug($"{tile.name}: Fix drip billboarding");
+                            Plugin.Logger.LogDebug($"{tile.name}: Fixed drip billboarding");
+                        }
+                    }
+
+                    if (cave)
+                    {
+                        LODGroup[] lodGroups = tile.GetComponentsInChildren<LODGroup>();
+                        foreach (LODGroup lodGroup in lodGroups)
+                        {
+                            if (lodGroup.fadeMode != LODFadeMode.None)
+                            {
+                                lodGroup.fadeMode = LODFadeMode.None;
+                                Plugin.Logger.LogDebug($"{tile.name}: Fixed LOD fade for \"{lodGroup.name}\"");
+                            }
                         }
                     }
                 }

@@ -77,27 +77,41 @@ namespace ButteryFixes.Utility
 
         public static void TrackGiftBoxOnClient(GiftBoxItem giftBoxItem, GrabbableObject objectInPresent)
         {
-            if (!allTrackedItems.Contains(giftBoxItem))
+            if (giftBoxItem == null)
             {
-                allTrackedItems.Add(giftBoxItem);
-                if (giftBoxItem.scrapValue > 0)
-                    TotalValue += giftBoxItem.scrapValue;
+                Plugin.Logger.LogWarning("Gift box is null on client after being opened");
+                return;
             }
 
-            if (giftBoxItem.isInShipRoom)
-                RoundManager.Instance.scrapCollectedInLevel = Mathf.Max(RoundManager.Instance.scrapCollectedInLevel - giftBoxItem.scrapValue, 0);
-
-            if (objectInPresent != null)
+            try
             {
-                if (!allTrackedItems.Contains(objectInPresent))
-                    allTrackedItems.Add(objectInPresent);
+                if (!allTrackedItems.Contains(giftBoxItem))
+                {
+                    allTrackedItems.Add(giftBoxItem);
+                    if (giftBoxItem.scrapValue > 0)
+                        TotalValue += giftBoxItem.scrapValue;
+                }
 
-                if (giftBoxItem.isInShipRoom || objectInPresent.isInShipRoom || objectInPresent.transform.parent == StartOfRound.Instance.elevatorTransform)
-                    RoundManager.Instance.CollectNewScrapForThisRound(objectInPresent);
+                if (giftBoxItem.isInShipRoom)
+                    RoundManager.Instance.scrapCollectedInLevel = Mathf.Max(RoundManager.Instance.scrapCollectedInLevel - giftBoxItem.scrapValue, 0);
+
+                if (objectInPresent != null)
+                {
+                    if (!allTrackedItems.Contains(objectInPresent))
+                        allTrackedItems.Add(objectInPresent);
+
+                    if (giftBoxItem.isInShipRoom || objectInPresent.isInShipRoom || objectInPresent.transform.parent == StartOfRound.Instance.elevatorTransform)
+                        RoundManager.Instance.CollectNewScrapForThisRound(objectInPresent);
+                }
+
+                if (!giftBoxItem.IsServer)
+                    TotalValue = Mathf.Max(TotalValue - Mathf.Max(giftBoxItem.scrapValue, 0) + (objectInPresent != null ? objectInPresent.scrapValue : 0), TotalValue);
             }
-
-            if (!giftBoxItem.IsServer)
-                TotalValue = Mathf.Max(TotalValue - Mathf.Max(giftBoxItem.scrapValue, 0) + (objectInPresent != null ? objectInPresent.scrapValue : 0), TotalValue);
+            catch (System.Exception e)
+            {
+                Plugin.Logger.LogError("An error occurred while trying to open gift box on client");
+                Plugin.Logger.LogError(e);
+            }
         }
     }
 }

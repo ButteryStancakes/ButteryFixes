@@ -46,7 +46,10 @@ namespace ButteryFixes.Patches.General
         static void HUDManager_Post_FillEndGameStats(HUDManager __instance, int scrapCollected = 0)
         {
             if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || StartOfRound.Instance.allPlayersDead)
+            {
+                ScrapTracker.Reset();
                 return;
+            }
 
             if (RoundManager.Instance.totalScrapValueInLevel > ScrapTracker.TotalValue)
                 Plugin.Logger.LogWarning("Vanilla is tracking more scrap than we are - this shouldn't happen");

@@ -186,8 +186,18 @@ namespace ButteryFixes.Patches.General
         {
             for (int i = 0; i < spawnedScrap.Length; i++)
             {
-                if (spawnedScrap[i].TryGet(out NetworkObject networkObject) && networkObject.TryGetComponent(out GrabbableObject grabbableObject) && grabbableObject is not GiftBoxItem)
-                    ScrapTracker.Track(grabbableObject);
+                if (spawnedScrap[i].TryGet(out NetworkObject networkObject) && networkObject.TryGetComponent(out GrabbableObject grabbableObject))
+                {
+                    if (grabbableObject is not GiftBoxItem)
+                    {
+                        ScrapTracker.Track(grabbableObject);
+
+                        if (grabbableObject is AnimatedItem animatedItem)
+                            animatedItem.itemRandomChance = new System.Random(StartOfRound.Instance.randomMapSeed + StartOfRound.Instance.currentLevelID + animatedItem.itemProperties.itemId);
+                        else if (grabbableObject is NoisemakerProp noisemakerProp)
+                            noisemakerProp.noisemakerRandom = new System.Random(StartOfRound.Instance.randomMapSeed + 85);
+                    }
+                }
             }
 
             /*KeyItem[] keyItems = Object.FindObjectsByType<KeyItem>(FindObjectsSortMode.None);

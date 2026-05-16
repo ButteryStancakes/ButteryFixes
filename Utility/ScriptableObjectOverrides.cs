@@ -8,6 +8,11 @@ namespace ButteryFixes.Utility
     {
         internal static void OverrideEnemyTypes()
         {
+            string[] lodWhitelist = [
+                "BushWolf",
+                "GiantKiwi"
+            ];
+
             foreach (KeyValuePair<string, EnemyType> enemy in GlobalReferences.allEnemiesList)
             {
                 switch (enemy.Key)
@@ -52,10 +57,35 @@ namespace ButteryFixes.Utility
                         enemy.Value.canBeDestroyed = false;
                         Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Don't get eaten by other worms");
                         break;
+                    case "SpringMan":
+                        Transform mapDot = enemy.Value.enemyPrefab?.transform.Find("SpringManModel/MapDot (2)");
+                        if (mapDot != null)
+                        {
+                            float scale = (mapDot.localScale.x + mapDot.localScale.z) / 2f;
+                            mapDot.localPosition += (scale - (mapDot.localScale.y / 2f)) * Vector3.up;
+                            mapDot.localScale = new(mapDot.localScale.x, scale, mapDot.localScale.z);
+                            Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Fix radar appearance");
+                        }
+
+                        break;
                 }
+
                 // fix residue in ScriptableObject
                 enemy.Value.numberSpawned = 0;
                 enemy.Value.hasSpawnedAtLeastOne = false;
+
+                if (enemy.Value.enemyPrefab != null && System.Array.IndexOf(lodWhitelist, enemy.Key) < 0)
+                {
+                    LODGroup[] lodGroups = enemy.Value.enemyPrefab.GetComponentsInChildren<LODGroup>();
+                    foreach (LODGroup lodGroup in lodGroups)
+                    {
+                        if (lodGroup.fadeMode != LODFadeMode.None)
+                        {
+                            lodGroup.fadeMode = LODFadeMode.None;
+                            Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Fixed LOD fade for \"{lodGroup.name}\"");
+                        }
+                    }
+                }
             }
         }
 

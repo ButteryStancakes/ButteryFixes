@@ -35,6 +35,9 @@ namespace ButteryFixes.Utility
 
             foreach (Volume volume in Object.FindObjectsByType<Volume>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
+                if (volume.sharedProfile == null)
+                    continue;
+
                 if (volume.sharedProfile.name != "UIEffects" && Configuration.restoreFilmGrain.Value == FilmGrains.MenusOnly)
                     continue;
 

@@ -117,5 +117,8 @@ namespace ButteryFixes.Utility
 
         // piping fix for mineshafts
         internal static BreakerBox breakerBox;
+
+        // meteor showers
+        internal static float meteorRPCReceivedTime;
     }
 }
