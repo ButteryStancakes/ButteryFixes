@@ -27,7 +27,7 @@ namespace ButteryFixes
     {
         static ConfigFile configFile;
 
-        internal static ConfigEntry<bool> makeConductive, fixJumpCheese, showApparatusValue, scanImprovements, fixSurfacePrices, lockInTerminal, filterDecor, typeGordion, playermodelPatches, patchLadders, adjustCooldowns, noBodyNoSignal, theGoldenGoblet, charredBodies, bodiesCollectSelf;
+        internal static ConfigEntry<bool> makeConductive, fixJumpCheese, showApparatusValue, scanImprovements, fixSurfacePrices, lockInTerminal, filterDecor, typeGordion, playermodelPatches, patchLadders, adjustCooldowns, noBodyNoSignal, theGoldenGoblet, charredBodies, bodiesCollectSelf, cadaverHUD;
         internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
@@ -147,6 +147,12 @@ namespace ButteryFixes
                 "CharredBodies",
                 true,
                 "When a player dies to any sort of explosion, their corpse will appear burnt, much like Cruiser explosions. (This also applies to electrocution from the electric chair.) \"PlayermodelPatches\" is *required* for this to work!");
+
+            cadaverHUD = configFile.Bind(
+                "Extra",
+                "CadaverHUD",
+                false,
+                "Displays filter quality in multiplayer, as well as the \"triple threat\" warning when you are about to bloom. This *DOES NOT* display fever warnings or change time-of-death in multiplayer.");
         }
 
         static void MigrateLegacyConfigs()

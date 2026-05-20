@@ -16,6 +16,9 @@ namespace ButteryFixes.Utility
 
         internal static void Track(GrabbableObject grabbableObject, bool addValue = true)
         {
+            if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.isDisconnecting)
+                return;
+
             if (grabbableObject == null || grabbableObject.NetworkObject == null || !grabbableObject.NetworkObject.IsSpawned)
                 return;
 
@@ -68,6 +71,9 @@ namespace ButteryFixes.Utility
 
         internal static void TrackGiftBoxOnServer(GiftBoxItem giftBoxItem)
         {
+            if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.isDisconnecting)
+                return;
+
             if (allTrackedItems.Contains(giftBoxItem))
                 return;
 
@@ -77,6 +83,9 @@ namespace ButteryFixes.Utility
 
         public static void TrackGiftBoxOnClient(GiftBoxItem giftBoxItem, GrabbableObject objectInPresent)
         {
+            if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.isDisconnecting)
+                return;
+
             if (giftBoxItem == null)
             {
                 Plugin.Logger.LogWarning("Gift box is null on client after being opened");

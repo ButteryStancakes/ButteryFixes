@@ -109,7 +109,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void HUDManager_Post_CanPlayerScan(ref bool __result)
         {
-            if (!__result && !Compatibility.DISABLE_SCAN_PATCH && GameNetworkManager.Instance.localPlayerController.inVehicleAnimation && !GameNetworkManager.Instance.localPlayerController.isPlayerDead)
+            if (!__result && !Compatibility.INSTALLED_CRUISER_IMPROVED && GameNetworkManager.Instance.localPlayerController.inVehicleAnimation && !GameNetworkManager.Instance.localPlayerController.isPlayerDead)
                 __result = true;
         }
 
@@ -126,6 +126,30 @@ namespace ButteryFixes.Patches.General
 
             if (itemToDisplay is GiftBoxItem giftBoxItem && giftBoxItem.deactivated)
                 __instance.itemsToBeDisplayed.Remove(itemToDisplay);
+        }
+
+        [HarmonyPatch(nameof(HUDManager.DisplayStatusEffect))]
+        [HarmonyPrefix]
+        static void HUDManager_Pre_DisplayStatusEffect(HUDManager __instance, ref string statusEffect)
+        {
+            if (GlobalReferences.cadaverGrowthAI != null && statusEffect == CadaverGrowthAI.sporesWarningText)
+            {
+                if (GlobalReferences.playerJustCoughed)
+                {
+                    GlobalReferences.playerJustCoughed = false;
+                    return;
+                }
+
+                if (StartOfRound.Instance.connectedPlayersAmount > 0 && !Configuration.cadaverHUD.Value)
+                    return;
+
+                statusEffect = $"{statusEffect.Replace("RISK!\n\nAir", "RISK!\nAir")};\n\nFilter ";
+                float immunity = StartOfRound.Instance.connectedPlayersAmount > 0 ? (4f + GlobalReferences.cadaverGrowthAI.infectInterval) : 7f;
+                if (GlobalReferences.cadaverGrowthAI.localPlayerImmunityTimer >= immunity)
+                    statusEffect += "inoperative!";
+                else
+                    statusEffect += $"quality: {Mathf.RoundToInt(Mathf.Lerp(100f, 0f, GlobalReferences.cadaverGrowthAI.localPlayerImmunityTimer / immunity))}%";
+            }
         }
     }
 }

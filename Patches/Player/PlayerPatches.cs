@@ -249,5 +249,13 @@ namespace ButteryFixes.Patches.Player
                 GlobalReferences.localPlayerHasBackFlowers = false;
             }
         }
+
+        [HarmonyPatch(nameof(PlayerControllerB.LateUpdate))]
+        [HarmonyPostfix]
+        static void PlayerControllerB_Post_LateUpdate(PlayerControllerB __instance)
+        {
+            if (__instance.inVehicleAnimation && !__instance.isPlayerDead && __instance.isPlayerControlled && GlobalReferences.vehicleController != null && GlobalReferences.vehicleController.vehicleID == 0 && !Compatibility.INSTALLED_V55_CRUISER && (GlobalReferences.vehicleController.currentDriver == __instance || GlobalReferences.vehicleController.currentPassenger == __instance))
+                CruiserAnimator.ResetPlayerAnimator(__instance);
+        }
     }
 }

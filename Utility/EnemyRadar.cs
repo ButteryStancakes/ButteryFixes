@@ -18,6 +18,9 @@ namespace ButteryFixes.Utility
 
         internal static void SpawnButler(ButlerEnemyAI butler)
         {
+            if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.isDisconnecting)
+                return;
+
             allButlers.Add(new()
             {
                 butler = butler,
@@ -108,6 +111,9 @@ namespace ButteryFixes.Utility
 
         internal static void InfectLocalPlayer(CadaverGrowthAI cadaverGrowthAI)
         {
+            if (GameNetworkManager.Instance == null || GameNetworkManager.Instance.isDisconnecting)
+                return;
+
             if (infectionDot == null)
             {
                 if (cadaverGrowthAI?.scanNodePrefab == null)

@@ -82,6 +82,7 @@ namespace ButteryFixes.Utility
 
         // optimization
         internal static VehicleController vehicleController;
+        internal static CadaverGrowthAI cadaverGrowthAI;
 
         // lock in terminal
         internal static int lockingCamera;
@@ -113,7 +114,8 @@ namespace ButteryFixes.Utility
         internal static bool forceMaxQuality;
 
         // spore coughing
-        internal static bool localPlayerHasBackFlowers;
+        internal static bool localPlayerHasBackFlowers,
+                             playerJustCoughed;
 
         // piping fix for mineshafts
         internal static BreakerBox breakerBox;

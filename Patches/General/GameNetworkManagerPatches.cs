@@ -1,4 +1,5 @@
-﻿using ButteryFixes.Utility;
+﻿using ButteryFixes.Patches.Objects;
+using ButteryFixes.Utility;
 using HarmonyLib;
 
 namespace ButteryFixes.Patches.General
@@ -48,6 +49,7 @@ namespace ButteryFixes.Patches.General
             GlobalReferences.localPlayerHasBackFlowers = false;
             EnemyRadar.Reset();
             ScrapTracker.Reset();
+            CruiserAnimator.Reset();
         }
     }
 }

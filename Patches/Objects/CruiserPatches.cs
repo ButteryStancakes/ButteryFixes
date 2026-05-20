@@ -14,7 +14,6 @@ namespace ButteryFixes.Patches.Objects
     static class CruiserPatches
     {
         static float radioPingTimestamp;
-        static Transform keyHolder;
 
         [HarmonyPatch(nameof(VehicleController.DestroyCar))]
         [HarmonyPostfix]
@@ -22,7 +21,10 @@ namespace ButteryFixes.Patches.Objects
         {
             __instance.hoodAudio.mute = true;
             __instance.healthMeter.GetComponentInChildren<Renderer>().forceRenderingOff = true;
-            __instance.turboMeter.GetComponentInChildren<Renderer>().forceRenderingOff = true;
+            //__instance.turboMeter.GetComponentInChildren<Renderer>().forceRenderingOff = true;
+
+            if (StartOfRound.Instance.attachedVehicle == __instance)
+                StartOfRound.Instance.attachedVehicle = null;
         }
 
         [HarmonyPatch(nameof(VehicleController.SetCarEffects))]
@@ -31,24 +33,42 @@ namespace ButteryFixes.Patches.Objects
         {
             List<CodeInstruction> codes = instructions.ToList();
 
-            MethodInfo playAudibleNoise = AccessTools.Method(typeof(RoundManager), nameof(RoundManager.PlayAudibleNoise));
-            for (int i = 0; i < codes.Count; i++)
+            MethodInfo playAudibleNoise = AccessTools.Method(typeof(RoundManager), nameof(RoundManager.PlayAudibleNoise)),
+                       getFloat = AccessTools.Method(typeof(Animator), nameof(Animator.GetFloat), [typeof(string)]);
+            FieldInfo playerBodyAnimator = AccessTools.Field(typeof(PlayerControllerB), nameof(PlayerControllerB.playerBodyAnimator));
+            bool patchNoise = false, patchAnimation = false;
+            for (int i = 0; i < codes.Count - 4; i++)
             {
-                if (codes[i].opcode == OpCodes.Callvirt && (MethodInfo)codes[i].operand == playAudibleNoise)
+                if (codes[i].opcode == OpCodes.Callvirt)
                 {
-                    for (int j = i + 1; j < codes.Count; j++)
+                    MethodInfo operand = codes[i].operand as MethodInfo;
+                    if (!patchNoise && operand == playAudibleNoise)
                     {
-                        if (codes[j].opcode == OpCodes.Br)
+                        for (int j = i + 1; j < codes.Count; j++)
                         {
-                            codes.Insert(i + 1, new(OpCodes.Br, codes[j].operand));
-                            Plugin.Logger.LogDebug("Transpiler (Cruiser noise alert): Fix 2 audible noises at once");
-                            return codes;
+                            if (codes[j].opcode == OpCodes.Br)
+                            {
+                                codes.Insert(i + 1, new(OpCodes.Br, codes[j].operand));
+                                Plugin.Logger.LogDebug("Transpiler (Cruiser effects): Fix 2 audible noises at once");
+                                i++;
+                                patchNoise = true;
+                                break;
+                            }
                         }
                     }
+                    else if (!patchAnimation && operand == getFloat && codes[i - 1].opcode == OpCodes.Ldstr && (string)codes[i - 1].operand == "animationSpeed" && codes[i - 1].opcode == OpCodes.Ldstr && (FieldInfo)codes[i - 2].operand == playerBodyAnimator && codes[i + 4].opcode == OpCodes.Add)
+                    {
+                        codes[i + 4].opcode = OpCodes.Sub;
+                        Plugin.Logger.LogDebug("Transpiler (Cruiser effects): Reverse animation");
+                        patchAnimation = true;
+                    }
+
+                    if (patchNoise && patchAnimation)
+                        return codes;
                 }
             }
 
-            Plugin.Logger.LogError("Cruiser noise alert transpiler failed");
+            Plugin.Logger.LogError("Cruiser effects transpiler failed");
             return instructions;
         }
 
@@ -70,9 +90,9 @@ namespace ButteryFixes.Patches.Objects
             List<CodeInstruction> codes = instructions.ToList();
 
             bool patchedTriggerInteraction = Chainloader.PluginInfos.ContainsKey(Compatibility.GUID_CRUISER_ADDITIONS), creditLastDriver = false;
-            MethodInfo overlapSphere = AccessTools.Method(typeof(Physics), nameof(Physics.OverlapSphere), [typeof(Vector3), typeof(float), typeof(int), typeof(QueryTriggerInteraction)]);
-            MethodInfo gameNetworkManagerInstance = AccessTools.DeclaredPropertyGetter(typeof(GameNetworkManager), nameof(GameNetworkManager.Instance));
-            MethodInfo setItemInElevator = AccessTools.Method(typeof(PlayerControllerB), nameof(PlayerControllerB.SetItemInElevator));
+            MethodInfo overlapSphere = AccessTools.Method(typeof(Physics), nameof(Physics.OverlapSphere), [typeof(Vector3), typeof(float), typeof(int), typeof(QueryTriggerInteraction)]),
+                       gameNetworkManagerInstance = AccessTools.DeclaredPropertyGetter(typeof(GameNetworkManager), nameof(GameNetworkManager.Instance)),
+                       setItemInElevator = AccessTools.Method(typeof(PlayerControllerB), nameof(PlayerControllerB.SetItemInElevator));
             FieldInfo localPlayerController = AccessTools.Field(typeof(GameNetworkManager), nameof(GameNetworkManager.localPlayerController));
             for (int i = 1; i < codes.Count - 7; i++)
             {
@@ -145,18 +165,8 @@ namespace ButteryFixes.Patches.Objects
         [HarmonyPostfix]
         static void VehicleController_Post_Update(VehicleController __instance)
         {
-            if (__instance.keyIsInDriverHand && __instance.localPlayerInControl && __instance.vehicleID == 0 && __instance.currentDriver?.localItemHolder != null)
-            {
-                if (keyHolder == null)
-                {
-                    keyHolder = new GameObject("ButteryFixes_CarKeyHolder").transform;
-                    keyHolder.SetParent(__instance.currentDriver.localItemHolder.parent, false);
-                    keyHolder.SetLocalPositionAndRotation(new(-0.002f, 0.036f, -0.042f), Quaternion.Euler(-3.616f, -2.302f, -179.855f));
-                    keyHolder.position += keyHolder.rotation * new Vector3(-__instance.positionOffset.x, -__instance.positionOffset.y, __instance.positionOffset.z);
-                }
-                else
-                    __instance.keyObject.transform.SetPositionAndRotation(keyHolder.position, keyHolder.rotation);
-            }
+            if (__instance.keyIsInDriverHand && __instance.vehicleID == 0 && __instance.currentDriver != null)
+                CruiserAnimator.AnimateKeyForCruiser(__instance);
         }
 
         [HarmonyPatch(nameof(VehicleController.LateUpdate))]
@@ -165,6 +175,8 @@ namespace ButteryFixes.Patches.Objects
         {
             if (__instance.currentDriver != null && GlobalReferences.lastDriver != __instance.currentDriver && !__instance.magnetedToShip)
                 GlobalReferences.lastDriver = __instance.currentDriver;
+
+            __instance.turboMeter.GetComponentInChildren<Renderer>().forceRenderingOff = __instance.carDestroyed || __instance.turboBoosts < 1;
         }
 
         [HarmonyPatch(typeof(VehicleCollisionTrigger), nameof(VehicleCollisionTrigger.OnTriggerEnter))]
@@ -195,6 +207,36 @@ namespace ButteryFixes.Patches.Objects
 
             Plugin.Logger.LogWarning($"Cruiser collision transpiler failed");
             return codes;
+        }
+
+        [HarmonyPatch(nameof(VehicleController.StartMagneting))]
+        [HarmonyPrefix]
+        static bool VehicleController_Pre_StartMagneting(VehicleController __instance)
+        {
+            return !__instance.carDestroyed;
+        }
+
+        [HarmonyPatch(nameof(VehicleController.CancelTryIgnitionClientRpc))]
+        [HarmonyPostfix]
+        static void VehicleController_Post_CancelTryIgnitionClientRpc(VehicleController __instance, int driverId)
+        {
+            if ((int)GameNetworkManager.Instance.localPlayerController.playerClientId != driverId)
+            {
+                // CancelIgnitionAnimation() should be called instead of just stopping the coroutine... this is the rest of that function
+                __instance.keyIgnitionCoroutine = null;
+                __instance.keyIsInDriverHand = false;
+            }
+        }
+
+        [HarmonyPatch(nameof(VehicleController.RevCarClientRpc))]
+        [HarmonyPostfix]
+        static void VehicleController_Post_RevCarClientRpc(VehicleController __instance, int driverId)
+        {
+            if (!Compatibility.INSTALLED_CRUISER_IMPROVED && (int)GameNetworkManager.Instance.localPlayerController.playerClientId != driverId)
+            {
+                __instance.keyIsInIgnition = true;
+                __instance.SetFrontCabinLightOn(__instance.keyIsInIgnition);
+            }
         }
     }
 }
