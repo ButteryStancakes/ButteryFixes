@@ -1,5 +1,4 @@
-﻿using ButteryFixes.Patches.Objects;
-using ButteryFixes.Utility;
+﻿using ButteryFixes.Utility;
 using HarmonyLib;
 
 namespace ButteryFixes.Patches.General
