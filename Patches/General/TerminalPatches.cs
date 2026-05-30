@@ -148,7 +148,13 @@ namespace ButteryFixes.Patches.General
                 System.Random rand = new(StartOfRound.Instance.randomMapSeed + 91);
                 foreach (GrabbableObject grabbableObject in Object.FindObjectsByType<GrabbableObject>(FindObjectsSortMode.None))
                 {
-                    if ((!grabbableObject.itemProperties.isScrap && (!scanOnShip || grabbableObject.itemProperties.itemId != 14)) || grabbableObject is RagdollGrabbableObject)
+                    if ((!grabbableObject.itemProperties.isScrap && (!scanOnShip || grabbableObject.itemProperties.itemId != 14)) || grabbableObject is RagdollGrabbableObject || grabbableObject.deactivated)
+                        continue;
+
+                    if (grabbableObject is GiftBoxItem giftBoxItem && giftBoxItem.hasUsedGift)
+                        continue;
+
+                    if (grabbableObject is StunGrenadeItem stunGrenadeItem && stunGrenadeItem.hasExploded && stunGrenadeItem.DestroyGrenade)
                         continue;
 
                     bool inShip = grabbableObject.isInShipRoom || grabbableObject.isInElevator;

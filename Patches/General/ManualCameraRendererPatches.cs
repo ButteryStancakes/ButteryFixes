@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace ButteryFixes.Patches.General
 {
@@ -58,7 +59,7 @@ namespace ButteryFixes.Patches.General
             // fix screen toggling on a delay (unlike the head mounted cams)
             if (__instance.LostSignalUI != null)
             {
-                if (__instance.targetedPlayer != null && __instance.targetedPlayer.isPlayerDead && __instance.headMountedCamUI != null)
+                if (__instance.targetedPlayer != null && __instance.targetedPlayer.isPlayerDead && __instance.targetedPlayer.redirectToEnemy == null && __instance.headMountedCamUI != null)
                 {
                     bool bodyMissing = __instance.targetedPlayer.deadBody == null || !__instance.targetedPlayer.deadBody.gameObject.activeSelf;
 
@@ -68,13 +69,13 @@ namespace ButteryFixes.Patches.General
                         __instance.headMountedCamUI.enabled = false;
                         if (__instance.headMountedCam != null)
                             __instance.headMountedCam.enabled = false;
-                    }
 
-                    // lose signal of dead bodies
-                    if (Configuration.noBodyNoSignal.Value && !__instance.headMountedCamUI.enabled && bodyMissing && __instance.targetedPlayer.redirectToEnemy == null)
-                    {
-                        __instance.LostSignalUI.SetActive(true);
-                        return;
+                        // lose signal of dead bodies
+                        if (Configuration.noBodyNoSignal.Value && !__instance.headMountedCamUI.enabled && __instance.targetedPlayer.redirectToEnemy == null)
+                        {
+                            __instance.LostSignalUI.SetActive(true);
+                            return;
+                        }
                     }
                 }
 
@@ -190,7 +191,7 @@ namespace ButteryFixes.Patches.General
         static bool ManualCameraRenderer_Pre_SetLineToExitFromRadarTarget(ManualCameraRenderer __instance)
         {
             // radar is not active
-            if (__instance.overrideCameraForOtherUse || __instance.LostSignalUI.activeSelf)
+            if (__instance.overrideCameraForOtherUse || !__instance.screenEnabledOnLocalClient || __instance.playerIsInCaves || __instance.LostSignalUI.activeSelf)
             {
                 __instance.lineFromRadarTargetToExit.enabled = false;
                 return false;
@@ -217,7 +218,46 @@ namespace ButteryFixes.Patches.General
                 return false;
             }
 
-            return true;
+            __instance.lineFromRadarTargetToExit.enabled = true;
+
+            if (__instance.updateLineInterval > 0f)
+            {
+                __instance.updateLineInterval -= Time.deltaTime;
+
+                __instance.dottedLineOffset -= Time.deltaTime;
+                Material dottedLineMat = __instance.lineFromRadarTargetToExit.material;
+                Vector2 offset = new(__instance.dottedLineOffset, 0f);
+                dottedLineMat.SetTextureOffset("_UnlitColorMap", offset); // proper texture map
+                dottedLineMat.SetTextureOffset("_MainTex", offset); // in case of fallback shader
+
+                __instance.lineFromRadarTargetToExit.SetPosition(0, __instance.mapCamera.transform.position + (2.5f * Vector3.down));
+            }
+            else
+            {
+                Vector3 lineTarget = NonPatchFunctions.GetTrueExitPoint();
+
+                // exit path can't be calculated
+                if (lineTarget == Vector3.zero || !NavMesh.CalculatePath(__instance.mapCamera.transform.position + (3.75f * Vector3.down), lineTarget, NavMesh.AllAreas, __instance.path1))
+                    return false;
+
+                // dynamic refresh rate, based on path complexity
+                if (__instance.path1.corners.Length > 50)
+                    __instance.setLineIntervalTo = 2f;
+                else if (__instance.path1.corners.Length < 36)
+                    __instance.setLineIntervalTo = 0.4f;
+
+                // update path vertices
+                __instance.lineFromRadarTargetToExit.positionCount = Mathf.Clamp(__instance.path1.corners.Length, 1, 20);
+                points[0] = __instance.mapCamera.transform.position + (2.5f * Vector3.down);
+                for (int i = 1; i < __instance.lineFromRadarTargetToExit.positionCount; i++)
+                    points[i] = __instance.path1.corners[i] + (1.25f * Vector3.up);
+                __instance.lineFromRadarTargetToExit.SetPositions(points);
+
+                // cooldown
+                __instance.updateLineInterval = __instance.setLineIntervalTo;
+            }
+
+            return false;
         }
     }
 }

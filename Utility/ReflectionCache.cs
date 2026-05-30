@@ -7,7 +7,9 @@ namespace ButteryFixes.Utility
 {
     internal static class ReflectionCache
     {
-        internal static readonly FieldInfo IS_IN_HANGAR_SHIP_ROOM = AccessTools.Field(typeof(PlayerControllerB), nameof(PlayerControllerB.isInHangarShipRoom)),
+        internal static readonly FieldInfo  LOCAL_PLAYER_CONTROLLER = AccessTools.Field(typeof(GameNetworkManager), nameof(GameNetworkManager.localPlayerController)),
+
+                                            IS_IN_HANGAR_SHIP_ROOM = AccessTools.Field(typeof(PlayerControllerB), nameof(PlayerControllerB.isInHangarShipRoom)),
 
                                             VEHICLE_CONTROLLER = AccessTools.Field(typeof(GlobalReferences), nameof(GlobalReferences.vehicleController)),
 
@@ -24,6 +26,9 @@ namespace ButteryFixes.Utility
                                             SET_SCRAP_VALUE = AccessTools.Method(typeof(GrabbableObject), nameof(GrabbableObject.SetScrapValue)),
                                             TRACK_GIFT_BOX_ON_CLIENT = AccessTools.Method(typeof(ScrapTracker), nameof(ScrapTracker.TrackGiftBoxOnClient)),
 
-                                            ROUND_MANAGER_INSTANCE = AccessTools.DeclaredPropertyGetter(typeof(RoundManager), nameof(RoundManager.Instance));
+                                            ROUND_MANAGER_INSTANCE = AccessTools.DeclaredPropertyGetter(typeof(RoundManager), nameof(RoundManager.Instance)),
+
+                                            DAMAGE_PLAYER = AccessTools.Method(typeof(PlayerControllerB), nameof(PlayerControllerB.DamagePlayer)),
+                                            KILL_PLAYER = AccessTools.Method(typeof(PlayerControllerB), nameof(PlayerControllerB.KillPlayer));
     }
 }

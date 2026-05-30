@@ -24,7 +24,7 @@ namespace ButteryFixes.Patches.Player
 
         static List<PlayerControllerB> bunnyhoppingPlayers = new(50);
 
-        static float safeTimer = 0, safeTimer2 = 0;
+        static float safeTimer = 0, safeTimer2 = 0, stabbedTimestamp = -1f;
 
         [HarmonyPatch(nameof(PlayerControllerB.Update))]
         [HarmonyPostfix]
@@ -256,6 +256,27 @@ namespace ButteryFixes.Patches.Player
         {
             if (__instance.inVehicleAnimation && !__instance.isPlayerDead && __instance.isPlayerControlled && GlobalReferences.vehicleController != null && GlobalReferences.vehicleController.vehicleID == 0 && !Compatibility.INSTALLED_V55_CRUISER && (GlobalReferences.vehicleController.currentDriver == __instance || GlobalReferences.vehicleController.currentPassenger == __instance))
                 CruiserAnimator.ResetPlayerAnimator(__instance);
+        }
+
+        [HarmonyPatch($"{nameof(IHittable)}.{nameof(IHittable.Hit)}")]
+        [HarmonyPrefix]
+        static void PlayerControllerB_Pre_Hit(PlayerControllerB __instance, int hitID)
+        {
+            if (hitID == 5 && __instance == GameNetworkManager.Instance.localPlayerController)
+                stabbedTimestamp = Time.realtimeSinceStartup;
+        }
+
+        [HarmonyPatch(nameof(PlayerControllerB.DamagePlayer))]
+        [HarmonyPrefix]
+        static void PlayerControllerB_Pre_DamagePlayer(ref CauseOfDeath causeOfDeath)
+        {
+            if (causeOfDeath == CauseOfDeath.Bludgeoning)
+            {
+                if (stabbedTimestamp >= 0f && Time.realtimeSinceStartup - stabbedTimestamp <= 10f)
+                    causeOfDeath = CauseOfDeath.Stabbing;
+
+                stabbedTimestamp = -1f;
+            }
         }
     }
 }

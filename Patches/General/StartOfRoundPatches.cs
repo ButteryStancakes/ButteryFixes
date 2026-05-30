@@ -41,6 +41,12 @@ namespace ButteryFixes.Patches.General
                 clipboard.GetComponent<ClipboardItem>().scrapValue = 0;
                 Plugin.Logger.LogDebug("Value: Clipboard");
             }
+            KillLocalPlayer killTrigger = __instance.elevatorTransform.Find("KillTrigger")?.GetComponent<KillLocalPlayer>();
+            if (killTrigger != null)
+            {
+                killTrigger.causeOfDeath = CauseOfDeath.Crushing;
+                Plugin.Logger.LogDebug("Cause of death: Ship");
+            }
 
             ScriptableObjectOverrides.OverrideUnlockables();
 

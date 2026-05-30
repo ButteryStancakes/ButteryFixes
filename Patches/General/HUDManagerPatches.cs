@@ -105,14 +105,6 @@ namespace ButteryFixes.Patches.General
                 __instance.increaseHelmetCondensation = true;
         }
 
-        [HarmonyPatch(nameof(HUDManager.CanPlayerScan))]
-        [HarmonyPostfix]
-        static void HUDManager_Post_CanPlayerScan(ref bool __result)
-        {
-            if (!__result && !Compatibility.INSTALLED_CRUISER_IMPROVED && GameNetworkManager.Instance.localPlayerController.inVehicleAnimation && !GameNetworkManager.Instance.localPlayerController.isPlayerDead)
-                __result = true;
-        }
-
         [HarmonyPatch(nameof(HUDManager.AddNewScrapFoundToDisplay))]
         [HarmonyPostfix]
         static void HUDManager_Post_AddNewScrapFoundToDisplay(HUDManager __instance)

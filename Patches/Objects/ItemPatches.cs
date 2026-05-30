@@ -1,4 +1,5 @@
 ﻿using ButteryFixes.Utility;
+using GameNetcodeStuff;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
@@ -165,5 +166,24 @@ namespace ButteryFixes.Patches.Objects
         {
             ScrapTracker.Untrack(__instance);
         }
+
+        /*[HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.DestroyObjectInHand))]
+        [HarmonyPostfix]
+        static void GrabbableObject_Post_DestroyObjectInHand(GrabbableObject __instance, PlayerControllerB playerHolding)
+        {
+            // fixes gift boxes, homemade flashbangs, and easter eggs from tracking as collected if they are destroyed in the ship
+            if (__instance != null && __instance.isInShipRoom && !__instance.scrapPersistedThroughRounds && __instance.scrapValue != 0)
+            {
+                __instance.isInShipRoom = false;
+                RoundManager.Instance.scrapCollectedInLevel = Mathf.Max(RoundManager.Instance.scrapCollectedInLevel - __instance.scrapValue, 0);
+                PlayerControllerB player = playerHolding ?? __instance.playerHeldBy;
+                if (player != null)
+                {
+                    int id = (int)player.playerClientId;
+                    if (id >= 0 && id < StartOfRound.Instance.gameStats.allPlayerStats.Length)
+                        StartOfRound.Instance.gameStats.allPlayerStats[(int)player.playerClientId].profitable -= __instance.scrapValue;
+                }
+            }
+        }*/
     }
 }

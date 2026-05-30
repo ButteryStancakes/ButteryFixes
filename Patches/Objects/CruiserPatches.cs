@@ -64,7 +64,6 @@ namespace ButteryFixes.Patches.Objects
             MethodInfo overlapSphere = AccessTools.Method(typeof(Physics), nameof(Physics.OverlapSphere), [typeof(Vector3), typeof(float), typeof(int), typeof(QueryTriggerInteraction)]),
                        gameNetworkManagerInstance = AccessTools.DeclaredPropertyGetter(typeof(GameNetworkManager), nameof(GameNetworkManager.Instance)),
                        setItemInElevator = AccessTools.Method(typeof(PlayerControllerB), nameof(PlayerControllerB.SetItemInElevator));
-            FieldInfo localPlayerController = AccessTools.Field(typeof(GameNetworkManager), nameof(GameNetworkManager.localPlayerController));
             for (int i = 1; i < codes.Count - 7; i++)
             {
                 if (codes[i].opcode == OpCodes.Call)
@@ -76,7 +75,7 @@ namespace ButteryFixes.Patches.Objects
                         Plugin.Logger.LogDebug("Transpiler (Cruiser collect): Auto-collect trigger colliders, for Teeth");
                         patchedTriggerInteraction = true;
                     }
-                    else if (!creditLastDriver && methodInfo == gameNetworkManagerInstance && codes[i + 1].opcode == OpCodes.Ldfld && (FieldInfo)codes[i + 1].operand == localPlayerController && codes[i + 7].opcode == OpCodes.Callvirt && codes[i + 7].operand as MethodInfo == setItemInElevator)
+                    else if (!creditLastDriver && methodInfo == gameNetworkManagerInstance && codes[i + 1].opcode == OpCodes.Ldfld && (FieldInfo)codes[i + 1].operand == ReflectionCache.LOCAL_PLAYER_CONTROLLER && codes[i + 7].opcode == OpCodes.Callvirt && codes[i + 7].operand as MethodInfo == setItemInElevator)
                     {
                         codes[i].operand = AccessTools.Method(typeof(NonPatchFunctions), nameof(NonPatchFunctions.CruiserCreditsPlayer));
                         codes[i + 1].opcode = OpCodes.Nop;

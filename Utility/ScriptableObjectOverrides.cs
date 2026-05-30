@@ -170,6 +170,10 @@ namespace ButteryFixes.Utility
                             Plugin.Logger.LogDebug("Cooldown: Clown horn");
                         }
                         break;
+                    case "ExtensionLadder":
+                        item.spawnPrefab.GetComponentInChildren<KillLocalPlayer>().causeOfDeath = CauseOfDeath.Bludgeoning;
+                        Plugin.Logger.LogDebug("Cause of death: Extension ladder");
+                        break;
                     case "FancyCup":
                         if (Configuration.theGoldenGoblet.Value)
                         {
