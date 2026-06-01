@@ -18,8 +18,9 @@ namespace ButteryFixes.Patches
 
             for (int i = 6; i < codes.Count; i++)
             {
-                if (codes[i].opcode == OpCodes.Callvirt && codes[i].operand as MethodInfo == ReflectionCache.DAMAGE_PLAYER && codes[i - 6].opcode == OpCodes.Ldloc_0)
+                if (codes[i].opcode == OpCodes.Callvirt && codes[i].operand as MethodInfo == ReflectionCache.DAMAGE_PLAYER && codes[i - 6].opcode == OpCodes.Ldc_I4_0)
                 {
+                    codes[i - 6].opcode = OpCodes.Ldfld;
                     codes[i - 6].operand = AccessTools.Field(typeof(KillLocalPlayer), nameof(KillLocalPlayer.causeOfDeath));
                     codes.Insert(i - 6, new(OpCodes.Ldarg_0));
                     Plugin.Logger.LogDebug("Transpiler (Kill trigger): Use correct cause of death");

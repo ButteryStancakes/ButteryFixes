@@ -13,8 +13,6 @@ namespace ButteryFixes.Patches.Objects
     [HarmonyPatch(typeof(VehicleController))]
     static class CruiserPatches
     {
-        static float radioPingTimestamp;
-
         [HarmonyPatch(nameof(VehicleController.DestroyCar))]
         [HarmonyPostfix]
         static void VehicleController_Post_DestroyCar(VehicleController __instance)

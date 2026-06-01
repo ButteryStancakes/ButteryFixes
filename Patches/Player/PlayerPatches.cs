@@ -24,7 +24,9 @@ namespace ButteryFixes.Patches.Player
 
         static List<PlayerControllerB> bunnyhoppingPlayers = new(50);
 
-        static float safeTimer = 0, safeTimer2 = 0, stabbedTimestamp = -1f;
+        static float safeTimer = 0, safeTimer2 = 0;
+
+        static bool stabbed;
 
         [HarmonyPatch(nameof(PlayerControllerB.Update))]
         [HarmonyPostfix]
@@ -258,25 +260,27 @@ namespace ButteryFixes.Patches.Player
                 CruiserAnimator.ResetPlayerAnimator(__instance);
         }
 
-        [HarmonyPatch($"{nameof(IHittable)}.{nameof(IHittable.Hit)}")]
+        [HarmonyPatch(nameof(PlayerControllerB.DamagePlayerFromOtherClientClientRpc))]
         [HarmonyPrefix]
-        static void PlayerControllerB_Pre_Hit(PlayerControllerB __instance, int hitID)
+        static void PlayerControllerB_Pre_DamagePlayerFromOtherClientClientRpc(PlayerControllerB __instance, int playerWhoHit)
         {
-            if (hitID == 5 && __instance == GameNetworkManager.Instance.localPlayerController)
-                stabbedTimestamp = Time.realtimeSinceStartup;
+            if (playerWhoHit >= 0 && playerWhoHit < StartOfRound.Instance.allPlayerScripts.Length && StartOfRound.Instance.allPlayerScripts[playerWhoHit].currentlyHeldObjectServer != null && StartOfRound.Instance.allPlayerScripts[playerWhoHit].currentlyHeldObjectServer is KnifeItem)
+                stabbed = true;
         }
 
         [HarmonyPatch(nameof(PlayerControllerB.DamagePlayer))]
         [HarmonyPrefix]
-        static void PlayerControllerB_Pre_DamagePlayer(ref CauseOfDeath causeOfDeath)
+        static void PlayerControllerB_Pre_DamagePlayer(PlayerControllerB __instance, ref CauseOfDeath causeOfDeath)
         {
-            if (causeOfDeath == CauseOfDeath.Bludgeoning)
-            {
-                if (stabbedTimestamp >= 0f && Time.realtimeSinceStartup - stabbedTimestamp <= 10f)
-                    causeOfDeath = CauseOfDeath.Stabbing;
+            if (causeOfDeath == CauseOfDeath.Bludgeoning && stabbed)
+                causeOfDeath = CauseOfDeath.Stabbing;
+        }
 
-                stabbedTimestamp = -1f;
-            }
+        [HarmonyPatch(nameof(PlayerControllerB.DamagePlayerFromOtherClientClientRpc))]
+        [HarmonyPostfix]
+        static void PlayerControllerB_Post_DamagePlayerFromOtherClientClientRpc()
+        {
+            stabbed = false;
         }
     }
 }
