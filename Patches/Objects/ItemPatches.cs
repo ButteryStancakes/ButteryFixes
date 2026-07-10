@@ -184,5 +184,13 @@ namespace ButteryFixes.Patches.Objects
                 }
             }
         }*/
+
+        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.SetControlTipsForItem))]
+        [HarmonyPostfix]
+        static void GrabbableObject_Post_SetControlTipsForItem(GrabbableObject __instance)
+        {
+            if (__instance is StunGrenadeItem stunGrenadeItem)
+                stunGrenadeItem.SetControlTipForGrenade();
+        }
     }
 }

@@ -173,9 +173,12 @@ namespace ButteryFixes.Patches.Enemies
         [HarmonyPostfix]
         static void CadaverGrowthAI_Post_ProgressPlayerInfections(CadaverGrowthAI __instance)
         {
+            if (GameNetworkManager.Instance.localPlayerController.isPlayerDead)
+                return;
+
             int playerId = (int)GameNetworkManager.Instance.localPlayerController.playerClientId;
 
-            if (__instance.playerInfections.Length <= playerId)
+            if (playerId < 0 || __instance.playerInfections.Length <= playerId)
                 return;
 
             if (__instance.playerInfections[playerId].burstMeter >= 0.9f)

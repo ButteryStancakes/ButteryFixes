@@ -13,6 +13,7 @@ namespace ButteryFixes.Utility
                 "GiantKiwi"
             ];
 
+            Transform mapDot;
             foreach (KeyValuePair<string, EnemyType> enemy in GlobalReferences.allEnemiesList)
             {
                 switch (enemy.Key)
@@ -58,7 +59,7 @@ namespace ButteryFixes.Utility
                         Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Don't get eaten by other worms");
                         break;
                     case "SpringMan":
-                        Transform mapDot = enemy.Value.enemyPrefab?.transform.Find("SpringManModel/MapDot (2)");
+                        mapDot = enemy.Value.enemyPrefab?.transform.Find("SpringManModel/MapDot (2)");
                         if (mapDot != null)
                         {
                             float scale = (mapDot.localScale.x + mapDot.localScale.z) / 2f;
@@ -66,7 +67,14 @@ namespace ButteryFixes.Utility
                             mapDot.localScale = new(mapDot.localScale.x, scale, mapDot.localScale.z);
                             Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Fix radar appearance");
                         }
-
+                        break;
+                    case "Crawler":
+                        mapDot = enemy.Value.enemyPrefab?.transform.Find("CrawlerModel/MapDot");
+                        if (mapDot != null)
+                        {
+                            mapDot.localPosition = new(mapDot.localPosition.x, 2f, mapDot.localPosition.z);
+                            Plugin.Logger.LogDebug($"{enemy.Value.enemyName}: Fix radar appearance");
+                        }
                         break;
                 }
 
