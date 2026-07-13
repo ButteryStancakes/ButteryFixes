@@ -24,7 +24,7 @@ namespace ButteryFixes.Utility
                 GlobalReferences.viewmodelArms.forceRenderingOff = true;
             }
 
-            ManualCameraRenderer mapScreen = StartOfRound.Instance?.mapScreen;
+            /*ManualCameraRenderer mapScreen = StartOfRound.Instance?.mapScreen;
             if (mapScreen != null && camera == mapScreen.headMountedCam && mapScreen.targetedPlayer != null)
             {
                 if (mapScreen.targetedPlayer.isPlayerDead)
@@ -34,7 +34,7 @@ namespace ButteryFixes.Utility
                 }
                 else if (mapScreen.targetedPlayer.nightVisionRadar != null)
                     mapScreen.targetedPlayer.nightVisionRadar.enabled = true;
-            }
+            }*/
         }
 
         public static void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
@@ -53,7 +53,7 @@ namespace ButteryFixes.Utility
                 armsNotRendering = null;
             }
 
-            PlayerControllerB targetedPlayer = StartOfRound.Instance.mapScreen?.targetedPlayer;
+            /*PlayerControllerB targetedPlayer = StartOfRound.Instance.mapScreen?.targetedPlayer;
             if (targetedPlayer != null)
             {
                 if (targetedPlayer.nightVisionRadar != null)
@@ -61,7 +61,7 @@ namespace ButteryFixes.Utility
 
                 if (targetedPlayer.deadBody?.nightVisionRadar != null)
                     targetedPlayer.deadBody.nightVisionRadar.enabled = false;
-            }
+            }*/
         }
     }
 }
