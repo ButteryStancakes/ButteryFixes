@@ -1,5 +1,4 @@
-﻿using GameNetcodeStuff;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Rendering;
 
 namespace ButteryFixes.Utility
@@ -24,16 +23,19 @@ namespace ButteryFixes.Utility
                 GlobalReferences.viewmodelArms.forceRenderingOff = true;
             }
 
-            /*ManualCameraRenderer mapScreen = StartOfRound.Instance?.mapScreen;
-            if (mapScreen != null && camera == mapScreen.headMountedCam && mapScreen.targetedPlayer != null)
+            /*if (!Compatibility.INSTALLED_OPEN_BODY_CAMS)
             {
-                if (mapScreen.targetedPlayer.isPlayerDead)
+                ManualCameraRenderer mapScreen = StartOfRound.Instance?.mapScreen;
+                if (mapScreen != null && camera == mapScreen.headMountedCam && mapScreen.targetedPlayer != null)
                 {
-                    if (mapScreen.targetedPlayer.deadBody?.nightVisionRadar != null)
-                        mapScreen.targetedPlayer.deadBody.nightVisionRadar.enabled = true;
+                    if (mapScreen.targetedPlayer.isPlayerDead)
+                    {
+                        if (mapScreen.targetedPlayer.deadBody?.nightVisionRadar != null)
+                            mapScreen.targetedPlayer.deadBody.nightVisionRadar.enabled = true;
+                    }
+                    else if (mapScreen.targetedPlayer.nightVisionRadar != null)
+                        mapScreen.targetedPlayer.nightVisionRadar.enabled = true;
                 }
-                else if (mapScreen.targetedPlayer.nightVisionRadar != null)
-                    mapScreen.targetedPlayer.nightVisionRadar.enabled = true;
             }*/
         }
 
@@ -53,14 +55,16 @@ namespace ButteryFixes.Utility
                 armsNotRendering = null;
             }
 
-            /*PlayerControllerB targetedPlayer = StartOfRound.Instance.mapScreen?.targetedPlayer;
-            if (targetedPlayer != null)
-            {
-                if (targetedPlayer.nightVisionRadar != null)
-                    targetedPlayer.nightVisionRadar.enabled = false;
+            /*if (!Compatibility.INSTALLED_OPEN_BODY_CAMS)
+                PlayerControllerB targetedPlayer = StartOfRound.Instance.mapScreen?.targetedPlayer;
+                if (targetedPlayer != null)
+                {
+                    if (targetedPlayer.nightVisionRadar != null)
+                        targetedPlayer.nightVisionRadar.enabled = false;
 
-                if (targetedPlayer.deadBody?.nightVisionRadar != null)
-                    targetedPlayer.deadBody.nightVisionRadar.enabled = false;
+                    if (targetedPlayer.deadBody?.nightVisionRadar != null)
+                        targetedPlayer.deadBody.nightVisionRadar.enabled = false;
+                }
             }*/
         }
     }

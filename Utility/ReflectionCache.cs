@@ -7,7 +7,7 @@ namespace ButteryFixes.Utility
 {
     internal static class ReflectionCache
     {
-        internal static readonly FieldInfo  LOCAL_PLAYER_CONTROLLER = AccessTools.Field(typeof(GameNetworkManager), nameof(GameNetworkManager.localPlayerController)),
+        internal static readonly FieldInfo LOCAL_PLAYER_CONTROLLER = AccessTools.Field(typeof(GameNetworkManager), nameof(GameNetworkManager.localPlayerController)),
 
                                             IS_IN_HANGAR_SHIP_ROOM = AccessTools.Field(typeof(PlayerControllerB), nameof(PlayerControllerB.isInHangarShipRoom)),
 

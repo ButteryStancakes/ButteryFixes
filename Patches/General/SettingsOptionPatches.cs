@@ -13,7 +13,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void SettingsOption_Post_OnEnable(SettingsOption __instance)
         {
-            if (__instance.optionType == SettingsOptionType.PixelRes)
+            if (__instance.optionType == SettingsOptionType.PixelRes && !Compatibility.DISABLE_RESOLUTION_PATCHES)
             {
                 TMP_Dropdown dropdown = __instance.GetComponentInChildren<TMP_Dropdown>();
                 if (dropdown != null)
@@ -46,7 +46,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPrefix]
         static bool SettingsOption_Pre_SetValueToMatchSettings(SettingsOption __instance)
         {
-            if (__instance.optionType == SettingsOptionType.PixelRes)
+            if (__instance.optionType == SettingsOptionType.PixelRes && !Compatibility.DISABLE_RESOLUTION_PATCHES)
             {
                 TMP_Dropdown dropdown = __instance.GetComponentInChildren<TMP_Dropdown>();
                 if (dropdown == null)

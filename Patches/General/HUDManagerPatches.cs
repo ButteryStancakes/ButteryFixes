@@ -1,4 +1,5 @@
 ﻿using ButteryFixes.Utility;
+using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
 
@@ -45,7 +46,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void HUDManager_Post_FillEndGameStats(HUDManager __instance, int scrapCollected = 0)
         {
-            if (Compatibility.INSTALLED_GENERAL_IMPROVEMENTS || StartOfRound.Instance.allPlayersDead)
+            if (/*Compatibility.INSTALLED_GENERAL_IMPROVEMENTS ||*/ StartOfRound.Instance.allPlayersDead)
             {
                 ScrapTracker.Reset();
                 return;
@@ -85,7 +86,28 @@ namespace ButteryFixes.Patches.General
                 grade--;
 
             string[] grades = { "D", "C", "B", "A", "S" };
-            __instance.statsUIElements.gradeLetter.SetText(grades[Mathf.Clamp(grade + 1, 0, grades.Length)]);*/
+            __instance.statsUIElements.gradeLetter.SetText(grades[Mathf.Clamp(grade + 1, 0, grades.Length - 1)]);*/
+
+            if (!StartOfRound.Instance.allPlayersDead)
+            {
+                int deadPlayers = 0;
+                foreach (PlayerControllerB player in StartOfRound.Instance.allPlayerScripts)
+                {
+                    if (player.isPlayerDead)
+                    {
+                        deadPlayers++;
+
+                        if (deadPlayers > 1)
+                        {
+                            // grade doesn't properly reset in vanilla under these conditions
+                            if ((RoundManager.Instance.scrapCollectedInLevel / RoundManager.Instance.totalScrapValueInLevel) <= 0.25f)
+                                __instance.statsUIElements.gradeLetter.text = "D";
+
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         [HarmonyPatch(nameof(HUDManager.SetPlayerLevelSmoothly))]

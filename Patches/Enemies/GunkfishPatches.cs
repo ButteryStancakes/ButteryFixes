@@ -11,7 +11,7 @@ namespace ButteryFixes.Patches.Enemies
     {
         [HarmonyPatch(nameof(StingrayAI.HitEnemy))]
         [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> FlowermanAI_Trans_HitEnemy(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> StingrayAI_Trans_HitEnemy(IEnumerable<CodeInstruction> instructions)
         {
             List<CodeInstruction> codes = instructions.ToList();
 

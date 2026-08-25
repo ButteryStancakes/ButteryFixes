@@ -119,7 +119,7 @@ namespace ButteryFixes.Utility
             Dictionary<string, bool> conductiveItems = new()
             {
                 //{ "Airhorn", true },
-                //{ "ControlPad", false },
+                { "ControlPad", false },
                 { "DustPan", true },
                 { "FancyCup", !Compatibility.INSTALLED_UPTURNED_VARIETY },
                 { "LockPicker", true },
@@ -205,6 +205,19 @@ namespace ButteryFixes.Utility
                         sharedMaterials[1] = flashlightItem.bulbDark;
                         flashlightItem.flashlightMesh.sharedMaterials = sharedMaterials;
                         Plugin.Logger.LogDebug($"Bulb off: {item.itemName}");
+                        break;
+                    case "Flask":
+                        if (Configuration.chemistryFlasks.Value)
+                        {
+                            if (scanNodeProperties != null)
+                            {
+                                scanNodeProperties.headerText = scanNodeProperties.headerText.Replace("Flask", "Chemistry flask");
+                                Plugin.Logger.LogDebug("Scan node: Flask");
+                            }
+
+                            item.itemName = item.itemName.Replace("Flask", "Chemistry flask");
+                            Plugin.Logger.LogDebug("Name: Flask");
+                        }
                         break;
                     case "Hairdryer":
                         if (Configuration.adjustCooldowns.Value)
@@ -336,6 +349,12 @@ namespace ButteryFixes.Utility
                         {
                             unlockableItem.prefabObject.GetComponentInChildren<InteractTrigger>().cooldownTime = 0.45f;
                             Plugin.Logger.LogDebug("Cooldown: Jack o' Lantern");
+                        }
+                        Transform pumpkinMesh = unlockableItem.prefabObject.transform.Find("PumpkinMesh");
+                        if (pumpkinMesh != null)
+                        {
+                            GlobalReferences.sphere = pumpkinMesh.GetComponent<MeshFilter>()?.sharedMesh;
+                            GlobalReferences.pumpkinMatPlastic = pumpkinMesh.GetComponent<MeshRenderer>()?.sharedMaterial;
                         }
                         break;
                     case "Plushie pajama man":

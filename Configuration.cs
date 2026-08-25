@@ -9,25 +9,11 @@ namespace ButteryFixes
         Full
     }
 
-    // just for save migration
-    enum GameResolution
-    {
-        DontChange = -1,
-        Low,
-        High
-    }
-    enum MusicDopplerLevel
-    {
-        Vanilla = -1,
-        None,
-        Reduced
-    }
-
     internal class Configuration
     {
         static ConfigFile configFile;
 
-        internal static ConfigEntry<bool> makeConductive, fixJumpCheese, showApparatusValue, scanImprovements, fixSurfacePrices, lockInTerminal, filterDecor, typeGordion, playermodelPatches, patchLadders, adjustCooldowns, noBodyNoSignal, theGoldenGoblet, charredBodies, bodiesCollectSelf, cadaverHUD;
+        internal static ConfigEntry<bool> makeConductive, fixJumpCheese, showApparatusValue, scanImprovements, fixSurfacePrices, lockInTerminal, filterDecor, typeGordion, playermodelPatches, patchLadders, adjustCooldowns, noBodyNoSignal, theGoldenGoblet, charredBodies, bodiesCollectSelf, cadaverHUD, chemistryFlasks;
         internal static ConfigEntry<FilmGrains> restoreFilmGrain;
 
         internal static void Init(ConfigFile cfg)
@@ -142,6 +128,12 @@ namespace ButteryFixes
                 false,
                 "Renames the \"Golden cup\" to \"Golden goblet\"");
 
+            chemistryFlasks = configFile.Bind(
+                "Extra",
+                "ChemistryFlasks",
+                false,
+                "Renames the \"Flask\" to \"Chemistry flask\" like the original v45 release poem.");
+
             charredBodies = configFile.Bind(
                 "Extra",
                 "CharredBodies",
@@ -157,12 +149,49 @@ namespace ButteryFixes
 
         static void MigrateLegacyConfigs()
         {
-            // removed when fixed in v60
-            configFile.Bind("Gameplay", "KillOldBirds", true, "Legacy setting, doesn't work");
-            configFile.Remove(configFile["Gameplay", "KillOldBirds"].Definition);
-            // moved to Chameleon
-            configFile.Bind("Visual", "FancyEntranceDoors", false, "Legacy setting, use \"Chameleon\" instead");
-            configFile.Remove(configFile["Visual", "FancyEntranceDoors"].Definition);
+            foreach ((string, string) oldKey in new (string, string)[]
+            {
+                // removed when fixed in v60
+                ("Gameplay", "KillOldBirds"),
+                // moved to Chameleon
+                ("Visual", "FancyEntranceDoors"),
+                // overlaps compass as of v70 (also restored in v80)
+                ("Visual", "RestoreShipIcon"),
+                // moved to Spawn Cycle Fixes
+                ("Gameplay", "LimitSpawnChance"),
+                ("Gameplay", "UnlimitedOldBirds"),
+                ("Gameplay", "MaskHornetsPower"),
+                // removed when fixed in v80
+                ("Gameplay", "RandomizeDefaultSeed"),
+                ("Gameplay", "FixGiantSight"),
+                ("Compatibility", "PatchPocketLights"),
+                ("Audio", "RestoreArtificeAmbience"),
+                ("Visual", "DisableLODFade"),
+                // no longer compatible with changes from v80
+                ("Compatibility", "AutoCollect"),
+                ("Compatibility", "EndOrbitEarly"),
+                // replaced with pause menu setting
+                ("Visual", "ForceMaxQuality"),
+                // removed when fixed in v81
+                ("Gameplay", "KeysAreScrap"),
+                ("Gameplay", "FixFireExits"),
+                // moved to Enemy Sound Fixes
+                ("Audio", "MusicDopplerLevel"),
+                // just not necessary anymore as of v80 (sorry Sigurd)
+                ("Extra", "AlterBestiary"),
+            })
+            {
+                try
+                {
+                    configFile.Bind(oldKey.Item1, oldKey.Item2, string.Empty, "Legacy setting, doesn't work");
+                    configFile.Remove(configFile[oldKey.Item1, oldKey.Item2].Definition);
+                }
+                catch
+                {
+                    Plugin.Logger.LogWarning($"Can't delete \"{oldKey.Item1}\" - \"{oldKey.Item2}\" from config");
+                }
+            }
+
             // updated to ScanImprovements
             if (!scanImprovements.Value)
             {
@@ -171,9 +200,6 @@ namespace ButteryFixes
                     scanImprovements.Value = true;
                 configFile.Remove(configFile["Extra", "ScanOnShip"].Definition);
             }
-            // overlaps compass as of v70 (also restored in v80)
-            configFile.Bind("Visual", "RestoreShipIcon", true, "Legacy setting, doesn't work");
-            configFile.Remove(configFile["Visual", "RestoreShipIcon"].Definition);
             // updated to FixSurfacePrices
             if (fixSurfacePrices.Value)
             {
@@ -182,43 +208,6 @@ namespace ButteryFixes
                     fixSurfacePrices.Value = false;
                 configFile.Remove(configFile["Gameplay", "FixHivePrices"].Definition);
             }
-            // moved to Spawn Cycle Fixes
-            configFile.Bind("Gameplay", "LimitSpawnChance", false, "Legacy setting, use \"Spawn Cycle Fixes\" instead");
-            configFile.Remove(configFile["Gameplay", "LimitSpawnChance"].Definition);
-            configFile.Bind("Gameplay", "UnlimitedOldBirds", false, "Legacy setting, use \"Spawn Cycle Fixes\" instead");
-            configFile.Remove(configFile["Gameplay", "UnlimitedOldBirds"].Definition);
-            configFile.Bind("Gameplay", "MaskHornetsPower", false, "Legacy setting, use \"Spawn Cycle Fixes\" instead");
-            configFile.Remove(configFile["Gameplay", "MaskHornetsPower"].Definition);
-            // removed when fixed in v80
-            configFile.Bind("Gameplay", "RandomizeDefaultSeed", true, "Legacy setting, doesn't work");
-            configFile.Remove(configFile["Gameplay", "RandomizeDefaultSeed"].Definition);
-            configFile.Bind("Gameplay", "FixGiantSight", true, "Legacy setting, doesn't work");
-            configFile.Remove(configFile["Gameplay", "FixGiantSight"].Definition);
-            configFile.Bind("Compatibility", "PatchPocketLights", true, "Legacy setting, doesn't work");
-            configFile.Remove(configFile["Compatibility", "PatchPocketLights"].Definition);
-            configFile.Bind("Audio", "RestoreArtificeAmbience", true, "Legacy setting, doesn't work");
-            configFile.Remove(configFile["Audio", "RestoreArtificeAmbience"].Definition);
-            configFile.Bind("Visual", "DisableLODFade", true, "Legacy setting, doesn't work");
-            configFile.Remove(configFile["Visual", "DisableLODFade"].Definition);
-            // no longer compatible with changes from v80
-            configFile.Bind("Compatibility", "AutoCollect", true, "Legacy setting, doesn't work");
-            configFile.Remove(configFile["Compatibility", "AutoCollect"].Definition);
-            configFile.Bind("Compatibility", "EndOrbitEarly", true, "Legacy setting, doesn't work");
-            configFile.Remove(configFile["Compatibility", "EndOrbitEarly"].Definition);
-            // replaced with pause menu setting
-            configFile.Bind("Visual", "ForceMaxQuality", false, "Legacy setting, doesn't work");
-            configFile.Remove(configFile["Visual", "ForceMaxQuality"].Definition);
-            // removed when fixed in v81
-            configFile.Bind("Gameplay", "KeysAreScrap", false, "Legacy setting, doesn't work");
-            configFile.Remove(configFile["Gameplay", "KeysAreScrap"].Definition);
-            configFile.Bind("Gameplay", "FixFireExits", true, "Legacy setting, doesn't work");
-            configFile.Remove(configFile["Gameplay", "FixFireExits"].Definition);
-            // moved to Enemy Sound Fixes
-            configFile.Bind("Audio", "MusicDopplerLevel", false, "Legacy setting, use \"Enemy Sound Fixes\" instead");
-            configFile.Remove(configFile["Audio", "MusicDopplerLevel"].Definition);
-            // just not necessary anymore as of v80 (sorry Sigurd)
-            configFile.Bind("Extra", "AlterBestiary", false, "Legacy setting, doesn't work");
-            configFile.Remove(configFile["Extra", "AlterBestiary"].Definition);
 
             configFile.Save();
         }

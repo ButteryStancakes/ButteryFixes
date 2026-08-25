@@ -14,15 +14,16 @@ namespace ButteryFixes
         internal const string GUID_CRUISER_ADDITIONS = "4902.Cruiser_Additions";
         internal const string GUID_TERMINAL_STUFF = "darmuh.TerminalStuff";
         internal const string GUID_LOBBY_COMPATIBILITY = "BMX.LobbyCompatibility";
-        internal const string GUID_OPEN_BODY_CAMS = "Zaggy1024.OpenBodyCams";
+        //internal const string GUID_OPEN_BODY_CAMS = "Zaggy1024.OpenBodyCams";
         internal const string GUID_NO_LOST_SIGNAL = "Tomatobird.NoLostSignal";
         internal const string GUID_DROP_SHIP_DELIVERY_CAP_MODIFIER = "com.github.Sylkadi.DropShipDeliveryCapModifier";
         internal const string GUID_UPTURNED_VARIETY = "butterystancakes.lethalcompany.upturnedvariety";
         internal const string GUID_VERSION55_COMPANY_CRUISER = "scandal.v55cruiser";
         internal const string GUID_V70_POWERED_LIGHTS_FIX = "watergun.v72lightfix";
+        internal const string GUID_CUSTOM_RESOLUTION = "Tomatobird.CustomResolution";
 
-        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_MORE_COMPANY, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_REBALANCED_MOONS, INSTALLED_UPTURNED_VARIETY, INSTALLED_V55_CRUISER;
-        internal static bool DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING, DISABLE_ROTATION_PATCH, DISABLE_SIGNAL_PATCH, DISABLE_PURCHASE_CAP_PATCH;
+        internal static bool INSTALLED_GENERAL_IMPROVEMENTS, INSTALLED_MORE_COMPANY, INSTALLED_EVERYTHING_CAN_DIE, INSTALLED_REBALANCED_MOONS, INSTALLED_UPTURNED_VARIETY, INSTALLED_V55_CRUISER/*, INSTALLED_OPEN_BODY_CAMS*/;
+        internal static bool DISABLE_SPRAY_PAINT_PATCHES, DISABLE_INTERACT_FIX, DISABLE_PRICE_TEXT_FITTING, /*DISABLE_ROTATION_PATCH,*/ DISABLE_SIGNAL_PATCH, DISABLE_PURCHASE_CAP_PATCH, DISABLE_RESOLUTION_PATCHES;
 
         internal static void Init()
         {
@@ -74,11 +75,11 @@ namespace ButteryFixes
                 LobbyCompatibility.Init();
             }
 
-            if (Chainloader.PluginInfos.ContainsKey(GUID_OPEN_BODY_CAMS))
+            /*if (Chainloader.PluginInfos.ContainsKey(GUID_OPEN_BODY_CAMS))
             {
-                DISABLE_ROTATION_PATCH = true;
+                INSTALLED_OPEN_BODY_CAMS = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - OpenBodyCams detected");
-            }
+            }*/
 
             if (Chainloader.PluginInfos.ContainsKey(GUID_NO_LOST_SIGNAL))
             {
@@ -102,6 +103,12 @@ namespace ButteryFixes
             {
                 INSTALLED_V55_CRUISER = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Version-55 Company Cruiser detected");
+            }
+
+            if (Chainloader.PluginInfos.ContainsKey(GUID_CUSTOM_RESOLUTION))
+            {
+                DISABLE_RESOLUTION_PATCHES = true;
+                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - CustomResolution detected");
             }
         }
     }

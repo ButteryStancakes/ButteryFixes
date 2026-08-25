@@ -13,13 +13,16 @@ namespace ButteryFixes.Patches.Objects
     [HarmonyPatch(typeof(VehicleController))]
     static class CruiserPatches
     {
+        static Renderer turboRenderer;
+
         [HarmonyPatch(nameof(VehicleController.DestroyCar))]
         [HarmonyPostfix]
         static void VehicleController_Post_DestroyCar(VehicleController __instance)
         {
             __instance.hoodAudio.mute = true;
             __instance.healthMeter.GetComponentInChildren<Renderer>().forceRenderingOff = true;
-            //__instance.turboMeter.GetComponentInChildren<Renderer>().forceRenderingOff = true;
+            if (turboRenderer != null && __instance.turboMeter == turboRenderer.gameObject)
+                turboRenderer.forceRenderingOff = true;
 
             if (StartOfRound.Instance.attachedVehicle == __instance)
                 StartOfRound.Instance.attachedVehicle = null;
@@ -94,7 +97,10 @@ namespace ButteryFixes.Patches.Objects
         static void VehicleController_Post_Awake(VehicleController __instance)
         {
             if (GlobalReferences.vehicleController == null)
+            {
                 GlobalReferences.vehicleController = __instance;
+                turboRenderer = __instance.turboMeter.GetComponentInChildren<Renderer>();
+            }
         }
 
         [HarmonyPatch(typeof(BushWolfEnemy), nameof(BushWolfEnemy.Update))]
@@ -143,8 +149,6 @@ namespace ButteryFixes.Patches.Objects
         {
             if (__instance.currentDriver != null && GlobalReferences.lastDriver != __instance.currentDriver && !__instance.magnetedToShip)
                 GlobalReferences.lastDriver = __instance.currentDriver;
-
-            __instance.turboMeter.GetComponentInChildren<Renderer>().forceRenderingOff = __instance.carDestroyed || __instance.turboBoosts < 1;
         }
 
         [HarmonyPatch(nameof(VehicleController.StartMagneting))]
@@ -152,6 +156,15 @@ namespace ButteryFixes.Patches.Objects
         static bool VehicleController_Pre_StartMagneting(VehicleController __instance)
         {
             return !__instance.carDestroyed;
+        }
+
+        [HarmonyPatch(nameof(VehicleController.AddTurboBoostOnLocalClient))]
+        [HarmonyPatch(nameof(VehicleController.UseTurboBoostLocalClient))]
+        [HarmonyPostfix]
+        static void VehicleController_Post_TurboBoostLocalClient(VehicleController __instance)
+        {
+            if (turboRenderer != null && __instance.turboMeter == turboRenderer.gameObject)
+                turboRenderer.forceRenderingOff = __instance.turboBoosts < 1 || __instance.carDestroyed;
         }
     }
 }

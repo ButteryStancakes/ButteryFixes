@@ -122,5 +122,9 @@ namespace ButteryFixes.Utility
 
         // meteor showers
         internal static float meteorRPCReceivedTime;
+
+        // halloween
+        internal static Mesh sphere;
+        internal static Material pumpkinMatPlastic;
     }
 }

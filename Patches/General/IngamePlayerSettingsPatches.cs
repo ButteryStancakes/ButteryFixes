@@ -11,7 +11,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPrefix]
         static bool IngamePlayerSettings_Pre_SetPixelResolution(IngamePlayerSettings __instance)
         {
-            if (!GlobalReferences.forceMaxQuality)
+            if (Compatibility.DISABLE_RESOLUTION_PATCHES || !GlobalReferences.forceMaxQuality)
                 return true;
 
             __instance.unsavedSettings.pixelRes = 0;
@@ -53,7 +53,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPrefix]
         static bool IngamePlayerSettings_Pre_SetOption(IngamePlayerSettings __instance, SettingsOptionType optionType, int value)
         {
-            if (optionType == SettingsOptionType.PixelRes)
+            if (optionType == SettingsOptionType.PixelRes && !Compatibility.DISABLE_RESOLUTION_PATCHES)
             {
                 if (GameNetworkManager.Instance != null)
                     __instance.SettingsAudio.PlayOneShot(GameNetworkManager.Instance.buttonTuneSFX);
