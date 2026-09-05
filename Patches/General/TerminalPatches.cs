@@ -20,9 +20,9 @@ namespace ButteryFixes.Patches.General
             { "Knife", (28, 84) },
             { "RedLocustHive", (40, 150) },
             { "Shotgun", (25, 90) }, // 25 from v50 beta
-            { "LungApparatus", (40, 131) }, // 130 from v9
+            { "LungApparatus", (40, 130) }, // 130 from v9
             { "BabyKiwiEgg", (30, 200) },
-            { "Key", (3, 6) }, // 5 from v80 beta
+            { "Key", (3, 5) }, // 5 from v80 beta
         };
 
         [HarmonyPatch(nameof(Terminal.Start))]
@@ -166,11 +166,11 @@ namespace ButteryFixes.Patches.General
                             value += grabbableObject.scrapValue;
                         else
                         {
-                            int min = grabbableObject.itemProperties.minValue, max = grabbableObject.itemProperties.maxValue;
+                            int min = grabbableObject.itemProperties.minValue, max = grabbableObject.itemProperties.maxValue + 1;
                             if (valueOverrides.TryGetValue(grabbableObject.itemProperties.name, out (int realMin, int realMax) values))
                             {
                                 min = values.realMin;
-                                max = values.realMax;
+                                max = values.realMax + 1;
                             }
                             else
                             {
@@ -192,7 +192,7 @@ namespace ButteryFixes.Patches.General
                     for (int i = 0; i < EnemyRadar.CountButlers(); i++)
                     {
                         (int min, int max) = valueOverrides["Knife"];
-                        value += Mathf.Clamp(rand.Next(min, max), 35 - (6 * objects), 35 + (9 * objects));
+                        value += Mathf.Clamp(rand.Next(min, max + 1), 35 - (6 * objects), 35 + (9 * objects));
                         objects++;
                     }
 

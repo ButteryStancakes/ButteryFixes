@@ -188,6 +188,7 @@ namespace ButteryFixes.Patches.General
 
         [HarmonyPatch(nameof(ManualCameraRenderer.SetLineToExitFromRadarTarget))]
         [HarmonyPrefix]
+        [HarmonyBefore(Compatibility.GUID_SCIENCE_BIRD_TWEAKS)]
         static bool ManualCameraRenderer_Pre_SetLineToExitFromRadarTarget(ManualCameraRenderer __instance)
         {
             // radar is not active

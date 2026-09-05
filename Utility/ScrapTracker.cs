@@ -118,8 +118,7 @@ namespace ButteryFixes.Utility
             }
             catch (System.Exception e)
             {
-                Plugin.Logger.LogError("An error occurred while trying to open gift box on client");
-                Plugin.Logger.LogError(e);
+                Plugin.Logger.LogWarning($"An error occurred while trying to open gift box on client\n{e}");
             }
         }
     }

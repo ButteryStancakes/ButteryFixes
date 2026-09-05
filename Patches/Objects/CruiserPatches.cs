@@ -19,10 +19,17 @@ namespace ButteryFixes.Patches.Objects
         [HarmonyPostfix]
         static void VehicleController_Post_DestroyCar(VehicleController __instance)
         {
-            __instance.hoodAudio.mute = true;
-            __instance.healthMeter.GetComponentInChildren<Renderer>().forceRenderingOff = true;
-            if (turboRenderer != null && __instance.turboMeter == turboRenderer.gameObject)
-                turboRenderer.forceRenderingOff = true;
+            if (__instance.vehicleID == 0)
+            {
+                if (__instance.hoodAudio != null)
+                    __instance.hoodAudio.mute = true;
+
+                Renderer healthRenderer = __instance.healthMeter?.GetComponentInChildren<Renderer>();
+                if (healthRenderer != null)
+                    healthRenderer.forceRenderingOff = true;
+                if (turboRenderer != null && __instance.turboMeter == turboRenderer.gameObject)
+                    turboRenderer.forceRenderingOff = true;
+            }
 
             if (StartOfRound.Instance.attachedVehicle == __instance)
                 StartOfRound.Instance.attachedVehicle = null;
@@ -99,7 +106,7 @@ namespace ButteryFixes.Patches.Objects
             if (GlobalReferences.vehicleController == null)
             {
                 GlobalReferences.vehicleController = __instance;
-                turboRenderer = __instance.turboMeter.GetComponentInChildren<Renderer>();
+                turboRenderer = __instance.turboMeter?.GetComponentInChildren<Renderer>();
             }
         }
 
@@ -163,7 +170,7 @@ namespace ButteryFixes.Patches.Objects
         [HarmonyPostfix]
         static void VehicleController_Post_TurboBoostLocalClient(VehicleController __instance)
         {
-            if (turboRenderer != null && __instance.turboMeter == turboRenderer.gameObject)
+            if (__instance.vehicleID == 0 && turboRenderer != null && __instance.turboMeter == turboRenderer.gameObject)
                 turboRenderer.forceRenderingOff = __instance.turboBoosts < 1 || __instance.carDestroyed;
         }
     }

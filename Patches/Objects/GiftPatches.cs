@@ -53,7 +53,7 @@ namespace ButteryFixes.Patches.Objects
                 if (codes[i].opcode == OpCodes.Callvirt && codes[i].operand as MethodInfo == ReflectionCache.SET_SCRAP_VALUE)
                 {
                     codes.InsertRange(i + 1, [
-                        new(OpCodes.Ldarg_0),
+                        new(OpCodes.Ldloc_1),
                         new(codes[i - 3].opcode, codes[i - 3].operand),
                         new(OpCodes.Call, ReflectionCache.TRACK_GIFT_BOX_ON_CLIENT),
                     ]);
