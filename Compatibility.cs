@@ -17,7 +17,6 @@ namespace ButteryFixes
                            // GUID_OPEN_BODY_CAMS = "Zaggy1024.OpenBodyCams",
                               GUID_NO_LOST_SIGNAL = "Tomatobird.NoLostSignal",
                               GUID_DROP_SHIP_DELIVERY_CAP_MODIFIER = "com.github.Sylkadi.DropShipDeliveryCapModifier",
-                              GUID_UPTURNED_VARIETY = "butterystancakes.lethalcompany.upturnedvariety",
                               GUID_VERSION55_COMPANY_CRUISER = "scandal.v55cruiser",
                               GUID_V70_POWERED_LIGHTS_FIX = "watergun.v72lightfix",
                               GUID_CUSTOM_RESOLUTION = "Tomatobird.CustomResolution",
@@ -27,13 +26,11 @@ namespace ButteryFixes
                              INSTALLED_MORE_COMPANY,
                              INSTALLED_EVERYTHING_CAN_DIE,
                              INSTALLED_REBALANCED_MOONS,
-                             INSTALLED_UPTURNED_VARIETY,
                              INSTALLED_V55_CRUISER,
                           // INSTALLED_OPEN_BODY_CAMS,
                              DISABLE_SPRAY_PAINT_PATCHES,
                              DISABLE_INTERACT_FIX,
                              DISABLE_PRICE_TEXT_FITTING,
-                          // DISABLE_ROTATION_PATCH,
                              DISABLE_SIGNAL_PATCH,
                              DISABLE_PURCHASE_CAP_PATCH,
                              DISABLE_RESOLUTION_PATCHES;
@@ -104,12 +101,6 @@ namespace ButteryFixes
             {
                 DISABLE_PURCHASE_CAP_PATCH = true;
                 Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Purchase cap patch (x12) will be disabled");
-            }
-
-            if (Chainloader.PluginInfos.ContainsKey(GUID_UPTURNED_VARIETY))
-            {
-                INSTALLED_UPTURNED_VARIETY = true;
-                Plugin.Logger.LogInfo("CROSS-COMPATIBILITY - Upturned Variety detected");
             }
 
             if (Chainloader.PluginInfos.ContainsKey(GUID_VERSION55_COMPANY_CRUISER))

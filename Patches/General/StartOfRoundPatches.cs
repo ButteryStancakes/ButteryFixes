@@ -167,6 +167,52 @@ namespace ButteryFixes.Patches.General
         }
 
         [HarmonyPatch(nameof(StartOfRound.LoadShipGrabbableItems))]
+        [HarmonyPrefix]
+        static void StartOfRound_Pre_LoadShipGrabbableItems(StartOfRound __instance)
+        {
+            ScanNodeProperties scanNodeProperties;
+
+            foreach (Item item in __instance.allItemsList.itemsList)
+            {
+                if (item == null)
+                    continue;
+
+                scanNodeProperties = item.spawnPrefab?.GetComponentInChildren<ScanNodeProperties>();
+
+                // item renaming needs to happen late, after DawnLib generates namespaced keys
+                switch (item.name)
+                {
+                    case "FancyCup":
+                        if (Configuration.theGoldenGoblet.Value)
+                        {
+                            if (scanNodeProperties != null)
+                            {
+                                scanNodeProperties.headerText = scanNodeProperties.headerText.Replace("Golden cup", "Golden goblet");
+                                Plugin.Logger.LogDebug("Scan node: Golden cup");
+                            }
+
+                            item.itemName = item.itemName.Replace("Golden cup", "Golden goblet");
+                            Plugin.Logger.LogDebug("Name: Golden cup");
+                        }
+                        break;
+                    case "Flask":
+                        if (Configuration.chemistryFlasks.Value)
+                        {
+                            if (scanNodeProperties != null)
+                            {
+                                scanNodeProperties.headerText = scanNodeProperties.headerText.Replace("Flask", "Chemistry flask");
+                                Plugin.Logger.LogDebug("Scan node: Flask");
+                            }
+
+                            item.itemName = item.itemName.Replace("Flask", "Chemistry flask");
+                            Plugin.Logger.LogDebug("Name: Flask");
+                        }
+                        break;
+                }
+            }
+        }
+
+        [HarmonyPatch(nameof(StartOfRound.LoadShipGrabbableItems))]
         [HarmonyPostfix]
         static void StartOfRound_Post_LoadShipGrabbableItems()
         {

@@ -121,7 +121,7 @@ namespace ButteryFixes.Utility
                 //{ "Airhorn", true },
                 { "ControlPad", false },
                 { "DustPan", true },
-                { "FancyCup", !Compatibility.INSTALLED_UPTURNED_VARIETY },
+                { "FancyCup", true },
                 { "LockPicker", true },
                 //{ "MagnifyingGlass", true },
                 //{ "Phone", true },
@@ -182,7 +182,8 @@ namespace ButteryFixes.Utility
                         item.spawnPrefab.GetComponentInChildren<KillLocalPlayer>().causeOfDeath = CauseOfDeath.Bludgeoning;
                         Plugin.Logger.LogDebug("Cause of death: Extension ladder");
                         break;
-                    case "FancyCup":
+                    // DawnLib
+                    /*case "FancyCup":
                         if (Configuration.theGoldenGoblet.Value)
                         {
                             if (scanNodeProperties != null)
@@ -194,7 +195,7 @@ namespace ButteryFixes.Utility
                             item.itemName = item.itemName.Replace("Golden cup", "Golden goblet");
                             Plugin.Logger.LogDebug("Name: Golden cup");
                         }
-                        break;
+                        break;*/
                     case "FancyLamp":
                         item.verticalOffset = 0f;
                         break;
@@ -206,7 +207,8 @@ namespace ButteryFixes.Utility
                         flashlightItem.flashlightMesh.sharedMaterials = sharedMaterials;
                         Plugin.Logger.LogDebug($"Bulb off: {item.itemName}");
                         break;
-                    case "Flask":
+                    // DawnLib
+                    /*case "Flask":
                         if (Configuration.chemistryFlasks.Value)
                         {
                             if (scanNodeProperties != null)
@@ -218,7 +220,7 @@ namespace ButteryFixes.Utility
                             item.itemName = item.itemName.Replace("Flask", "Chemistry flask");
                             Plugin.Logger.LogDebug("Name: Flask");
                         }
-                        break;
+                        break;*/
                     case "Hairdryer":
                         if (Configuration.adjustCooldowns.Value)
                         {
@@ -252,13 +254,30 @@ namespace ButteryFixes.Utility
 
                             Plugin.Logger.LogDebug("Animation: Heart");
                         }
-                        break;
-                    case "SeveredThigh":
+
                         LODGroup lodGroup = item.spawnPrefab.GetComponent<LODGroup>();
                         LOD[] lods = lodGroup.GetLODs();
-                        lods[0].screenRelativeTransitionHeight = 0.15f; // 60% is too high
-                        lodGroup.SetLODs(lods);
-                        Plugin.Logger.LogDebug("LoDs: Knee");
+                        if (lods.Length > 1)
+                        {
+                            lods[1].renderers = [item.spawnPrefab?.transform.Find("HeartLOD1")?.GetComponent<Renderer>()];
+                            lodGroup.SetLODs(lods);
+                            lodGroup.size = 55f; // by default, it automatically changes this value and breaks the transition distance?
+                            Plugin.Logger.LogDebug("LoDs: Heart");
+                        }
+                        break;
+                    case "SeveredThigh":
+                        MeshRenderer meshRenderer = item.spawnPrefab?.transform.Find("SeveredThighLOD1")?.GetComponent<MeshRenderer>();
+                        if (meshRenderer != null && meshRenderer.sharedMaterials != null && meshRenderer.sharedMaterials.Length == 4)
+                        {
+                            meshRenderer.sharedMaterials =
+                            [
+                                meshRenderer.sharedMaterials[0],
+                                meshRenderer.sharedMaterials[2],
+                                meshRenderer.sharedMaterials[1],
+                                meshRenderer.sharedMaterials[3],
+                            ];
+                            Plugin.Logger.LogDebug("LoD: Knee");
+                        }
                         break;
                     case "SeveredTongue":
                         item.syncDiscardFunction = true;
