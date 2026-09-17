@@ -257,7 +257,7 @@ namespace ButteryFixes.Utility
 
                         LODGroup lodGroup = item.spawnPrefab.GetComponent<LODGroup>();
                         LOD[] lods = lodGroup.GetLODs();
-                        if (lods.Length > 1)
+                        if (lods.Length > 1 && (lods[1].renderers.Length < 1 || lods[1].renderers[0] == null))
                         {
                             lods[1].renderers = [item.spawnPrefab?.transform.Find("HeartLOD1")?.GetComponent<Renderer>()];
                             lodGroup.SetLODs(lods);
@@ -267,7 +267,7 @@ namespace ButteryFixes.Utility
                         break;
                     case "SeveredThigh":
                         MeshRenderer meshRenderer = item.spawnPrefab?.transform.Find("SeveredThighLOD1")?.GetComponent<MeshRenderer>();
-                        if (meshRenderer != null && meshRenderer.sharedMaterials != null && meshRenderer.sharedMaterials.Length == 4)
+                        if (meshRenderer != null && meshRenderer.sharedMaterials != null && meshRenderer.sharedMaterials.Length == 4 && meshRenderer.sharedMaterials[1] != null && meshRenderer.sharedMaterials[1].name.Contains("Bone") && meshRenderer.sharedMaterials[2] != null && meshRenderer.sharedMaterials[2].name.Contains("Hand"))
                         {
                             meshRenderer.sharedMaterials =
                             [

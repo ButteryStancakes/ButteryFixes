@@ -22,7 +22,7 @@ namespace ButteryFixes
     [BepInDependency(Compatibility.GUID_CUSTOM_RESOLUTION, BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
-        internal const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.17.20";
+        internal const string PLUGIN_GUID = "butterystancakes.lethalcompany.butteryfixes", PLUGIN_NAME = "Buttery Fixes", PLUGIN_VERSION = "1.17.21";
         internal static new ManualLogSource Logger;
 
         void Awake()
