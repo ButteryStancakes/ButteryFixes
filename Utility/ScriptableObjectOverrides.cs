@@ -182,20 +182,6 @@ namespace ButteryFixes.Utility
                         item.spawnPrefab.GetComponentInChildren<KillLocalPlayer>().causeOfDeath = CauseOfDeath.Bludgeoning;
                         Plugin.Logger.LogDebug("Cause of death: Extension ladder");
                         break;
-                    // DawnLib
-                    /*case "FancyCup":
-                        if (Configuration.theGoldenGoblet.Value)
-                        {
-                            if (scanNodeProperties != null)
-                            {
-                                scanNodeProperties.headerText = scanNodeProperties.headerText.Replace("Golden cup", "Golden goblet");
-                                Plugin.Logger.LogDebug("Scan node: Golden cup");
-                            }
-
-                            item.itemName = item.itemName.Replace("Golden cup", "Golden goblet");
-                            Plugin.Logger.LogDebug("Name: Golden cup");
-                        }
-                        break;*/
                     case "FancyLamp":
                         item.verticalOffset = 0f;
                         break;
@@ -207,20 +193,6 @@ namespace ButteryFixes.Utility
                         flashlightItem.flashlightMesh.sharedMaterials = sharedMaterials;
                         Plugin.Logger.LogDebug($"Bulb off: {item.itemName}");
                         break;
-                    // DawnLib
-                    /*case "Flask":
-                        if (Configuration.chemistryFlasks.Value)
-                        {
-                            if (scanNodeProperties != null)
-                            {
-                                scanNodeProperties.headerText = scanNodeProperties.headerText.Replace("Flask", "Chemistry flask");
-                                Plugin.Logger.LogDebug("Scan node: Flask");
-                            }
-
-                            item.itemName = item.itemName.Replace("Flask", "Chemistry flask");
-                            Plugin.Logger.LogDebug("Name: Flask");
-                        }
-                        break;*/
                     case "Hairdryer":
                         if (Configuration.adjustCooldowns.Value)
                         {
@@ -353,6 +325,46 @@ namespace ButteryFixes.Utility
                 {
                     item.canBeGrabbedBeforeGameStart = grabbableBeforeStart[item.name];
                     Plugin.Logger.LogDebug($"Hold before ship has landed: {item.itemName} ({item.canBeGrabbedBeforeGameStart})");
+                }
+            }
+        }
+
+        internal static void RenameItems()
+        {
+            ScanNodeProperties scanNodeProperties;
+
+            foreach (Item item in StartOfRound.Instance.allItemsList.itemsList)
+            {
+                scanNodeProperties = item.spawnPrefab?.GetComponentInChildren<ScanNodeProperties>();
+
+                switch (item.name)
+                {
+                    case "FancyCup":
+                        if (Configuration.theGoldenGoblet.Value)
+                        {
+                            if (scanNodeProperties != null)
+                            {
+                                scanNodeProperties.headerText = scanNodeProperties.headerText.Replace("Golden cup", "Golden goblet");
+                                Plugin.Logger.LogDebug("Scan node: Golden cup");
+                            }
+
+                            item.itemName = item.itemName.Replace("Golden cup", "Golden goblet");
+                            Plugin.Logger.LogDebug("Name: Golden cup");
+                        }
+                        break;
+                    case "Flask":
+                        if (Configuration.chemistryFlasks.Value)
+                        {
+                            if (scanNodeProperties != null)
+                            {
+                                scanNodeProperties.headerText = scanNodeProperties.headerText.Replace("Flask", "Chemistry flask");
+                                Plugin.Logger.LogDebug("Scan node: Flask");
+                            }
+
+                            item.itemName = item.itemName.Replace("Flask", "Chemistry flask");
+                            Plugin.Logger.LogDebug("Name: Flask");
+                        }
+                        break;
                 }
             }
         }

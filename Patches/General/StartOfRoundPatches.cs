@@ -170,46 +170,7 @@ namespace ButteryFixes.Patches.General
         [HarmonyPrefix]
         static void StartOfRound_Pre_LoadShipGrabbableItems(StartOfRound __instance)
         {
-            ScanNodeProperties scanNodeProperties;
-
-            foreach (Item item in __instance.allItemsList.itemsList)
-            {
-                if (item == null)
-                    continue;
-
-                scanNodeProperties = item.spawnPrefab?.GetComponentInChildren<ScanNodeProperties>();
-
-                // item renaming needs to happen late, after DawnLib generates namespaced keys
-                switch (item.name)
-                {
-                    case "FancyCup":
-                        if (Configuration.theGoldenGoblet.Value)
-                        {
-                            if (scanNodeProperties != null)
-                            {
-                                scanNodeProperties.headerText = scanNodeProperties.headerText.Replace("Golden cup", "Golden goblet");
-                                Plugin.Logger.LogDebug("Scan node: Golden cup");
-                            }
-
-                            item.itemName = item.itemName.Replace("Golden cup", "Golden goblet");
-                            Plugin.Logger.LogDebug("Name: Golden cup");
-                        }
-                        break;
-                    case "Flask":
-                        if (Configuration.chemistryFlasks.Value)
-                        {
-                            if (scanNodeProperties != null)
-                            {
-                                scanNodeProperties.headerText = scanNodeProperties.headerText.Replace("Flask", "Chemistry flask");
-                                Plugin.Logger.LogDebug("Scan node: Flask");
-                            }
-
-                            item.itemName = item.itemName.Replace("Flask", "Chemistry flask");
-                            Plugin.Logger.LogDebug("Name: Flask");
-                        }
-                        break;
-                }
-            }
+            ScriptableObjectOverrides.RenameItems();
         }
 
         [HarmonyPatch(nameof(StartOfRound.LoadShipGrabbableItems))]
@@ -260,24 +221,57 @@ namespace ButteryFixes.Patches.General
         [HarmonyPostfix]
         static void StartOfRound_Post_Start(StartOfRound __instance)
         {
-            if (!__instance.IsServer && __instance.inShipPhase && !GameNetworkManager.Instance.gameHasStarted)
+            if (!__instance.IsServer)
             {
+                ScriptableObjectOverrides.RenameItems();
+
+                bool inLobby = __instance.inShipPhase && !GameNetworkManager.Instance.gameHasStarted;
+                ScanNodeProperties scanNodeProperties;
                 foreach (GrabbableObject grabbableObject in Object.FindObjectsByType<GrabbableObject>(FindObjectsSortMode.None))
                 {
-                    grabbableObject.scrapPersistedThroughRounds = true;
-                    grabbableObject.isInElevator = true;
-                    grabbableObject.isInShipRoom = true;
-                    grabbableObject.hasBeenHeld = true;
-
-                    LungProp lungProp = grabbableObject as LungProp;
-                    if (lungProp != null && lungProp.isLungDocked)
+                    if (inLobby)
                     {
-                        Plugin.Logger.LogDebug("Player late-joined a lobby with a powered apparatus");
-                        lungProp.isLungDocked = false;
-                        lungProp.GetComponent<AudioSource>().Stop();
+                        grabbableObject.scrapPersistedThroughRounds = true;
+                        grabbableObject.isInElevator = true;
+                        grabbableObject.isInShipRoom = true;
+                        grabbableObject.hasBeenHeld = true;
+
+                        LungProp lungProp = grabbableObject as LungProp;
+                        if (lungProp != null && lungProp.isLungDocked)
+                        {
+                            Plugin.Logger.LogDebug("Player late-joined a lobby with a powered apparatus");
+                            lungProp.isLungDocked = false;
+                            lungProp.GetComponent<AudioSource>().Stop();
+                        }
+                    }
+
+                    if (grabbableObject.itemProperties != null)
+                    {
+                        scanNodeProperties = grabbableObject.GetComponentInChildren<ScanNodeProperties>();
+                        if (scanNodeProperties != null)
+                        {
+                            switch (grabbableObject.itemProperties.name)
+                            {
+                                case "FancyCup":
+                                    if (Configuration.theGoldenGoblet.Value)
+                                    {
+                                        scanNodeProperties.headerText = scanNodeProperties.headerText.Replace("Golden cup", "Golden goblet");
+                                        //Plugin.Logger.LogDebug("Scan node: Golden cup");
+                                    }
+                                    break;
+                                case "Flask":
+                                    if (Configuration.chemistryFlasks.Value)
+                                    {
+                                        scanNodeProperties.headerText = scanNodeProperties.headerText.Replace("Flask", "Chemistry flask");
+                                        //Plugin.Logger.LogDebug("Scan node: Flask");
+                                    }
+                                    break;
+                            }
+                        }
                     }
                 }
-                Plugin.Logger.LogDebug("Mark all scrap already in the ship as collected");
+                if (inLobby)
+                    Plugin.Logger.LogDebug("Mark all scrap already in the ship as collected");
             }
         }
 
