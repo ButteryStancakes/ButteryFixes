@@ -147,6 +147,7 @@ namespace ButteryFixes.Utility
                 { "WeedKillerBottle", true }
             };
             ScanNodeProperties scanNodeProperties;
+            Renderer renderer;
 
             foreach (Item item in StartOfRound.Instance.allItemsList.itemsList)
             {
@@ -163,6 +164,25 @@ namespace ButteryFixes.Utility
                     case "BabyKiwiEgg":
                         item.spawnPrefab.GetComponent<KiwiBabyItem>().isInFactory = false;
                         Plugin.Logger.LogDebug("Factory: Egg");
+                        break;
+                    case "BottleBin":
+                        renderer = item.spawnPrefab?.transform.Find("BinFullOfBottles_lowDetail")?.GetComponent<Renderer>();
+                        if (renderer != null && renderer.sharedMaterials != null && renderer.sharedMaterials.Length == 2 && renderer.sharedMaterials[1] != null && renderer.sharedMaterials[1].name.StartsWith("BottleBin"))
+                        {
+                            Vector2 tiling = renderer.sharedMaterials[1].GetTextureScale("_BaseColorMap");
+                            if (tiling.x == 2f && tiling.y == 0.4f)
+                            {
+                                tiling = new(8.2f, 0.7f);
+                                Material bottleBin = Object.Instantiate(renderer.sharedMaterials[1]);
+                                bottleBin.SetTextureScale("_BaseColorMap", tiling);
+                                bottleBin.SetTextureScale("_MainTex", tiling);
+                                renderer.sharedMaterials = [
+                                    renderer.sharedMaterials[0],
+                                    bottleBin
+                                ];
+                                Plugin.Logger.LogDebug("LoD: Bottles");
+                            }
+                        }
                         break;
                     case "CashRegister":
                         if (Configuration.adjustCooldowns.Value)
@@ -238,15 +258,15 @@ namespace ButteryFixes.Utility
                         }
                         break;
                     case "SeveredThigh":
-                        MeshRenderer meshRenderer = item.spawnPrefab?.transform.Find("SeveredThighLOD1")?.GetComponent<MeshRenderer>();
-                        if (meshRenderer != null && meshRenderer.sharedMaterials != null && meshRenderer.sharedMaterials.Length == 4 && meshRenderer.sharedMaterials[1] != null && meshRenderer.sharedMaterials[1].name.Contains("Bone") && meshRenderer.sharedMaterials[2] != null && meshRenderer.sharedMaterials[2].name.Contains("Hand"))
+                        renderer = item.spawnPrefab?.transform.Find("SeveredThighLOD1")?.GetComponent<MeshRenderer>();
+                        if (renderer != null && renderer.sharedMaterials != null && renderer.sharedMaterials.Length == 4 && renderer.sharedMaterials[1] != null && renderer.sharedMaterials[1].name.Contains("Bone") && renderer.sharedMaterials[2] != null && renderer.sharedMaterials[2].name.Contains("Hand"))
                         {
-                            meshRenderer.sharedMaterials =
+                            renderer.sharedMaterials =
                             [
-                                meshRenderer.sharedMaterials[0],
-                                meshRenderer.sharedMaterials[2],
-                                meshRenderer.sharedMaterials[1],
-                                meshRenderer.sharedMaterials[3],
+                                renderer.sharedMaterials[0],
+                                renderer.sharedMaterials[2],
+                                renderer.sharedMaterials[1],
+                                renderer.sharedMaterials[3],
                             ];
                             Plugin.Logger.LogDebug("LoD: Knee");
                         }

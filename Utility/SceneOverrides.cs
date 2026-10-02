@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.SceneManagement;
 
 namespace ButteryFixes.Utility
@@ -12,12 +13,14 @@ namespace ButteryFixes.Utility
             if (mode != LoadSceneMode.Additive)
                 return;
 
+            Transform map = GameObject.Find("/Environment/Map")?.transform;
             // factory ambience
-            Transform bigMachine = GameObject.Find("/Environment/Map/DiageticAmbiance/BigMachine")?.transform;
+            Transform bigMachine = map?.Find("DiageticAmbiance/BigMachine");
             // for unused objects underneath the map
             List<string> modelsIntroScene = [];
             // entrance scan node
             GameObject scanNodeMainEntrance = GameObject.Find("/Environment/ScanNodes/ScanNode");
+            int hideLadder = 0;
             switch (scene.name)
             {
                 case "Level1Experimentation":
@@ -58,13 +61,13 @@ namespace ButteryFixes.Utility
                         Plugin.Logger.LogDebug("Experimentation - Fixed old back entrance");
                     }
                     // hide weird untextured geometry
-                    Renderer cube1 = GameObject.Find("/Environment/Map/Cube (1)")?.GetComponent<Renderer>();
+                    Renderer cube1 = map?.Find("Cube (1)")?.GetComponent<Renderer>();
                     if (cube1 != null)
                     {
                         cube1.enabled = false;
                         Plugin.Logger.LogDebug("Experimentation - Hide untextured geometry");
                     }
-                    GameObject buttresses = GameObject.Find("/Environment/Map/ModelsIntroScene/Cube.007/Buttresses.001");
+                    GameObject buttresses = map?.Find("ModelsIntroScene/Cube.007/Buttresses.001")?.gameObject;
                     if (buttresses != null)
                     {
                         buttresses.AddComponent<MeshCollider>();
@@ -123,13 +126,14 @@ namespace ButteryFixes.Utility
                         "PlayerScaleRef",
                         "PlayerScaleRef.001"
                     ]);
+                    hideLadder = 1;
                     break;
                 case "Level3Vow":
                     Plugin.Logger.LogDebug("Detected landing on Vow");
                     break;
                 case "Level4March":
                     Plugin.Logger.LogDebug("Detected landing on March");
-                    Transform trees = GameObject.Find("/Environment/Map/Trees")?.transform;
+                    Transform trees = map?.Find("Trees");
                     if (trees != null)
                     {
                         GameObject wychElmA_LOD1 = trees.GetComponentsInChildren<MeshFilter>().FirstOrDefault(meshFilter => meshFilter.name == "WychElmA_LOD1" && meshFilter.sharedMesh?.name == "WychElmTreeALOD1" && meshFilter.GetComponent<Renderer>() != null)?.gameObject;
@@ -166,7 +170,7 @@ namespace ButteryFixes.Utility
                     break;
                 case "Level5Rend":
                     Plugin.Logger.LogDebug("Detected landing on Rend");
-                    GameObject cube002 = GameObject.Find("/Environment/Map/CementFacility1/Cube.002");
+                    GameObject cube002 = map?.Find("CementFacility1/Cube.002")?.gameObject;
                     if (cube002 != null)
                     {
                         GameObject cube002_2 = new("Cube.002 (2)");
@@ -189,12 +193,27 @@ namespace ButteryFixes.Utility
                 case "Level6Dine":
                     Plugin.Logger.LogDebug("Detected landing on Dine");
                     // fix death pit in front of fire exit
-                    Transform killTrigger4 = GameObject.Find("/Environment/Map/KillTrigger (4)")?.transform;
+                    Transform killTrigger4 = map?.Find("KillTrigger (4)");
                     if (killTrigger4 != null)
                     {
                         killTrigger4.localPosition = new(148.11f, killTrigger4.localPosition.y, 83.61f);
                         killTrigger4.localScale = new(35.3778f, killTrigger4.localScale.y, killTrigger4.localScale.z);
                         Plugin.Logger.LogDebug("Dine - Fixed death pit");
+                    }
+                    if (map != null)
+                    {
+                        string[] oobObjs = [
+                            "Cube.001",
+                            "Cube.001 (1)",
+                            "Cube.001 (2)",
+                            "Cube.001 (5)",
+                            "Cube.001 (6)",
+                            "GridPlate",
+                            "GridPlate (3)"
+                        ];
+                        foreach (string oobjObj in oobObjs)
+                            map.Find(oobjObj)?.gameObject.SetActive(false);
+                        Plugin.Logger.LogDebug("Dine - Hide out-of-bounds objects");
                     }
                     break;
                 case "Level7Offense":
@@ -215,8 +234,12 @@ namespace ButteryFixes.Utility
                         "PlayerScaleRef.001",
                         "LargePipeCorner (1)",
                         "LargePipeCorner (2)",
-                        "Girder1 (4)"
+                        "Girder1 (4)",
+                        // sidenote: these have collision
+                        "ChainlinkFence (18)",
+                        "SiloShort"
                     ]);
+                    hideLadder = 2;
                     break;
                 case "Level8Titan":
                     Plugin.Logger.LogDebug("Detected landing on Titan");
@@ -228,7 +251,7 @@ namespace ButteryFixes.Utility
                     break;
                 case "Level9Artifice":
                     Plugin.Logger.LogDebug("Detected landing on Artifice");
-                    GameObject circularRoofBeam = GameObject.Find("/Environment/Map/WarehouseV1 (2)/CircularRoofBeam");
+                    GameObject circularRoofBeam = map?.Find("WarehouseV1 (2)/CircularRoofBeam")?.gameObject;
                     if (circularRoofBeam != null)
                     {
                         circularRoofBeam.SetActive(false);
@@ -277,6 +300,12 @@ namespace ButteryFixes.Utility
                         scanNodeMainEntrance.SetActive(false);
                         Plugin.Logger.LogDebug("Gordion - Disabled \"Main entrance\" scan node");
                     }
+                    Material steelBolt = map?.Find("GiantDrill/SteelBolt")?.GetComponent<MeshRenderer>()?.sharedMaterial;
+                    if (steelBolt != null)
+                    {
+                        HDMaterial.SetAlphaClipping(steelBolt, true);
+                        Plugin.Logger.LogDebug("Gordion - Fixed drill bolts");
+                    }
                     break;
                 default:
                     Plugin.Logger.LogInfo("Landed on unknown moon");
@@ -286,7 +315,7 @@ namespace ButteryFixes.Utility
             // hide out-of-bounds objects
             if (modelsIntroScene.Count > 0)
             {
-                Transform modelsIntroSceneParent = GameObject.Find("Environment/Map/ModelsIntroScene")?.transform;
+                Transform modelsIntroSceneParent = map?.Find("ModelsIntroScene");
                 foreach (Transform modelIntroScene in modelsIntroSceneParent)
                 {
                     if (modelsIntroScene.Remove(modelIntroScene.name))
@@ -311,6 +340,24 @@ namespace ButteryFixes.Utility
                         foreach (string modelIntroSceneName in modelsIntroScene)
                             Plugin.Logger.LogWarning($"- \"{modelIntroSceneName}\"");
                     }
+                }
+            }
+
+            if (hideLadder > 0)
+            {
+                Transform ladder = map?.Find("Ladder1.5x (1)");
+                if (ladder != null)
+                {
+                    foreach (Renderer rend in ladder.GetComponentsInChildren<Renderer>())
+                        rend.enabled = false;
+
+                    if (hideLadder >= 2)
+                    {
+                        foreach (Collider collider in ladder.GetComponentsInChildren<Collider>())
+                            collider.enabled = false;
+                    }
+
+                    Plugin.Logger.LogDebug("Hide out-of-bounds ladder (Assurance/Offense)");
                 }
             }
 

@@ -3,6 +3,7 @@ using DunGen;
 using DunGen.Graph;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.HighDefinition;
 
 namespace ButteryFixes.Utility
 {
@@ -58,6 +59,33 @@ namespace ButteryFixes.Utility
                         }
                         break;
 
+                    // foyer
+                    case "ManorStartRoom":
+                    case "ManorStartRoomSmall":
+                        Transform manorStartRoomMesh = tile.transform.Find("ManorStartRoomMesh");
+                        Material chandMat = null;
+                        if (manorStartRoomMesh != null)
+                        {
+                            foreach (string chandelier in new string[]{
+                                "Chandelier",
+                                "Chandelier2"
+                            })
+                            {
+                                Renderer chand = manorStartRoomMesh.Find(chandelier)?.GetComponent<Renderer>();
+                                if (chand != null)
+                                {
+                                    if (chandMat == null)
+                                    {
+                                        chandMat = Object.Instantiate(chand.sharedMaterial);
+                                        HDMaterial.SetAlphaClipping(chandMat, true);
+                                    }
+                                    chand.sharedMaterial = chandMat;
+                                    Plugin.Logger.LogDebug($"{tile.name}: Fix chandelier material");
+                                }
+                            }
+                        }
+                        break;
+
                     // greenhouse
                     case "GreenhouseTile":
                         string[] sinkColliderPaths =
@@ -96,7 +124,7 @@ namespace ButteryFixes.Utility
                         }
                         break;
 
-                        // --- MINESHAFT ---
+                    // --- MINESHAFT ---
                 }
 
                 bool cave = tile.name.StartsWith("Cave");

@@ -28,39 +28,39 @@ namespace ButteryFixes.Utility
             }
         }
 
-        static HangarShipDoor hangarShipDoor;
+        static HangarShipDoor _hangarShipDoor;
         internal static HangarShipDoor HangarShipDoor
         {
             get
             {
-                if (hangarShipDoor == null)
-                    hangarShipDoor = Object.FindAnyObjectByType<HangarShipDoor>();
+                if (_hangarShipDoor == null)
+                    _hangarShipDoor = Object.FindAnyObjectByType<HangarShipDoor>();
 
-                return hangarShipDoor;
+                return _hangarShipDoor;
             }
         }
 
-        static StartMatchLever startMatchLever;
+        static StartMatchLever _startMatchLever;
         internal static StartMatchLever StartMatchLever
         {
             get
             {
-                if (startMatchLever == null)
-                    startMatchLever = Object.FindAnyObjectByType<StartMatchLever>();
+                if (_startMatchLever == null)
+                    _startMatchLever = Object.FindAnyObjectByType<StartMatchLever>();
 
-                return startMatchLever;
+                return _startMatchLever;
             }
         }
 
-        static MoldSpreadManager moldSpreadManager;
+        static MoldSpreadManager _moldSpreadManager;
         internal static MoldSpreadManager MoldSpreadManager
         {
             get
             {
-                if (moldSpreadManager == null)
-                    moldSpreadManager = Object.FindAnyObjectByType<MoldSpreadManager>();
+                if (_moldSpreadManager == null)
+                    _moldSpreadManager = Object.FindAnyObjectByType<MoldSpreadManager>();
 
-                return moldSpreadManager;
+                return _moldSpreadManager;
             }
         }
 
