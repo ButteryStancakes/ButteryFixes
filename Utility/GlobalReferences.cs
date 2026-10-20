@@ -126,5 +126,10 @@ namespace ButteryFixes.Utility
         // halloween
         internal static Mesh sphere;
         internal static Material pumpkinMatPlastic;
+
+        // "ghost girl"
+        internal static DressGirlAI girl;
+        internal static bool girlUpdating;
+        internal static Renderer girlRenderer;
     }
 }

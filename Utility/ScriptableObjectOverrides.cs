@@ -16,6 +16,7 @@ namespace ButteryFixes.Utility
             Transform mapDot;
             foreach (KeyValuePair<string, EnemyType> enemy in GlobalReferences.allEnemiesList)
             {
+                bool noShadows = false;
                 switch (enemy.Key)
                 {
                     case "RadMech":
@@ -44,11 +45,8 @@ namespace ButteryFixes.Utility
                         }
                         break;
                     case "ClaySurgeon":
-                        foreach (Renderer rend in enemy.Value.enemyPrefab.GetComponentsInChildren<Renderer>())
-                        {
-                            if (rend.gameObject.layer == 19)
-                                rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                        }
+                    case "DressGirl":
+                        noShadows = true;
                         break;
                     case "CaveDweller":
                         enemy.Value.enemyPrefab.GetComponent<CaveDwellerPhysicsProp>().itemProperties.isConductiveMetal = false;
@@ -94,6 +92,15 @@ namespace ButteryFixes.Utility
                         }
                     }
                 }
+
+                if (noShadows)
+                {
+                    foreach (Renderer rend in enemy.Value.enemyPrefab.GetComponentsInChildren<Renderer>())
+                    {
+                        if (rend.gameObject.layer == 19)
+                            rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    }
+                }
             }
         }
 
@@ -103,12 +110,24 @@ namespace ButteryFixes.Utility
             {
                 switch (selectableLevel.name)
                 {
+                    case "VowLevel":
+                        selectableLevel.LevelDescription = selectableLevel.LevelDescription.Replace("Rough terrain. Teeming with plant-life.", "Rough terrain.").Replace("A competitive ecosystem supports aggressive lifeforms.", "Diverse, teeming with plant-life.");
+                        Plugin.Logger.LogDebug("Vow: Description");
+                        break;
                     case "OffenseLevel":
                         if (selectableLevel.videoReel != null && selectableLevel.videoReel.name == "MapView220Ass")
                         {
                             selectableLevel.videoReel = null;
                             Plugin.Logger.LogDebug("Offense: Video reel");
                         }
+                        break;
+                    case "TitanLevel":
+                        selectableLevel.LevelDescription = selectableLevel.LevelDescription.Replace("This moon was mined for resources. It's easy to get lost here.", "It's easy to get lost here.").Replace("Dangerous entities have been rumored to take residence in the vast network of tunnels.", "Dangerous entities rumored to reside in its vast tunnels.");
+                        Plugin.Logger.LogDebug("Titan: Description");
+                        break;
+                    case "EmbrionLevel":
+                        selectableLevel.LevelDescription = selectableLevel.LevelDescription.Replace("Embrion is devoid", "Devoid");
+                        Plugin.Logger.LogDebug("Embrion: Description");
                         break;
                 }
             }
@@ -143,6 +162,7 @@ namespace ButteryFixes.Utility
             {
                 { "BabyKiwiEgg", false },
                 { "PillBottle", true },
+                { "SodaCanRed", true },
                 { "SprayPaint", true },
                 { "WeedKillerBottle", true }
             };
@@ -329,7 +349,7 @@ namespace ButteryFixes.Utility
 
                         if (!hasInspectTip)
                         {
-                            item.toolTips = item.toolTips.AddToArray("Inspect: [Z]");
+                            item.toolTips = item.toolTips.AddToArray("Inspect : [Z]");
                             Plugin.Logger.LogDebug($"Inspect tooltip: {item.itemName}");
                         }
                     }

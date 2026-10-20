@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
+using UnityEngine.VFX;
 
 namespace ButteryFixes.Patches.Enemies
 {
@@ -242,6 +243,37 @@ namespace ButteryFixes.Patches.Enemies
         static void CadaverGrowthAI_Post_CoughSporesRpc()
         {
             GlobalReferences.playerJustCoughed = false;
+        }
+
+        [HarmonyPatch(typeof(CadaverGrowthAI), nameof(CadaverGrowthAI.HealPlayerSporeEffect))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> CadaverGrowthAI_Trans_HealPlayerSporeEffect(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
+        {
+            List<CodeInstruction> codes = instructions.ToList();
+
+            MethodInfo play = AccessTools.Method(typeof(VisualEffect), nameof(VisualEffect.Play), []);
+            FieldInfo faceSpores = AccessTools.Field(typeof(PlayerInfection), nameof(PlayerInfection.faceSpores));
+            for (int i = 2; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Callvirt && codes[i].operand as MethodInfo == play && codes[i - 1].opcode == OpCodes.Ldfld && (FieldInfo)codes[i - 1].operand == faceSpores && codes[i - 2].opcode == OpCodes.Ldloc_0)
+                {
+                    for (int j = i - 2; j <= i; j++)
+                        codes[j].opcode = OpCodes.Nop;
+                    Plugin.Logger.LogDebug("Transpiler (Cadaver heal): Remove spore spray");
+                    return codes;
+                }
+            }
+
+            Plugin.Logger.LogError($"Cadaver heal transpiler failed");
+            return instructions;
+        }
+
+        [HarmonyPatch(typeof(CadaverGrowthAI), nameof(CadaverGrowthAI.HealPlayerSporeEffect))]
+        [HarmonyPostfix]
+        static void CadaverGrowthAI_Post_HealPlayerSporeEffect(CadaverGrowthAI __instance, int infectionId, int clipIndex)
+        {
+            if ((clipIndex == 0 || clipIndex == 2) && __instance.playerInfections[infectionId]?.faceSpores != null)
+                __instance.playerInfections[infectionId].faceSpores.Play();
         }
     }
 }

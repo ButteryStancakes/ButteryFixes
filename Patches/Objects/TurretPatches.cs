@@ -8,7 +8,7 @@ namespace ButteryFixes.Patches.Objects
     static class TurretPatches
     {
         // Default, Room, Colliders
-        static LayerMask wallLayers = (1 << 0) | (1 << 8) | (1 << 11);
+        static readonly LayerMask wallLayers = (1 << 0) | (1 << 8) | (1 << 11);
         static RaycastHit hit2;
 
         [HarmonyPatch(nameof(Turret.CheckForPlayersInLineOfSight))]

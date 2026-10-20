@@ -33,6 +33,24 @@ namespace ButteryFixes.Patches.General
             {
                 switch (enemyFile.name)
                 {
+                    case "RadMechFile":
+                        if (GameNetworkManager.Instance != null && (GameNetworkManager.Instance.username == "Buttery Stancakes" || GameNetworkManager.Instance.username == "Cookie"))
+                        {
+                            if (!enemyFile.displayText.Contains("Anglen"))
+                            {
+                                enemyFile.displayText = enemyFile.displayText.Replace(
+                                    "\n The subject of who developed the Old Birds has been an intense debate since their first recorded appearance on December 18 of 2143, when a large number of Old Birds invaded the",
+                                    "\n The subject of who developed the Old Birds has been an intense debate since their first recorded appearance on December 18 of 2143, when over fifty Old Birds invaded the Anglen Capital. This is considered one of the first major causes for the downfall of the Anglen Empire. The most commonly upheld theory takes into account the tension between the Anglen and Buemoch military throughout the 2100's, however nothing has been proven in the centuries since.");
+                            }
+                            // he will never die
+                            if (!enemyFile.displayText.Contains("Sigurd"))
+                            {
+                                enemyFile.displayText = enemyFile.displayText.Replace("OLD BIRDS", "OLD BIRDS\n\nSigurd's danger level: 95%")
+                                    + " DON'T MESS AROUND OR THEYLL GIVE YOU A RIDE.tHEY LOSE TRACK QUICK AND THEY CANT TURN VERY FAST, THEYRE DUMB AND THEY WONT SHUT UP sorry caps";
+                            }
+                            Plugin.Logger.LogDebug("Bestiary: Old Birds");
+                        }
+                        break;
                     case "MaskHornetsFile":
                         enemyFile.creatureName = enemyFile.creatureName[0].ToString().ToUpper() + enemyFile.creatureName[1..];
                         if (enemyFile.displayVideo != null && enemyFile.displayVideo.name == "NutcrackerVideo0001-0109")
@@ -43,6 +61,8 @@ namespace ButteryFixes.Patches.General
             }
 
             TerminalKeyword buy = __instance.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.name == "Buy");
+            TerminalKeyword info = __instance.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.word == "info");
+            TerminalKeyword route = null;
 
             if (buy != null)
             {
@@ -78,7 +98,7 @@ namespace ButteryFixes.Patches.General
                     TerminalKeyword companyMoon = __instance.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.word == "company");
                     if (companyMoon != null)
                     {
-                        TerminalKeyword route = companyMoon.defaultVerb;
+                        route = companyMoon.defaultVerb;
                         if (route != null)
                         {
                             if (gordion == null)
@@ -104,7 +124,6 @@ namespace ButteryFixes.Patches.General
 
                                 Plugin.Logger.LogDebug("Terminal: Registered \"gordion\" to route");
 
-                                TerminalKeyword info = __instance.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.word == "info");
                                 if (info != null)
                                 {
                                     CompatibleNoun companyNoun2 = info.compatibleNouns.FirstOrDefault(compatibleNoun => compatibleNoun.noun == companyMoon);
@@ -130,6 +149,74 @@ namespace ButteryFixes.Patches.General
             {
                 shipCosmeticsList.displayText = shipCosmeticsList.displayText.Replace("* Teleporter      //    Price: $400", "* Loud horn      //    Price: $100\n* Signal Translator      //    Price: $255\n* Teleporter      //    Price: $375\n* Inverse Teleporter      //    Price: $425");
                 Plugin.Logger.LogDebug("Terminal: Upgrades");
+            }
+
+            if (info != null)
+            {
+                foreach (CompatibleNoun compatibleNoun in info.compatibleNouns)
+                {
+                    if (compatibleNoun?.result == null)
+                        continue;
+
+                    if (compatibleNoun.result.displayText.Contains("FAUNA:"))
+                    {
+                        switch (compatibleNoun.result.name)
+                        {
+                            case "ExpInfo":
+                                compatibleNoun.result.displayText = compatibleNoun.result.displayText.Replace("Low habitability, worsened by industrial artifacts.", "Thick haze, worsened by industrial artifacts.").Replace("FAUNA: Unknown", "FAUNA: Dominated by a few species.");
+                                Plugin.Logger.LogDebug("Experimentation: Info");
+                                break;
+                            case "AssInfo":
+                                compatibleNoun.result.displayText = compatibleNoun.result.displayText.Replace("FAUNA: Unknown", "FAUNA: Ecosystem supports territorial behaviour.");
+                                Plugin.Logger.LogDebug("Assurance: Info");
+                                break;
+                            case "VowInfo":
+                                compatibleNoun.result.displayText = compatibleNoun.result.displayText.Replace("Humid.\n", "Humid. Rough terrain.\n");
+                                Plugin.Logger.LogDebug("Vow: Info");
+                                break;
+                            case "MarchInfo":
+                                compatibleNoun.result.displayText = compatibleNoun.result.displayText.Replace("FAUNA: Unknown", "FAUNA: Diverse");
+                                Plugin.Logger.LogDebug("March: Info");
+                                break;
+                            case "RendInfo":
+                                compatibleNoun.result.displayText = compatibleNoun.result.displayText.Replace("Its planet orbits white dwarf star", "Its planet orbits a white dwarf star");
+                                Plugin.Logger.LogDebug("Rend: Info");
+                                break;
+                            case "DineInfo":
+                                compatibleNoun.result.displayText = compatibleNoun.result.displayText.Replace("Its planet orbits white dwarf star", "Its planet orbits a white dwarf star");
+                                Plugin.Logger.LogDebug("Dine: Info");
+                                break;
+                        }
+                    }
+                }
+            }
+
+            if (route == null)
+                route = __instance.terminalNodes.allKeywords.FirstOrDefault(keyword => keyword.word == "route");
+
+            if (route != null)
+            {
+                foreach (CompatibleNoun compatibleNoun in route.compatibleNouns)
+                {
+                    if (compatibleNoun?.result == null)
+                        continue;
+
+                    TerminalNode routeConfirm = compatibleNoun.result.terminalOptions?.FirstOrDefault(option => option.noun?.name == "Confirm")?.result;
+                    if (routeConfirm == null)
+                        continue;
+
+                    switch (routeConfirm.name)
+                    {
+                        case "20routeConfirm":
+                            routeConfirm.displayText = routeConfirm.displayText.Replace("Good luck.", "Please enjoy your flight.");
+                            Plugin.Logger.LogDebug("Adamance: Route");
+                            break;
+                        case "68routeConfirm":
+                            routeConfirm.displayText = routeConfirm.displayText.Replace("Please enjoy your flight.", "Good luck.");
+                            Plugin.Logger.LogDebug("Artifice: Route");
+                            break;
+                    }
+                }
             }
         }
 

@@ -9,8 +9,12 @@ namespace ButteryFixes.Utility
 {
     internal static class TileOverrides
     {
+        static readonly Vector3 MINESHAFT_FIRE_EXIT_SCALE = new(1.176471f, 1.176471f, 1.176471f);
+
         internal static void OverrideTiles(IndoorMapType[] indoorMapTypes)
         {
+            Transform alleyExitDoorContainer = null, fireExitLight = null, breakerBoxSpawn = null, ventSpawn = null;
+            bool removeAnomalySpawns = false, fixVentsSAndNW = false;
             foreach (GameObject tile in GetAllTiles(indoorMapTypes))
             {
                 switch (tile.name)
@@ -20,12 +24,15 @@ namespace ButteryFixes.Utility
 
                     // apparatus rooms
                     case "DoubleDoorRoom":
+                        removeAnomalySpawns = true;
+                        break;
                     case "MediumRoomHallway1B":
-                        Transform anomalySpawns = tile.transform.Find("AnomalySpawns");
-                        if (anomalySpawns != null)
+                        removeAnomalySpawns = true;
+                        ventSpawn = tile.transform.Find("Vents (2)/Vent (1)");
+                        if (ventSpawn != null)
                         {
-                            anomalySpawns.gameObject.SetActive(false);
-                            Plugin.Logger.LogDebug($"{tile.name}: Removed obsolete triggers (fix spray paint)");
+                            ventSpawn.localPosition = new(-13.095f, ventSpawn.localPosition.y, ventSpawn.localPosition.z);
+                            Plugin.Logger.LogDebug($"{tile.name}: Corrected position for \"{ventSpawn.name}\"");
                         }
                         break;
 
@@ -80,9 +87,19 @@ namespace ButteryFixes.Utility
                                         HDMaterial.SetAlphaClipping(chandMat, true);
                                     }
                                     chand.sharedMaterial = chandMat;
-                                    Plugin.Logger.LogDebug($"{tile.name}: Fix chandelier material");
+                                    Plugin.Logger.LogDebug($"{tile.name}: Fix material for \"{chand.name}\"");
                                 }
                             }
+                        }
+                        break;
+
+                    // spiral stairs
+                    case "ManorStairTile":
+                        ventSpawn = tile.transform.Find("Vents/Vent (8)");
+                        if (ventSpawn != null)
+                        {
+                            ventSpawn.localPosition = new(ventSpawn.localPosition.x, -5.96f, ventSpawn.localPosition.z);
+                            Plugin.Logger.LogDebug($"{tile.name}: Corrected position for \"{ventSpawn.name}\"");
                         }
                         break;
 
@@ -125,6 +142,78 @@ namespace ButteryFixes.Utility
                         break;
 
                     // --- MINESHAFT ---
+
+                    // tunnels
+                    case "TunnelSplit":
+                    case "TunnelSplitBranchStart Variant":
+                    case "TunnelSplitBranchStart2 Variant":
+                        alleyExitDoorContainer = tile.transform.Find("Props/PropSet2/AlleyExitDoorContainer");
+                        if (alleyExitDoorContainer != null)
+                        {
+                            alleyExitDoorContainer.localScale = MINESHAFT_FIRE_EXIT_SCALE;
+                            fireExitLight = alleyExitDoorContainer.Find("FireExitDoor/Light");
+                            if (fireExitLight != null)
+                            {
+                                fireExitLight.localPosition = new(0.229f, fireExitLight.localPosition.y, fireExitLight.localPosition.z);
+                                Plugin.Logger.LogDebug($"{tile.name}: Corrected scale for \"{alleyExitDoorContainer.name}\"");
+                            }
+                        }
+                        alleyExitDoorContainer = tile.transform.Find("EastWallProps/AlleyExitDoorContainer (1)");
+                        if (alleyExitDoorContainer != null)
+                        {
+                            alleyExitDoorContainer.localScale = MINESHAFT_FIRE_EXIT_SCALE;
+                            Plugin.Logger.LogDebug($"{tile.name}: Corrected scale for \"{alleyExitDoorContainer.name}\"");
+                        }
+                        fixVentsSAndNW = true;
+                        break;
+                    case "TunnelSplitEndTile":
+                        foreach (string fireExit in new string[]{
+                            "AlleyExitDoorContainer",
+                            "AlleyExitDoorContainer (1)"
+                        })
+                        {
+                            alleyExitDoorContainer = tile.transform.Find(fireExit);
+                            if (alleyExitDoorContainer != null)
+                            {
+                                alleyExitDoorContainer.localScale = MINESHAFT_FIRE_EXIT_SCALE;
+                                Plugin.Logger.LogDebug($"{tile.name}: Corrected scale for \"{alleyExitDoorContainer.name}\"");
+                            }
+                        }
+                        fixVentsSAndNW = true;
+                        break;
+
+                    // ramp
+                    case "GrandTunnelRamp":
+                        foreach (string fireExit in new string[]{
+                            "AlleyExitDoorContainerN",
+                            "AlleyExitDoorContainerS"
+                        })
+                        {
+                            alleyExitDoorContainer = tile.transform.Find(fireExit);
+                            if (alleyExitDoorContainer != null)
+                            {
+                                alleyExitDoorContainer.localScale = MINESHAFT_FIRE_EXIT_SCALE;
+                                fireExitLight = alleyExitDoorContainer.Find("FireExitDoor/Light");
+                                if (fireExitLight != null)
+                                {
+                                    fireExitLight.localPosition = new(0.052f, fireExitLight.localPosition.y, fireExitLight.localPosition.z);
+                                    Plugin.Logger.LogDebug($"{tile.name}: Corrected scale for \"{alleyExitDoorContainer.name}\"");
+                                }
+                            }
+                        }
+                        foreach (string breakerBox in new string[]{
+                            "BreakerBoxSpawn",
+                            "BreakerBoxSpawn (1)"
+                        })
+                        {
+                            breakerBoxSpawn = tile.transform.Find(breakerBox);
+                            if (breakerBoxSpawn != null)
+                            {
+                                breakerBoxSpawn.localRotation = Quaternion.Euler(breakerBoxSpawn.localEulerAngles.x, breakerBoxSpawn.localEulerAngles.y + 180f, breakerBoxSpawn.localEulerAngles.z);
+                                Plugin.Logger.LogDebug($"{tile.name}: Corrected rotation for \"{breakerBoxSpawn.name}\"");
+                            }
+                        }
+                        break;
                 }
 
                 bool cave = tile.name.StartsWith("Cave");
@@ -166,6 +255,34 @@ namespace ButteryFixes.Utility
                         }
                     }
                 }
+
+                if (removeAnomalySpawns)
+                {
+                    Transform anomalySpawns = tile.transform.Find("AnomalySpawns");
+                    if (anomalySpawns != null)
+                    {
+                        anomalySpawns.gameObject.SetActive(false);
+                        Plugin.Logger.LogDebug($"{tile.name}: Removed obsolete triggers (fix spray paint)");
+                    }
+                    removeAnomalySpawns = false;
+                }
+
+                if (fixVentsSAndNW)
+                {
+                    ventSpawn = tile.transform.Find("VentSpawnS");
+                    if (ventSpawn != null)
+                    {
+                        ventSpawn.localPosition = new(ventSpawn.localPosition.x, ventSpawn.localPosition.y, 0.1f);
+                        Plugin.Logger.LogDebug($"{tile.name}: Corrected position for \"{ventSpawn.name}\"");
+                    }
+                    ventSpawn = tile.transform.Find("NorthWallVentSpawn");
+                    if (ventSpawn != null)
+                    {
+                        ventSpawn.localPosition = new(ventSpawn.localPosition.x, ventSpawn.localPosition.y, 7.901f);
+                        Plugin.Logger.LogDebug($"{tile.name}: Corrected position for \"{ventSpawn.name}\"");
+                    }
+                    fixVentsSAndNW = false;
+                }
             }
         }
 
@@ -185,7 +302,11 @@ namespace ButteryFixes.Utility
                 foreach (GraphLine line in indoorMapType.dungeonFlow.Lines)
                 {
                     foreach (DungeonArchetype dungeonArchetype in line.DungeonArchetypes)
+                    {
                         tileSets.AddRange(dungeonArchetype.TileSets);
+                        tileSets.AddRange(dungeonArchetype.BranchStartTileSets);
+                        tileSets.AddRange(dungeonArchetype.BranchCapTileSets);
+                    }
                 }
 
                 foreach (TileSet tileSet in tileSets)

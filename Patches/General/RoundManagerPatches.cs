@@ -250,5 +250,13 @@ namespace ButteryFixes.Patches.General
                 }
             }
         }
+
+        [HarmonyPatch(nameof(RoundManager.FlickerLights))]
+        [HarmonyPostfix]
+        static void RoundManager_Post_FlickerLights()
+        {
+            if (GlobalReferences.girlUpdating && GlobalReferences.girl != null && GlobalReferences.girl.IsOwner)
+                GameNetworkManager.Instance.localPlayerController.JumpToFearLevel(GlobalReferences.girl.timesSeenByPlayer > 0 ? 0.9f : 0.2f);
+        }
     }
 }
