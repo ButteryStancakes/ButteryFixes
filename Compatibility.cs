@@ -20,7 +20,8 @@ namespace ButteryFixes
                               GUID_VERSION55_COMPANY_CRUISER = "scandal.v55cruiser",
                               GUID_V70_POWERED_LIGHTS_FIX = "watergun.v72lightfix",
                               GUID_CUSTOM_RESOLUTION = "Tomatobird.CustomResolution",
-                              GUID_SCIENCE_BIRD_TWEAKS = "ScienceBird.ScienceBirdTweaks";
+                              GUID_SCIENCE_BIRD_TWEAKS = "ScienceBird.ScienceBirdTweaks",
+                              GUID_AUTO_SCROLL = "AutoScroll";
 
         internal static bool INSTALLED_GENERAL_IMPROVEMENTS,
                              INSTALLED_MORE_COMPANY,

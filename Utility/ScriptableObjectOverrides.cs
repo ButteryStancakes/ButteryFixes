@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BepInEx.Bootstrap;
+using HarmonyLib;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -114,7 +115,7 @@ namespace ButteryFixes.Utility
                         selectableLevel.LevelDescription = selectableLevel.LevelDescription.Replace("Rough terrain. Teeming with plant-life.", "Rough terrain.").Replace("A competitive ecosystem supports aggressive lifeforms.", "Diverse, teeming with plant-life.");
                         Plugin.Logger.LogDebug("Vow: Description");
                         break;
-                    case "OffenseLevel":
+                    case "OffenseLevel":;
                         if (selectableLevel.videoReel != null && selectableLevel.videoReel.name == "MapView220Ass")
                         {
                             selectableLevel.videoReel = null;
@@ -122,8 +123,11 @@ namespace ButteryFixes.Utility
                         }
                         break;
                     case "TitanLevel":
-                        selectableLevel.LevelDescription = selectableLevel.LevelDescription.Replace("This moon was mined for resources. It's easy to get lost here.", "It's easy to get lost here.").Replace("Dangerous entities have been rumored to take residence in the vast network of tunnels.", "Dangerous entities rumored to reside in its vast tunnels.");
-                        Plugin.Logger.LogDebug("Titan: Description");
+                        if (!Chainloader.PluginInfos.ContainsKey(Compatibility.GUID_AUTO_SCROLL))
+                        {
+                            selectableLevel.LevelDescription = selectableLevel.LevelDescription.Replace("This moon was mined for resources. It's easy to get lost here.", "It's easy to get lost here.").Replace("Dangerous entities have been rumored to take residence in the vast network of tunnels.", "Dangerous entities rumored to reside in its vast tunnels.");
+                            Plugin.Logger.LogDebug("Titan: Description");
+                        }
                         break;
                     case "EmbrionLevel":
                         selectableLevel.LevelDescription = selectableLevel.LevelDescription.Replace("Embrion is devoid", "Devoid");
